@@ -1,12 +1,11 @@
 import express from 'express';
+import * as categoryController from '../controllers/categoryController.js'
 const routerCategory = express.Router();
 
 /// Category Routes ///
 
 // GET request to the homepage (all categories)
-routerCategory.get("/", (req, res) => {
-  res.send("GET request to the homepage");
-});
+routerCategory.get("/", categoryController.categoryList);
 
 // GET request to get a category
 routerCategory.get("/category", (req, res) => {

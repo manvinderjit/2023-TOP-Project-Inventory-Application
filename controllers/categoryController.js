@@ -13,6 +13,25 @@ const categoryList = async(req, res, next) => {
     }
 }
 
+// Display details for one category
+const categoryDetail = async(req, res, next) => {
+    try {
+        const category = await Category.findById(req.params.id).exec();
+        if(category === null) {
+
+        } else {
+            res.render("categoryDetail", {
+              title: category.name,
+              name: category.name,
+              description: category.description,
+            });
+        }
+        
+    } catch (error) {
+        console.error(error);
+    }
+}
+
 // Add a New Category
 const createCategoryPost = async(req, res, next) => {
     try {
@@ -27,4 +46,4 @@ const createCategoryPost = async(req, res, next) => {
     }
 }
 
-export { categoryList, createCategoryPost };
+export { categoryList, createCategoryPost, categoryDetail };

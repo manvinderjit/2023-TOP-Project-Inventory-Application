@@ -8,9 +8,7 @@ const routerCategory = express.Router();
 routerCategory.get("/", categoryController.categoryList);
 
 // GET request to get a category
-routerCategory.get("/category", (req, res) => {
-  res.send("GET request to the create category page, NOT IMPLEMENTED!");
-});
+routerCategory.get("/category/:id", categoryController.categoryDetail);
 
 // POST request to create a category
 routerCategory.post("/", categoryController.createCategoryPost);

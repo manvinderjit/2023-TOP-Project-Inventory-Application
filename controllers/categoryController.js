@@ -13,4 +13,18 @@ const categoryList = async(req, res, next) => {
     }
 }
 
-export { categoryList };
+// Add a New Category
+const createCategoryPost = async(req, res, next) => {
+    try {
+        const category = new Category({
+          name: req.body.nameCategory,
+          description: req.body.descriptionCategory,
+        });
+        await category.save();
+        res.redirect('/');
+    } catch (error) {
+        console.error(error);
+    }
+}
+
+export { categoryList, createCategoryPost };

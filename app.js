@@ -8,7 +8,6 @@ import { fileURLToPath } from "url";
 const port = process.env.PORT || 5000;
 const app = express();
 
-
 const viewsPath = fileURLToPath(new URL("views", import.meta.url));
 const staticsPath = fileURLToPath(new URL("public", import.meta.url));
 
@@ -19,6 +18,7 @@ main().catch((err) => console.log(err));
 
 app.use(express.json());
 app.use(express.static(staticsPath));
+app.use(express.urlencoded({ extended: true }));
 
 app.use("/", indexRouter);
 app.use("/catalog", catalogRouter);

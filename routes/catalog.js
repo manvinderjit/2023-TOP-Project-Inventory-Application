@@ -13,9 +13,8 @@ routerCategory.get("/category", (req, res) => {
 });
 
 // POST request to create a category
-routerCategory.post("/category", (req, res) => {
-  res.send("POST request to the create category page, NOT IMPLEMENTED!");
-});
+routerCategory.post("/", categoryController.createCategoryPost);
+
 
 // GET request to update a category
 routerCategory.put("/category", (req, res) => {

@@ -21,9 +21,11 @@ const categoryDetail = async(req, res, next) => {
 
         } else {
             res.render("categoryDetail", {
+              _id: category._id,
               title: category.name,
               name: category.name,
               description: category.description,
+              url: category.url,
             });
         }
         
@@ -46,4 +48,40 @@ const createCategoryPost = async(req, res, next) => {
     }
 }
 
-export { categoryList, createCategoryPost, categoryDetail };
+// Display details for one category to be deleted
+const deleteCategoryDetails = async (req, res, next) => {
+  try {
+    const category = await Category.findById(req.params.id).exec();
+    if (category === null) {
+    } else {
+      res.render("categoryDelete", {
+        _id: category._id,
+        title: category.name,
+        name: category.name,
+        description: category.description,
+        url: category.url,
+      });
+    }
+  } catch (error) {
+    console.error(error);
+  }
+};
+
+// Delete a Category
+const deleteCategory = async(req, res, next) => {
+    try {
+        console.log("called" + req.body)
+        await Category.findByIdAndRemove(req.body.categoryId);
+        res.redirect('/');
+    } catch (error) {
+        console.error(error);
+    }
+}
+
+export {
+  categoryList,
+  createCategoryPost,
+  categoryDetail,
+  deleteCategory,
+  deleteCategoryDetails,
+};

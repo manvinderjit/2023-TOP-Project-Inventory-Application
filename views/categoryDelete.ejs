@@ -1,0 +1,25 @@
+<%- include('./partials/header'); -%>
+    <h1><%= title %></h1>
+    <p>Welcome to the <%= name %> page!</p>
+
+    <div>
+        <h2>Category: <%= name %></h2>
+        <hr>
+        <hr>
+                    <div>
+                        <h3><%= name %></h3>
+                        <p>Description: <%= description %></p>
+                        <div><a href="">Edit Category: <strong><%= name %> </strong></a></div>                        
+                        <form method='POST' action="">
+                            <input type="hidden" id="categoryId" class="form-control" name='categoryId', required='true', value=<%= _id %> >
+                            <button type="submit">Delete</button>
+                        </form>
+                        <hr>
+                        <div><a href="/">Back to All Categories Category</a></div>
+                    </div>
+                </div>
+                <hr>
+        </div>
+    </div>
+
+<%- include('./partials/footer'); -%>

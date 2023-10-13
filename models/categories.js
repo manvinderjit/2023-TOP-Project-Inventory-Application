@@ -20,7 +20,7 @@ const categorySchema = new mongoose.Schema({
 // Virtual for category's URL
 const categoryURL = categorySchema.virtual("url");
 categoryURL.get(function () {
-    return `/category/${this._id}`;
+    return `/catalog/${this._id}`;
 });
 
 const Category = mongoose.model("Category", categorySchema);

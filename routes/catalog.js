@@ -1,28 +1,28 @@
 import express from 'express';
-import * as categoryController from '../controllers/categoryController.js'
+import * as categoryController from '../controllers/categoryController.js';
 const routerCategory = express.Router();
 
 /// Category Routes ///
 
 // GET request to the homepage (all categories)
-routerCategory.get("/", categoryController.categoryList);
+routerCategory.get('/', categoryController.categoryList);
 
 // GET request to get a category
-routerCategory.get("/:id", categoryController.categoryDetail);
+routerCategory.get('/:id', categoryController.categoryDetail);
 
 // POST request to create a category
-routerCategory.post("/", categoryController.createCategoryPost);
+routerCategory.post('/', categoryController.createCategoryPost);
 
 // GET request to update a category
-routerCategory.put("/category", (req, res) => {
-  res.send("PUT request to the create category page, NOT IMPLEMENTED!");
+routerCategory.put('/category', (req, res) => {
+    res.send('PUT request to the create category page, NOT IMPLEMENTED!');
 });
 
 // GET request to delete a category
-routerCategory.get("/:id/delete/:id", categoryController.deleteCategoryDetails);
+routerCategory.get('/:id/delete/:id', categoryController.deleteCategoryDetails);
 
 // POST request to delete a category
-routerCategory.post("/:id/delete/:id", categoryController.deleteCategory);
+routerCategory.post('/:id/delete/:id', categoryController.deleteCategory);
 
 // POST request to delete a category
 

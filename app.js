@@ -1,9 +1,11 @@
-import express from 'express';
+import express from "express";
 import "dotenv/config";
 import indexRouter from "./routes/index.js";
-import catalogRouter from "./routes/catalog.js";
-import main from './db/mongoose.js';
+import routerCategory from "./routes/catalog.js";
+import routerUser from "./routes/userRoutes.js";
+import main from "./db/mongoose.js";
 import { fileURLToPath } from "url";
+import cors from 'cors';
 
 const port = process.env.PORT || 5000;
 const app = express();
@@ -19,10 +21,12 @@ main().catch((err) => console.log(err));
 app.use(express.json());
 app.use(express.static(staticsPath));
 app.use(express.urlencoded({ extended: true }));
+app.use(cors());
 
 app.use("/", indexRouter);
-app.use("/catalog", catalogRouter);
+app.use("/catalog", routerCategory);
+app.use("/api/users", routerUser);
 
 app.listen(port, () => {
-  console.log(`Example app listening on port ${port}`);
+    console.log(`Example app listening on port ${port}`);
 });

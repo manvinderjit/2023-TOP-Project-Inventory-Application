@@ -5,7 +5,9 @@ import routerCategory from "./routes/catalog.js";
 import routerUser from "./routes/userRoutes.js";
 import main from "./db/mongoose.js";
 import { fileURLToPath } from "url";
+import corsOptions from './config/corsOptions.js';
 import cors from 'cors';
+import errorHandler from "./middleware/errorHandler.js";
 
 const port = process.env.PORT || 5000;
 const app = express();
@@ -18,14 +20,17 @@ app.set("view engine", "ejs");
 
 main().catch((err) => console.log(err));
 
+app.use(cors(corsOptions));
 app.use(express.json());
 app.use(express.static(staticsPath));
 app.use(express.urlencoded({ extended: true }));
-app.use(cors());
+
 
 app.use("/", indexRouter);
 app.use("/catalog", routerCategory);
 app.use("/api/users", routerUser);
+
+app.use(errorHandler);
 
 app.listen(port, () => {
     console.log(`Example app listening on port ${port}`);

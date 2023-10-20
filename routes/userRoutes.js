@@ -3,7 +3,6 @@ import express from 'express';
 import { protectRoutes } from '../middleware/authMiddleware.js';
 const routerUser = express.Router();
 
-
 // POST request to register user
 routerUser.post('/', userController.registerUser);
 

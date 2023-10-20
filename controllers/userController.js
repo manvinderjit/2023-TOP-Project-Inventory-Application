@@ -17,36 +17,29 @@ export const registerUser = async (req, res, next) => {
                 res.status(400).send({
                     error: 'User with the email already exists.',
                 });
-
             } else {
-
                 // Hash password
-                const hashedPassword = await bcrypt.hashSync(
-                    password,
-                    10
-                );
+                const hashedPassword = await bcrypt.hashSync(password, 10);
 
                 // Create user
                 const user = await User.create({
                     email,
                     password: hashedPassword,
-                })
+                });
 
-                if(user) {
+                if (user) {
                     res.status(201).json({
+                        message: `New user create with ${user.email}`,
                         _id: user.id,
-                        username: user.email,                        
+                        username: user.email,
                     });
                 } else {
                     res.status(400).send({
                         error: 'User creation failed.',
                     });
                 }
-
             }
-            
         }
-        
     } catch (error) {
         console.error(error);
     }
@@ -59,7 +52,7 @@ export const loginUser = async (req, res, next) => {
         // Check if user with the provided email exists
         const user = await User.findOne({ email }).exec();
 
-        if (user && await bcrypt.compareSync(password, user.password)) {
+        if (user && (await bcrypt.compareSync(password, user.password))) {
             res.status(201).json({
                 _id: user._id,
                 username: user.email,
@@ -70,27 +63,25 @@ export const loginUser = async (req, res, next) => {
                 error: 'Invalid email or password.',
             });
         }
-        
-        
     } catch (error) {
         console.error(error);
     }
 };
 
 const generateToken = (id) => {
-    return jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn:'4h' });
-}
+    return jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: '4h' });
+};
 
-export const getUser = async (req, res, next) => {    
+export const getUser = async (req, res, next) => {
     try {
         const { _id, email } = await User.findById(req.user.id);
         res.status(200).json({
-            id:_id,
-            email
+            id: _id,
+            email,
         });
     } catch (error) {
         res.status(400).json({
-            error: error
+            error: error,
         });
     }
 };

@@ -45,6 +45,16 @@ export const registerUser = async (req, res, next) => {
     }
 };
 
+const generateToken = (id) => {
+    return jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: '5min' });
+};
+
+const generateRefreshToken = (id) => {
+    return jwt.sign({ id }, process.env.REFRESH_TOKEN_SECRET, {
+        expiresIn: '1d',
+    });
+};
+
 export const loginUser = async (req, res, next) => {
     try {
         const { email, password } = req.body;
@@ -53,10 +63,16 @@ export const loginUser = async (req, res, next) => {
         const user = await User.findOne({ email }).exec();
 
         if (user && (await bcrypt.compareSync(password, user.password))) {
+            res.cookie('jwt', generateRefreshToken(user._id), {
+                httpOnly: true,
+                sameSite: 'None',
+                secure: true,
+                maxAge: 24 * 60 * 60 * 1000,
+            });
             res.status(201).json({
                 _id: user._id,
                 username: user.email,
-                token: generateToken(user._id),
+                token: generateToken(user._id),                
             });
         } else {
             res.status(400).send({
@@ -68,9 +84,7 @@ export const loginUser = async (req, res, next) => {
     }
 };
 
-const generateToken = (id) => {
-    return jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: '4h' });
-};
+
 
 export const getUser = async (req, res, next) => {
     try {

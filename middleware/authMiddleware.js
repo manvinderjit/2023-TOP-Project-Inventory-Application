@@ -11,18 +11,18 @@ const protectRoutes = async (req, res, next) => {
             try {
                 // Get token from header
                 token = req.headers.authorization.split(' ')[1];
-
+                console.log('token: ' + token);
+                console.log(req.cookies);
                 // Verify Token
-                const decodedToken = jwt.verify(token, process.env.JWT_SECRET);
-
-                // Get user from the token
-                req.user = await User.findById(decodedToken.id)
+                jwt.verify(token, process.env.JWT_SECRET, async (error, decodedToken) => {
+                    if(error) return res.sendStatus(403);                    
+                    req.user = await User.findById(decodedToken.id)
                     .select('-password')
-                    .exec();
-
-                next();
-            } catch (error) {
-                console.log(error);
+                    .exec();                    
+                    next();
+                });                
+                
+            } catch (error) {                
                 res.status(401).json({
                     error: 'You are not authorized to do that.',
                 });

@@ -8,6 +8,8 @@ import { fileURLToPath } from "url";
 import corsOptions from './config/corsOptions.js';
 import cors from 'cors';
 import errorHandler from "./middleware/errorHandler.js";
+import cookieParser from 'cookie-parser';
+import { credentials } from "./config/corsOptions.js";
 
 const port = process.env.PORT || 5000;
 const app = express();
@@ -20,14 +22,16 @@ app.set("view engine", "ejs");
 
 main().catch((err) => console.log(err));
 
-app.use(cors(corsOptions));
 app.use(express.json());
 app.use(express.static(staticsPath));
 app.use(express.urlencoded({ extended: true }));
-
+app.use(cookieParser());
 
 app.use("/", indexRouter);
 app.use("/catalog", routerCategory);
+
+app.use(credentials);
+app.use(cors(corsOptions));
 app.use("/api/users", routerUser);
 
 app.use(errorHandler);

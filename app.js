@@ -10,6 +10,8 @@ import cors from 'cors';
 import errorHandler from "./middleware/errorHandler.js";
 import cookieParser from 'cookie-parser';
 import { credentials } from "./config/corsOptions.js";
+import session from 'express-session';
+import { strict } from "assert";
 
 const port = process.env.PORT || 5000;
 const app = express();
@@ -21,6 +23,17 @@ app.set("views", viewsPath);
 app.set("view engine", "ejs");
 
 main().catch((err) => console.log(err));
+
+app.use(
+    session({
+        secret: process.env.ACCESS_TOKEN_SECRET,
+        resave: false,
+        saveUninitialized: true,
+        sameSite: strict,
+        cookie: { },
+        // name: 'inventory-app',
+    }),
+);
 
 app.use(express.json());
 app.use(express.static(staticsPath));
@@ -39,3 +52,5 @@ app.use(errorHandler);
 app.listen(port, () => {
     console.log(`Example app listening on port ${port}`);
 });
+
+export default app;

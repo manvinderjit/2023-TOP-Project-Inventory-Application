@@ -41,4 +41,13 @@ const protectRoutes = async (req, res, next) => {
     }
 };
 
-export { protectRoutes };
+const checkSessionStatus = (req, res) => {
+    
+    if (req.session.userId) {        
+        res.redirect('/');
+    } else {
+        res.redirect('/login');
+    }
+}
+
+export { protectRoutes, checkSessionStatus };

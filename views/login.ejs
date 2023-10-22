@@ -1,0 +1,22 @@
+<%- include('./partials/header'); -%>
+    <h1><%= title %></h1>    
+    <h2><%= error %></h2>
+    <div>    
+        <h2>Login Here</h2>
+        <form method='POST' action="">
+            <fieldset>
+                <legend>Add New Category</legend>
+                <div>
+                    <label for="username">Username: </label>                    
+                    <input type="text" id="username" name="username" required minlength="3" maxlength="30" value=<%= username %>>
+                </div>
+                <div>
+                    <label for="password">Password: </label>
+                    <input type="password" id="password" name="password" required>                    
+                </div>
+            </fieldset>
+            <button type="submit">Login</button>
+        </form>
+    </div>
+
+<%- include('./partials/footer'); -%>

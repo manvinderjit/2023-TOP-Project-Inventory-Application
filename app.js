@@ -12,6 +12,7 @@ import cookieParser from 'cookie-parser';
 import { credentials } from "./config/corsOptions.js";
 import session from 'express-session';
 import { strict } from "assert";
+import { checkSessionStatus } from "./middleware/authMiddleware.js";
 
 const port = process.env.PORT || 5000;
 const app = express();
@@ -32,16 +33,15 @@ app.use(
         sameSite: strict,
         cookie: { },
         // name: 'inventory-app',
-    }),
+    })
 );
-
 app.use(express.json());
 app.use(express.static(staticsPath));
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
 app.use("/", indexRouter);
-app.use("/catalog", routerCategory);
+app.use('/catalog', checkSessionStatus, routerCategory);
 
 app.use(credentials);
 app.use(cors(corsOptions));

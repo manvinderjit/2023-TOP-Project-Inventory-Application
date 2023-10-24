@@ -40,7 +40,7 @@ const loginEmployee = async (req, res, next) => {
         //         error: 'Invalid email or password.',
         //     });
         // }
-        next();
+        // next();
     } catch (error) {
         console.error(error);
     }    

@@ -41,12 +41,12 @@ const protectRoutes = async (req, res, next) => {
     }
 };
 
-const checkSessionStatus = (req, res) => {
+const checkSessionStatus = (req, res, next) => {
     
-    if (req.session.userId) {        
-        res.redirect('/');
-    } else {
+    if (!req.session.userId || req.session.authorized !== true ) {
         res.redirect('/login');
+    } else {
+        next();
     }
 }
 

@@ -1,4 +1,4 @@
-const allowedOrigins = ['http://developer2.com'];
+const allowedOrigins = ['http://developer2.com', 'http://localhost:5173', 'http://localhost:5000'];
 
 export const credentials = (req, res, next) => {
     const origin = req.headers.origin;

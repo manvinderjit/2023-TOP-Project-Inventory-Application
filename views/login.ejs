@@ -1,22 +1,42 @@
 <%- include('./partials/header'); -%>
-    <h1><%= title %></h1>    
-    <h2><%= error %></h2>
-    <div>    
-        <h2>Login Here</h2>
-        <form method='POST' action="">
-            <fieldset>
-                <legend>Add New Category</legend>
-                <div>
-                    <label for="username">Username: </label>                    
-                    <input type="text" id="username" name="username" required minlength="3" maxlength="30" value=<%= username %>>
+
+            <li class="nav-item"><a href="login" class="nav-link active" aria-current="page">Login</a></li>
+            <li class="nav-item"><a href="register" class="nav-link">Register</a></li>        
+        </ul>
+    </header>
+
+    <main class="flex-shrink-0">
+        <div class="container w-25">
+            
+            <h2 class="mt-5 mb-4 py-3 border-bottom"><%= title %></h2>            
+            <% if(error == '') { '' } else { %>
+                <div class="alert alert-danger" role="alert">
+                    <%= error %>
                 </div>
-                <div>
-                    <label for="password">Password: </label>
-                    <input type="password" id="password" name="password" required>                    
+            <% } %>
+              
+            <form method='POST' action="/login" >                    
+                <fieldset>
+                    <legend class="mb-4 ">Enter Your Information</legend>
+                    <div class="mb-3">
+                        <label class="form-label" for="email">Email Address: </label>                    
+                        <input class="form-control" type="email" id="email" name="email" required minlength="3" maxlength="30" value=<%= email %> >
+                        <div id="emailError" aria-live="polite"></div>
+                    </div >
+                    <div class="mb-3">
+                        <label class="form-label" for="password">Password: </label>
+                        <input class="form-control" type="password" id="password" name="password" minlength="5" pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{5,}" required>       
+                        <div id="passwordError" aria-live="polite"></div>
+                    </div >
+                </fieldset>
+                <div class="mb-3  d-flex justify-content-center">
+                    <button type="submit" class="btn btn-primary">Login</button>
                 </div>
-            </fieldset>
-            <button type="submit">Login</button>
-        </form>
-    </div>
+            </form>
+            
+        </div>
+    </main>
+
+   
 
 <%- include('./partials/footer'); -%>

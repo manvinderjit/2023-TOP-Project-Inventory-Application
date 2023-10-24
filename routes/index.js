@@ -1,38 +1,43 @@
-import express from 'express';
-const router = express.Router();
-import loginEmployee from '../controllers/loginController.js';
-import { checkSessionStatus } from '../middleware/authMiddleware.js';
+import Router from 'express';
+const indexRouter = new Router();
+import {
+    redirectToLogin,
+    redirectToDashboard,
+} from '../middleware/AuthenticateMw.js';
+import {
+    loginEmployee,
+    logoutEmployee,
+} from '../controllers/authenticateController.js';
+import { registerEmployee } from '../controllers/registrationController.js';
+import nocache from '../middleware/noCacheMw.js';
 
-/* GET home page. */
-router.get('/', checkSessionStatus, function (req, res) {
-    // console.log(req.session);
-    // if (req.session.userId && req.session.authorized === true) {
-    //     res.redirect('/');
-    // } else {
-    // res.render('login', {
-    //     title: 'Login',
-    //     username: '',
-    //     error: '',
-    // });
-    // }
-    res.redirect('/');
+indexRouter.get('/', redirectToLogin, nocache, (req, res) => {
+    res.render('dashboard', {
+        title: 'Dashboard',
+        username: res.locals.user,
+    });
 });
 
-/* Get Login Page */
-router.get('/login', function (req, res) {    
-    console.log(req.session);
-    if (req.session.userId && req.session.authorized === true) {
-        console.log(req.session.userId);
-        res.redirect('/');
-    } else {        
-        res.render('login', {
-            title: 'Login',  
-            username:'',
-            error:''
-        });
-    }
+indexRouter.get('/login', redirectToDashboard, (req, res) => {
+    res.render('login', {
+        title: 'Login',
+        email: '',
+        error: '',
+    });
 });
 
-router.post('/login', loginEmployee);
+indexRouter.post('/login', redirectToDashboard, loginEmployee);
 
-export default router;
+indexRouter.get('/register', redirectToDashboard, (req, res) => {
+    res.render('register', {
+        title: 'Registration Page',
+        email: '',
+        error: '',
+    });
+});
+
+indexRouter.post('/register', registerEmployee);
+
+indexRouter.post('/logout', redirectToLogin, logoutEmployee);
+
+export default indexRouter;

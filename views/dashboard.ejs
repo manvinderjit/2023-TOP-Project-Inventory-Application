@@ -1,0 +1,20 @@
+<%- include('./partials/headerProtected'); -%>
+
+            <li class="nav-item"><a href="/" class="nav-link  active">Dashboard</a></li>            
+        </ul>
+    </header>
+
+    <main class="flex-shrink-0">
+        <div class="container">
+
+            <h2 class="mb-4 py-3 border-bottom"><%= title %></h2>            
+            <p>Welcome to the home page, <%= username %> !</p>
+
+            <form method="POST" action="/logout">
+                <button class="btn btn-outline-primary me-2">Logout</button>        
+            </form>
+
+        </div>
+    </main>
+    
+<%- include('./partials/footer'); -%>

@@ -12,4 +12,17 @@ const validatePassword = (password) => {
     return passwordRegex.test(enteredPassword);
 }
 
-export { validateEmail, validatePassword };
+const validateCategoryName = (categoryName) => {
+    const categoryNameRegex = /^[a-zA-Z0-9.\-_\(\) ]{3,30}$/;
+    let enteredCategoryName = categoryName.trim();
+    return categoryNameRegex.test(enteredCategoryName);
+}
+
+const validateCategoryDescription = (categoryDescription) => {
+    const categoryDescriptionRegex =
+        /^[a-zA-Z0-9.\-_\(\) ]{5,100}$/;
+    let enteredCategoryDescription = categoryDescription.trim();    
+    return categoryDescriptionRegex.test(enteredCategoryDescription);
+}
+
+export { validateEmail, validatePassword, validateCategoryName, validateCategoryDescription };

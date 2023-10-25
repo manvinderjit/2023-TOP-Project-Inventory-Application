@@ -28,7 +28,7 @@ app.use(
         store: MongoStore.create({
             client: mongoose.connection.getClient(),
             autoRemove: 'native',
-            ttl: 60, // 60 seconds
+            ttl: process.env.SESSION_TTL, // 60 minutes
         }),
     }),
 );

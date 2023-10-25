@@ -10,6 +10,7 @@ import {
 } from '../controllers/authenticateController.js';
 import { registerEmployee } from '../controllers/registrationController.js';
 import nocache from '../middleware/noCacheMw.js';
+import categoryRouter from './categoryRoutes.js';
 
 indexRouter.get('/', redirectToLogin, nocache, (req, res) => {
     res.render('dashboard', {
@@ -17,6 +18,8 @@ indexRouter.get('/', redirectToLogin, nocache, (req, res) => {
         username: res.locals.user,
     });
 });
+
+indexRouter.use('/categories', redirectToLogin, nocache, categoryRouter);
 
 indexRouter.get('/login', redirectToDashboard, (req, res) => {
     res.render('login', {

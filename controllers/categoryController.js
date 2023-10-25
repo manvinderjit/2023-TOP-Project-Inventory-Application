@@ -1,48 +1,128 @@
-import Category from '../models/categories.js';
+import Category from '../models/categoryModel.js';
+import { validateCategoryName,validateCategoryDescription } from '../utilities/validation.js';
+import { trimMultipleWhiteSpaces } from '../utilities/stringFormatting.js';
 
 // Display all categories
-const categoryList = async (req, res, next) => {
+const getAllCategoriesList = async (req, res, next) => {
     try {
         const allCategories = await Category.find().sort({ name: 1 }).exec();
-        res.render('index', {
-            title: 'Inventory Application',
-            all_categories: allCategories,
+
+        res.render('categories', {
+            title: 'All Categories',
+            username: res.locals.user,
+            allCategoriesList: allCategories,
         });
+
     } catch (error) {
         console.error(error);
+        res.render('categoryView', {
+            username: res.locals.user,
+            title: 'Error! Something went wrong!',
+            error: 'Something went wrong!',
+        });
     }
 };
 
 // Display details for one category
-const categoryDetail = async (req, res, next) => {
+const getCategoryDetail = async (req, res, next) => {
     try {
-        const category = await Category.findById(req.params.id).exec();
-        if (category === null) {
+        const categoryDetails = await Category.findById(req.params.id).exec();
+
+        if (categoryDetails === null) {
+            res.render('categoryView', {
+                username: res.locals.user,
+                title: 'Error! Not found.',
+                error: 'Category details not found!',
+            });
         } else {
-            res.render('categoryDetail', {
-                _id: category._id,
-                title: category.name,
-                name: category.name,
-                description: category.description,
-                url: category.url,
+            res.render('categoryView', {
+                username: res.locals.user,
+                _id: categoryDetails._id,
+                title: categoryDetails.name,
+                name: categoryDetails.name,
+                description: categoryDetails.description,
+                url: categoryDetails.url,
             });
         }
+
     } catch (error) {
         console.error(error);
+        res.render('categoryView', {
+            username: res.locals.user,
+            title: 'Error! Something went wrong!',
+            error: 'Something went wrong!',
+        });
+    }
+};
+
+const getCreateCategory = async (req, res, next) => {
+    try {
+        res.render('categoryCreate', {
+            username: res.locals.user,
+            title: 'Create Category',
+            categoryName: '',
+            categoryDescription: '',
+        });
+    } catch (error) {
+        console.error(error);
+        res.render('categoryCreate', {
+            username: res.locals.user,
+            title: 'Create Category',
+            error: error,
+            categoryName: '',
+            categoryDescription: '',
+        });
     }
 };
 
 // Add a New Category
-const createCategoryPost = async (req, res, next) => {
+const postCreateCategory = async (req, res, next) => {
     try {
-        const category = new Category({
-            name: req.body.nameCategory,
-            description: req.body.descriptionCategory,
-        });
-        await category.save();
-        res.redirect('/');
+        
+        const categoryName = trimMultipleWhiteSpaces(req.body.categoryName);
+        const categoryDescription = trimMultipleWhiteSpaces(req.body.categoryDescription);
+
+        // Validate categoryName & categoryDescription
+        if(!categoryName || !categoryDescription){
+            res.render('categoryCreate', {
+                username: res.locals.user,
+                title: 'Create Category',
+                error: 'Please provide all fields',
+                categoryName: categoryName,
+                categoryDescription: categoryDescription,
+            });
+        } else if(validateCategoryName(categoryName) && validateCategoryDescription(categoryDescription)){
+            const category = new Category({
+                name: categoryName,
+                description: categoryDescription,
+            });
+            const createdCategory = await category.save();
+            res.render('categoryCreate', {
+                username: res.locals.user,
+                title: 'Create Category',
+                success: `Category ${createdCategory.name} created successfully`,
+                categoryName: '',
+                categoryDescription: '',
+            });
+        } else {
+            res.render('categoryCreate', {
+                username: res.locals.user,
+                title: 'Create Category',
+                error: `Category creation failed. Validation Error`,
+                categoryName: categoryName,
+                categoryDescription: categoryDescription,
+            });
+        }
+
     } catch (error) {
         console.error(error);
+        res.render('categoryCreate', {
+            username: res.locals.user,
+            title: 'Create Category',
+            error: `Category creation failed! Something went wrong.`,
+            categoryName: categoryName,
+            categoryDescription: categoryDescription,
+        });
     }
 };
 
@@ -77,9 +157,10 @@ const deleteCategory = async (req, res, next) => {
 };
 
 export {
-    categoryList,
-    createCategoryPost,
-    categoryDetail,
+    getAllCategoriesList,
+    getCreateCategory,
+    postCreateCategory,
+    getCategoryDetail,
     deleteCategory,
     deleteCategoryDetails,
 };

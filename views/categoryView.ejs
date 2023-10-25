@@ -31,15 +31,15 @@
                     <div class="col m-6">
                         <div class="card w-50 m-auto text-center">
                             <div class="card-header">
-                                <%= name %>
+                                <%= name %> Category
                             </div>
                             <div class="card-body">
-                                <h5 class="card-title"><%= name %> Category</h5>
+                                <h5 class="card-title"><%= name %></h5>
                                 <p class="card-text"><%= description %></p>
                             </div>
                             <div class="card-body">
-                                <a href="/categories" class="btn btn-primary ">Edit <%= name %></a>
-                                <a href="/categories" class="btn btn-primary ">Delete <%= name %></a>
+                                <a href=<%= `${url}/edit` %> class="btn btn-primary ">Edit <%= name %></a>
+                                <a href=<%= `${url}/delete` %> class="btn btn-primary ">Delete <%= name %></a>
                             </div>
                             <hr>
                             <div class="card-body">

@@ -1,25 +1,64 @@
-<%- include('./partials/header'); -%>
-    <h1><%= title %></h1>
-    <p>Welcome to the <%= name %> page!</p>
+<%- include('./partials/headerProtected'); -%>
 
-    <div>
-        <h2>Category: <%= name %></h2>
-        <hr>
-        <hr>
-                    <div>
-                        <h3><%= name %></h3>
-                        <p>Description: <%= description %></p>
-                        <div><a href="">Edit Category: <strong><%= name %> </strong></a></div>                        
-                        <form method='POST' action="">
-                            <input type="hidden" id="categoryId" class="form-control" name='categoryId', required='true', value=<%= _id %> >
-                            <button type="submit">Delete</button>
-                        </form>
-                        <hr>
-                        <div><a href="/">Back to All Categories Category</a></div>
-                    </div>
-                </div>
-                <hr>
+            <li class="nav-item"><a href="/" class="nav-link ">Dashboard</a></li>
+            <li class="nav-item"><a href="/categories" class="nav-link ">Categories</a></li>            
+        </ul>
+    </header>
+
+    <main class="flex-shrink-0">
+        <div class="container py-3  border-bottom">
+
+            <h2 class="mb-4 py-3 border-bottom">Category: <%= title %></h2>            
+            <p>Welcome, <%= username %>!</p>
+
+            <form method="POST" action="/logout">
+                <button class="btn btn-outline-primary me-2">Logout</button>        
+            </form>
+
         </div>
-    </div>
-
+        <div class="container mt-3">
+            <% if(locals.error && locals.error !=='' && locals.error !== undefined) { %>
+                
+                <div class="alert alert-warning" role="alert">
+                    Error: <%= error %>
+                </div>
+                <div class="card-body m-auto">
+                    <a href="/categories" class="btn btn-primary ">Back To All Categories</a>
+                </div>
+                
+            <% } else { %>
+                <div class="row row-cols-1 row-cols-md-1 g-4 m-3">
+                    <div class="col m-6">
+                        <div class="card w-50 m-auto text-center">
+                            <div class="card-header">
+                                Delete Category: <%= name %> 
+                            </div>
+                            <div class="card-body">
+                                <h5 class="card-title"><%= name %></h5>
+                                <p class="card-text"><%= description %></p>
+                            </div>
+                            <div class="card-body">
+                                <form method="POST">
+                                    <input class="form-control" type="hidden" id="categoryId" name="categoryId" value='<%= categoryId %>' />
+                                    <button type="submit" class="btn btn-primary ">Delete <%= name %></button>
+                                </form>
+                            </div>
+                            <hr>
+                            <div class="card-body">
+                                <a href=<%= url %> class="btn btn-primary ">View <%= name %></a>
+                                <a href=<%= `${url}/edit` %> class="btn btn-primary ">Edit <%= name %></a>
+                            </div>
+                            <hr>
+                            <div class="card-body">
+                                <a href="/categories" class="btn btn-primary ">Back To All Categories</a>
+                            </div>
+                        </div>
+                    </div>
+                
+                </div>
+            <% } %>
+           
+        </div>
+    </main>
+    
 <%- include('./partials/footer'); -%>

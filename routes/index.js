@@ -1,5 +1,5 @@
-import Router from 'express';
-const indexRouter = new Router();
+import express from 'express';
+const indexRouter = express.Router();
 import {
     redirectToLogin,
     redirectToDashboard,
@@ -11,6 +11,7 @@ import {
 import { registerEmployee } from '../controllers/registrationController.js';
 import nocache from '../middleware/noCacheMw.js';
 import categoryRouter from './categoryRoutes.js';
+import productRouter from './productRoutes.js';
 
 indexRouter.get('/', redirectToLogin, nocache, (req, res) => {
     res.render('dashboard', {
@@ -20,6 +21,7 @@ indexRouter.get('/', redirectToLogin, nocache, (req, res) => {
 });
 
 indexRouter.use('/categories', redirectToLogin, nocache, categoryRouter);
+indexRouter.use('/allproducts', redirectToLogin, nocache, productRouter);
 
 indexRouter.get('/login', redirectToDashboard, (req, res) => {
     res.render('login', {

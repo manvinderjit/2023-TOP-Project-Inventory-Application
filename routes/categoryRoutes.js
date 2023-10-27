@@ -1,5 +1,5 @@
-import Router from 'express';
-const categoryRouter = new Router();
+import express from 'express';
+const categoryRouter = express.Router();
 import {
     getAllCategoriesList,
     getCategoryDetail,
@@ -10,6 +10,7 @@ import {
     getDeleteCategory,
     postDeleteCategory,
 } from '../controllers/categoryController.js';
+import productRouter from './productRoutes.js';
 
 // GET request to fetch all categories
 categoryRouter.get('/', getAllCategoriesList);
@@ -34,5 +35,8 @@ categoryRouter.get('/:id/delete', getDeleteCategory);
 
 // POST request to delete category by :id
 categoryRouter.post('/:id/delete', postDeleteCategory);
+
+// Use 
+categoryRouter.use('/:id/products', productRouter);
 
 export default categoryRouter;

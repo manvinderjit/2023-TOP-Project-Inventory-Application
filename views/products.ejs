@@ -1,0 +1,76 @@
+<%- include('./partials/headerProtected'); -%>
+
+            <li class="nav-item"><a href="/" class="nav-link ">Dashboard</a></li>
+            <li class="nav-item"><a href="/categories" class="nav-link  ">Categories</a></li>      
+            <li class="nav-item"><a href="/allproducts" class="nav-link  active">Products</a></li>
+        </ul>
+    </header>
+
+    <main class="flex-shrink-0">
+        <div class="container py-3  ">
+
+            <!-- <h2 class="mb-4 py-3 border-bottom"><%= title %></h2>             -->
+            <p>Welcome, <%= username %> !</p>
+
+            <form method="POST" action="/logout">
+                <button class="btn btn-outline-primary me-2">Logout</button>        
+            </form>
+
+        </div>
+        <hr>
+        <div class="container">
+            <h2 class="py-2 text-center ">Add a New Product</h2>
+            <div class="card-body text-center">
+                <a href="/allproducts/create" class="btn btn-primary ">Add A New Product </a>
+            </div>
+        </div>
+        <hr>
+        <div class="container">
+            <h2 class="py-2 text-center ">All Products</h2>
+            <div class="row row-cols-1 row-cols-md-3 g-4 m-3">
+
+                <% if(locals.error && error !=='' && error !== undefined) { %>
+                    <div class="alert alert-warning w-50 m-auto" role="alert">
+                        Error: <%= error %>
+                    </div>        
+                <% } else if (locals.success && success !=='' && success !== undefined) { %>
+                    <div class="alert alert-success w-50 m-auto" role="alert">
+                        Success: <%= success %>
+                    </div>
+                <% } %>
+
+                <% if(locals.allProductsList && allProductsList.length > 0) { %>
+                    <% allProductsList.forEach( (product, index) => { %>
+                        <div class="col m-6">
+                            <div class="card w-75 m-auto ">
+                                <div class="card-header text-center">
+                                    <a class="card-link"  href=<%= product.url %> > <%= `${product.name}` %></a>
+                                </div>
+                                <div class="card-body">
+                                    <h5 class="card-title">Name: <%= product.name %></h5>
+                                    <p class="card-text">Description: <%= product.description %></p>
+                                    <p class="card-text">Category: <%= product.category %></p>
+                                    <p class="card-text"><%= product.price %></p>
+                                    <p class="card-text"><%= product.stock %></p>
+                                </div>
+                                <div class="card-body">
+                                    <a href=<%= product.url %> class="btn btn-primary ">View </a>
+                                    <a href=<%= product.url + '/edit' %> class="btn btn-primary ">Edit </a>
+                                    <a href=<%= product.url + '/delete/' %> class="btn btn-primary ">Delete </a>
+                                </div>
+                            </div>
+                        </div>
+                        
+                    <% }); } %>
+                </div>
+
+                <div class="card-body  text-center">
+                    <a href="/categories" class="btn btn-primary ">Back To All Categories</a>
+                </div>
+            
+            
+            
+        </div>
+    </main>
+    
+<%- include('./partials/footer'); -%>

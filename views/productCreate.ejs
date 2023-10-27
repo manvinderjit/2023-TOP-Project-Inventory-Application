@@ -1,0 +1,86 @@
+<%- include('./partials/headerProtected'); -%>
+
+            <li class="nav-item"><a href="/" class="nav-link ">Dashboard</a></li>
+            <li class="nav-item"><a href="/categories" class="nav-link  ">Categories</a></li>      
+            <li class="nav-item"><a href="/allproducts" class="nav-link  active">Products</a></li>
+        </ul>
+    </header>
+
+    <main class="flex-shrink-0">
+        <div class="container py-3  ">
+
+            <!-- <h2 class="mb-4 py-3 border-bottom"><%= title %></h2>             -->
+            <p>Welcome, <%= username %> !</p>
+
+            <form method="POST" action="/logout">
+                <button class="btn btn-outline-primary me-2">Logout</button>        
+            </form>
+
+        </div>
+        <hr>
+        <div class="container">
+            <h2 class="py-2 text-center "><%= title %></h2>            
+        </div>
+        <hr>
+        <div class="container">
+            <div class="row row-cols-1 row-cols-md-3 g-4 m-3">
+
+                <% if(locals.error && error !=='' && error !== undefined) { %>
+                    <div class="alert alert-warning w-50 m-auto" role="alert">
+                        Error: <%= error %>
+                    </div>        
+                <% } else if (locals.success && success !=='' && success !== undefined) { %>
+                    <div class="alert alert-success w-50 m-auto" role="alert">
+                        Success: <%= success %>
+                    </div>
+                <% } %>
+            </div>
+
+            <div class="container w-50 m-auto">
+                <form method='POST' action="" >
+                    <fieldset>
+                        <legend class="mb-4 ">Enter Product Details</legend>
+                        <div class="mb-3">
+                            <label class="form-label" for="productName">Product Name: </label>
+                            <input class="form-control" type="text" id="productName" name="productName" required minlength="3" maxlength="30" required pattern="^[a-zA-Z0-9.\-_\(\) ]{3,30}$" value=<%= productName %> >
+                            <div id="productNameError" aria-live="polite"></div>
+                        </div >
+                        <div class="mb-3">
+                            <label class="form-label" for="productDescription">Product Description: </label>
+                            <textarea class="form-control" type="text" id="productDescription" name="productDescription" minlength="5" maxlength="100" pattern="^[a-zA-Z0-9.\-_\(\) ]{5,100}$" required value="productDescription"></textarea>
+                            <div id="productDescriptionError" aria-live="polite"></div>
+                        </div >
+                        <div class="input-group mb-3">
+                            <label class="input-group-text" for="productCategory">Category</label>
+                            <select class="form-select" id="productCategory" name="productCategory">
+                                <option selected>Choose Category...</option>
+                                <% if(locals.categoryList && categoryList.length > 0) { %>
+                                    <% categoryList.forEach((category=> { %>
+                                        <option value="<%= category._id %>"><%= category.name %></option>
+                                    <% })) %>
+                                <% } %>
+                            </select>
+                            </div>
+                        <div class="mb-3">
+                            <label class="form-label" for="productPrice">Product Price: </label>
+                            <input class="form-control" type="number" id="productPrice" name="productPrice" min="0.00" step="any" required />
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label" for="productStock">Product Stock: </label>
+                            <input class="form-control"  type="number" id="productStock" name="productStock" min="0" step="1" value="0"/>
+                        </div>
+                    </fieldset>
+                    <div class="mb-3 d-flex justify-content-center">
+                        <button type="submit" class="btn btn-primary">Create Product</button>
+                    </div>
+                </form>
+            </div>
+            <hr>
+            <div class="card-body  text-center">
+                <a href="/allProducts" class="btn btn-primary ">Back To All Products</a>
+            </div>
+            
+        </div>
+    </main>
+    
+<%- include('./partials/footer'); -%>

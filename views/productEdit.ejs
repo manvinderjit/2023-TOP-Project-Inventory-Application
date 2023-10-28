@@ -41,7 +41,7 @@
                         <legend class="mb-4 ">Enter Product Details</legend>
                         <div class="mb-3">
                             <label class="form-label" for="productName">Product Name: </label>
-                            <input class="form-control" type="text" id="productName" name="productName" required minlength="3" maxlength="30" required pattern="^[a-zA-Z0-9.\-_\(\) ]{3,30}$" value="<%= productName %> ">
+                            <input class="form-control" type="text" id="productName" name="productName" required minlength="3" maxlength="30" required pattern="^[a-zA-Z0-9.\-_\(\) ]{3,30}$" value="<%= productName %>">
                             <div id="productNameError" aria-live="polite"></div>
                         </div >
                         <div class="mb-3">
@@ -52,10 +52,10 @@
                         <div class="input-group mb-3">
                             <label class="input-group-text" for="productCategory">Category</label>
                             <select class="form-select" id="productCategory" name="productCategory">
-                                <option selected value='choose'>Choose Category...</option>
+                                <option value='choose'>Choose Category...</option>
                                 <% if(locals.categoryList && categoryList.length > 0) { %>
                                     <% categoryList.forEach((category=> { %>
-                                        <option value="<%= category._id %>" ><%= category.name %></option>
+                                        <option value='<%= category._id %>' <% if(productCategory && category.name == productCategory.name) { %> selected <% } %> ><%= category.name %></option>
                                     <% })) %>
                                 <% } %>
                             </select>
@@ -73,9 +73,14 @@
                         </div>
                     </fieldset>
                     <div class="mb-3 d-flex justify-content-center">
-                        <button type="submit" class="btn btn-primary">Add Product</button>
+                        <button type="submit" class="btn btn-primary">Update Product</button>
                     </div>
                 </form>
+            </div>
+            <hr>
+            <div class="card-body text-center">
+                <a href=<%= `${productUrl}` %> class="btn btn-primary ">View <%= productName %></a>
+                <a href=<%= `${productUrl}/delete` %> class="btn btn-primary ">Delete <%= productName %></a>
             </div>
             <hr>
             <div class="card-body  text-center">

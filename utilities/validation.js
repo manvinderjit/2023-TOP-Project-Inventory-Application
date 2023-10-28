@@ -1,3 +1,6 @@
+import mongoose from "mongoose";
+const ObjectId = mongoose.Types.ObjectId;
+
 const validateEmail = (email) => {
     const emailRegex =
         /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/;
@@ -12,17 +15,37 @@ const validatePassword = (password) => {
     return passwordRegex.test(enteredPassword);
 }
 
-const validateCategoryName = (categoryName) => {
-    const categoryNameRegex = /^[a-zA-Z0-9.\-_\(\) ]{3,30}$/;
-    let enteredCategoryName = categoryName.trim();
-    return categoryNameRegex.test(enteredCategoryName);
+const validateName = (name) => {
+    const nameRegex = /^[a-zA-Z0-9.\-_\(\) ]{3,30}$/;
+    let enteredName = name.trim();
+    return nameRegex.test(enteredName);
 }
 
-const validateCategoryDescription = (categoryDescription) => {
-    const categoryDescriptionRegex =
+const validateDescription = (description) => {
+    const descriptionRegex =
         /^[a-zA-Z0-9.\-_\(\) ]{5,100}$/;
-    let enteredCategoryDescription = categoryDescription.trim();    
-    return categoryDescriptionRegex.test(enteredCategoryDescription);
+    let enteredDescription = description.trim();    
+    return descriptionRegex.test(enteredDescription);
 }
 
-export { validateEmail, validatePassword, validateCategoryName, validateCategoryDescription };
+const validateIsMongoObjectId = (id) => {
+    if (ObjectId.isValid(id)) {
+        if (String(new ObjectId(id)) === id) return true;
+        return false;
+    }
+    return false;
+}
+
+const validateIsNumber = (value) => {
+    return typeof Number(value.trim()) === 'number';
+}
+ 
+
+export {
+    validateEmail,
+    validatePassword,
+    validateName,
+    validateDescription,
+    validateIsMongoObjectId,
+    validateIsNumber,
+};

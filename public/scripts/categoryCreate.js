@@ -33,7 +33,7 @@ function showcategoryNameError() {
         categoryNameError.textContent = 'You need to enter a category name.';
 
     } else if (categoryName.validity.tooShort) {
-        categoryNameError.textContent = `Email should be at least ${categoryName.minLength} characters; you entered ${categoryName.value.length}.`;
+        categoryNameError.textContent = `Category Name should be at least ${categoryName.minLength} characters; you entered ${categoryName.value.length}.`;
 
     } else if (categoryName.validity.patternMismatch) {
         categoryNameError.textContent = `Can only use alphabets, numerals, and these special chars - . _ ( )`;

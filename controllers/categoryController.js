@@ -1,5 +1,6 @@
 import Category from '../models/categoryModel.js';
-import { validateCategoryName,validateCategoryDescription } from '../utilities/validation.js';
+import Product from '../models/productModel.js';
+import { validateName, validateDescription } from '../utilities/validation.js';
 import { trimMultipleWhiteSpaces } from '../utilities/stringFormatting.js';
 
 // Display all categories
@@ -26,6 +27,14 @@ const getAllCategoriesList = async (req, res, next) => {
 // Display details for one category
 const getCategoryDetail = async (req, res, next) => {
     try {
+
+        if(!req.params.id){
+            res.render('categoryView', {
+                username: res.locals.user,
+                title: 'Error! Not found.',
+                error: 'Category not provided or invalid!',
+            });
+        }
         const categoryDetails = await Category.findById(req.params.id).exec();
 
         if (categoryDetails === null) {
@@ -91,7 +100,7 @@ const postCreateCategory = async (req, res, next) => {
                 categoryName: categoryName,
                 categoryDescription: categoryDescription,
             });
-        } else if(validateCategoryName(categoryName) && validateCategoryDescription(categoryDescription)){
+        } else if(validateName(categoryName) && validateDescription(categoryDescription)){
             const category = new Category({
                 name: categoryName,
                 description: categoryDescription,
@@ -220,14 +229,13 @@ const postEditCategory = async (req, res, next) => {
                 categoryDescription: categoryDescription,
             })
         } else if (
-            validateCategoryName(categoryName) &&
-            validateCategoryDescription(categoryDescription)
+            validateName(categoryName) &&
+            validateDescription(categoryDescription)
         ) {
-            const updatedCategoryDetails = new Category({
-                _id: req.params.id,
+            const updatedCategoryDetails = {                
                 name: categoryName,
                 description: categoryDescription,
-            });
+            };
             const updatedCategory = await Category.findByIdAndUpdate(req.params.id, updatedCategoryDetails);
             res.redirect(updatedCategory.url);
         }
@@ -297,11 +305,26 @@ const postDeleteCategory = async (req, res, next) => {
                 categoryDescription: '',
             });
         }
-        await Category.findByIdAndRemove(req.body.categoryId);
-        res.redirect('/categories');
+
+        const allProductsInCategory = await Product.find({ category: req.body.categoryId }, 'name, description').exec();
+        if(allProductsInCategory.length === 0){
+            await Category.findByIdAndRemove(req.body.categoryId);
+            res.redirect('/categories');
+
+        } else{
+            res.render('categoryDelete', {
+                username: res.locals.user,
+                title: 'Delete Category',
+                error: `Category has ${allProductsInCategory.length} products under it. Please delete them before deleting the category!`,
+                id: req.body.categoryId,
+                categoryName: '',
+                categoryDescription: '',
+            });
+        }
+        
     } catch (error) {
         console.error(error);
-        es.render('categoryDelete', {
+        res.render('categoryDelete', {
             username: res.locals.user,
             title: 'Delete Category',
             error: error,

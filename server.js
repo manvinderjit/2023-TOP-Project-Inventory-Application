@@ -7,9 +7,11 @@ import connectDB from './config/mongodb.js';
 import errorHandler from './middleware/errorMw.js';
 import indexRouter from './routes/index.js';
 import mongoose from 'mongoose';
+import apiRouter from './routes/apiIndexRoutes.js';
+import cors from 'cors';
 
 const port = process.env.PORT || 5000;
-const app = new express();
+const app = express();
 
 const viewsPath = fileURLToPath(new URL('views', import.meta.url));
 const staticsPath = fileURLToPath(new URL('public', import.meta.url));
@@ -47,6 +49,9 @@ app.use((req, res, next) =>{
 });
 
 app.use('/', indexRouter);
+
+app.use(cors());
+app.use('/api', apiRouter);
 
 app.use(errorHandler);
 

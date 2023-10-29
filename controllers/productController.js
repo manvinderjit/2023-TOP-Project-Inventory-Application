@@ -376,17 +376,8 @@ const postEditProduct =  async (req, res, next) => {
             req.params.id,
             updatedProductDetails,
         );
-        res.render('productEdit', {
-            title: 'Product Edit',
-            username: res.locals.user,
-            success: `Product updated with name ${createdProduct.name}`,
-            productName: '',
-            productDescription: '',
-            productCategory: '',
-            productPrice: '',
-            productStock: '',
-            categoryList: allCategories,
-        });
+        res.redirect(`/allProducts/${req.params.id}`);
+        
     } catch (error) {
         console.error(error);
 

@@ -40,7 +40,7 @@ app.use(express.static(staticsPath));
 app.use(express.urlencoded({ extended: true }));
 
 // Makes userId available for all routes
-app.use((req, res, next) =>{
+app.use((req, res, next) => {
     const { userId, authorized } = req.session;
     if(userId && authorized){
         res.locals.user = userId;

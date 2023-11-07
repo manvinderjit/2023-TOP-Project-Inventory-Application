@@ -26,9 +26,9 @@ export const loginApiUser = async (req, res, next) => {
 
             if (
                 user &&
-                (await bcrypt.compareSync(userPassword, user.password))
-            ) {
-                res.status(201).json({
+                (await bcrypt.compare(userPassword, user.password))
+            ) {                
+                res.status(201).send({
                     token: generateToken(user._id, user.email),
                 });
             } else {

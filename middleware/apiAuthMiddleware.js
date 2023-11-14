@@ -15,10 +15,10 @@ const protectRoutes = async (req, res, next) => {
                 console.log(req.cookies);
                 // Verify Token
                 jwt.verify(token, process.env.JWT_SECRET, async (error, decodedToken) => {
-                    if(error) return res.sendStatus(403);                    
+                    if(error) return res.status(403).send({ error: 'Login expired!'});
                     req.user = await User.findById(decodedToken.id)
-                    .select('-password')
-                    .exec();                    
+                        .select('-password')
+                        .exec();
                     next();
                 });                
                 

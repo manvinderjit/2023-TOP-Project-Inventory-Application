@@ -5,7 +5,7 @@ import User from '../models/apiUserModel.js';
 import { validateEmail, validatePassword } from '../utilities/validation.js';
 
 const generateToken = (id, username) => {
-    return jwt.sign({ id, username }, process.env.JWT_SECRET, { expiresIn: '5min' });
+    return jwt.sign({ id, username }, process.env.JWT_SECRET, { expiresIn: '1hr' });
 };
 
 const generateRefreshToken = (id, username) => {

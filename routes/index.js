@@ -12,6 +12,7 @@ import { registerEmployee } from '../controllers/registrationController.js';
 import nocache from '../middleware/noCacheMw.js';
 import categoryRouter from './categoryRoutes.js';
 import productRouter from './productRoutes.js';
+import promoRouter from './promoRoutes.js';
 
 indexRouter.get('/', redirectToLogin, nocache, (req, res) => {
     res.render('dashboard', {
@@ -22,6 +23,7 @@ indexRouter.get('/', redirectToLogin, nocache, (req, res) => {
 
 indexRouter.use('/categories', redirectToLogin, nocache, categoryRouter);
 indexRouter.use('/allproducts', redirectToLogin, nocache, productRouter);
+indexRouter.use('/promos', redirectToLogin, nocache, promoRouter);
 
 indexRouter.get('/login', redirectToDashboard, (req, res) => {
     res.render('login', {

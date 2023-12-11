@@ -21,4 +21,23 @@ const apiGetCarouselImage = async (req, res, next) => {
     });
 };
 
-export { apiGetCarouselImage };
+const apiGetCarouselImageByParams = async (req, res, next) => {
+    if (!req.params.name) {
+        res.sendStatus(404);
+    }
+
+    const options = {
+        root: staticsPath,
+    };
+
+    const imgFileName = `/images/promos/${req.params.name}`;
+    res.sendFile(imgFileName, options, function (err) {
+        if (err) {
+            next(err);
+        } else {
+            console.log('Sent:', imgFileName);
+        }
+    });
+};
+
+export { apiGetCarouselImage, apiGetCarouselImageByParams };

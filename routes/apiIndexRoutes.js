@@ -9,6 +9,7 @@ import apiOrderRouter from './apiOrderRoutes.js';
 import { apiCreateOrder } from '../controllers/apiOrderController.js';
 import { apiGetCarousel } from '../controllers/apiCarouselController.js';
 import { apiGetCarouselImage } from '../controllers/apiImageController.js';
+import apiPromosRouter from './apiPromosRoutes.js';
 
 // GET request to register user
 apiRouter.get('/register', (req, res) => {
@@ -44,7 +45,7 @@ apiRouter.get('/carousel', apiGetCarousel);
 apiRouter.get('/products', apiGetAllProducts);
 
 // GET request to get all products
-apiRouter.get('/promos', apiGetCarouselImage);
+apiRouter.get('/promoimage', apiGetCarouselImage);
 
 // GET request to fetch data for logged-in user
 apiRouter.use('/dash', protectRoutes, apiUserRouter);
@@ -52,5 +53,7 @@ apiRouter.use('/dash', protectRoutes, apiUserRouter);
 apiRouter.use('/orders', protectRoutes, apiOrderRouter);
 
 apiRouter.use('/checkout', apiCreateOrder);
+
+apiRouter.use('/promos', apiPromosRouter);
 
 export default apiRouter;

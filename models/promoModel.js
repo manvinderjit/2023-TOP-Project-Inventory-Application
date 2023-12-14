@@ -1,6 +1,6 @@
 import mongoose from 'mongoose';
 
-const promosSchema = new mongoose.Schema(
+const promoSchema = new mongoose.Schema(
     {
         name: {
             type: String,
@@ -49,30 +49,32 @@ const promosSchema = new mongoose.Schema(
         startsOn: {
             type: Date,
             required: true,
-            validate: {
-                validator: function (input) {
-                    return (
-                        typeof new Date(input) === 'date' &&
-                        new Date(input) >= new Date()
-                    );
-                },
-                message: (props) =>
-                    `${props.value} Date must be in valid format and greater than today's date!`,
-            },
+            min: new Date(),
+            // validate: {
+            //     validator: function (input) {
+            //         return (
+            //             typeof new Date(input) === 'date' &&
+            //             new Date(input) >= new Date()
+            //         );
+            //     },
+            //     message: (props) =>
+            //         `${props.value} Date must be in valid format and greater than today's date!`,
+            // },
         },
-        expiresOn: {
+        endsOn: {
             type: Date,
             required: true,
-            validate: {
-                validator: function (input) {
-                    return (
-                        typeof new Date(input) === 'date' &&
-                        new Date(input) >= new Date()
-                    );
-                },
-                message: (props) =>
-                    `${props.value} Date must be in valid format and greater than today's date!`,
-            },
+            // min: new Date(),
+            // validate: {
+            //     validator: function (input) {
+            //         return (
+            //             typeof new Date(input) === 'date' &&
+            //             new Date(input) >= new Date()
+            //         );
+            //     },
+            //     message: (props) =>
+            //         `${props.value} Date must be in valid format and greater than today's date!`,
+            // },
         },
     },
     {
@@ -81,11 +83,11 @@ const promosSchema = new mongoose.Schema(
 );
 
 // Virtual for promo's URL
-const promoURL = promosSchema.virtual('url');
+const promoURL = promoSchema.virtual('url');
 promoURL.get(function () {
-    return `/promos/${this._id}`;
+    return `/promo/${this._id}`;
 });
 
-const Promos = mongoose.model('Promos', promosSchema);
+const Promo = mongoose.model('Promo', promoSchema);
 
-export default Promos;
+export default Promo;

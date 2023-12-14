@@ -1,8 +1,10 @@
-import Promos from '../models/promoModel.js'
+import Promo from '../models/promoModel.js'
 import { trimMultipleWhiteSpaces } from '../utilities/stringFormatting.js';
 import { access, constants, unlink, stat } from 'node:fs';
-
 import { fileURLToPath } from 'url';
+import { replaceFileNameSpacesWithHyphen } from '../utilities/fileFormatting.js';
+import { validateName, validateDescription } from '../utilities/validation.js';
+
 const staticsPath = fileURLToPath(new URL('../public', import.meta.url));
 
 const promoCategories = [
@@ -24,11 +26,11 @@ const getAllPromos = async (req, res, next) => {
         const allPromos =
             !req.body.promoCategory ||
             req.body.promoCategory.toLowerCase() === 'all'
-                ? await Promos.find()
+                ? await Promo.find()
                       .populate({ path: 'category', select: 'name' })
                       .sort({ name: 1 })
                       .exec()
-                : await Promos.find({ promoCategory: req.body.promoCategory })
+                : await Promo.find({ promoCategory: req.body.promoCategory })
                       .populate('category')
                       .sort({ name: 1 })
                       .exec();
@@ -87,6 +89,7 @@ const postCreatePromo = async (req, res, next) => {
         let uploadedFile;
         let uploadPath;
 
+        // If no file is uploaded
         if (!req.files || Object.keys(req.files).length === 0) {
             res.render('promoCreate', {
                 title: 'Create a New Promo',
@@ -96,70 +99,153 @@ const postCreatePromo = async (req, res, next) => {
                 promoName: req.body.promoName,
                 promoCaption: req.body.promoCaption,
                 promoDescription: req.body.promoDescription,
+                promoStatus: req.body.promoStatus,
+                promoStartDate: req.body.promoStartDate,
+                promoEndDate: req.body.promoEndDate,
                 promoCategoryList: promoCategories,
             });
         }
 
-        // The name of the input field (i.e. "promoImage") is used to retrieve the uploaded file
-        uploadedFile = req.files.promoImage;
-        uploadPath = staticsPath + '/images/promos/' + uploadedFile.name;
-
-        stat(uploadPath, (error, stats) => {
+        // TODO: Check if all values are provided
+        else if (
+            !req.body.promoName ||
+            !req.body.promoCaption ||
+            !req.body.promoDescription ||
+            !req.body.promoCategory ||
+            !req.body.promoStatus ||
+            !req.body.promoStartDate ||
+            !req.body.promoEndDate
+        ) {
+            res.render('promoCreate', {
+                title: 'Create a New Promo',
+                username: res.locals.user,
+                error: 'Please provide all values!',
+                // TODO: Pass following field values
+                promoName: req.body.promoName,
+                promoCaption: req.body.promoCaption,
+                promoDescription: req.body.promoDescription,
+                promoStatus: req.body.promoStatus,
+                promoStartDate: req.body.promoStartDate,
+                promoEndDate: req.body.promoEndDate,
+                promoCategoryList: promoCategories,
+            });
+        } else {
             
-            if (!error && stats.isFile()) {
-                // If a file with the same name exists in the path defined
-                // unlink(uploadPath, (error) => {
-                //    // Delete the file
-                //     if (error) throw error;
-                //     console.log('file was deleted');
-                // });
-            } else if (error && error.code == 'ENOENT') {
-                // If the file does not exist
-                // return;
-            } else {
-                // Other file error
-                res.render('promoCreate', {
-                    title: 'Create a New Promo',
-                    username: res.locals.user,
-                    error: error,
-                    // TODO: Pass following field values
-                    promoName: req.body.promoName,
-                    promoCaption: req.body.promoCaption,
-                    promoDescription: req.body.promoDescription,
-                    promoCategoryList: promoCategories,
-                });
-            }
-        });
+            // TODO: Check if all values are valid
 
-        // Use the mv() method to place the file somewhere on your server
-        uploadedFile.mv(uploadPath, function (error) {
-            if (error) {
-                console.log('e', error);
-                res.render('promoCreate', {
-                    title: 'Create a New Promo',
-                    username: res.locals.user,
-                    error: error,
-                    // TODO: Pass following field values
-                    promoName: req.body.promoName,
-                    promoCaption: req.body.promoCaption,
-                    promoDescription: req.body.promoDescription,
-                    promoCategoryList: promoCategories,
-                });
-            } else {
-                res.render('promoCreate', {
-                    title: 'Create a New Promo',
-                    username: res.locals.user,
-                    success: 'File uploaded.',
-                    // TODO: Pass following field values
-                    promoName: '',
-                    promoCaption: '',
-                    promoDescription: '',
-                    promoCategoryList: promoCategories,
-                });
-            }
+            // The name of the input field (i.e. "promoImage") is used to retrieve the uploaded file
+            uploadedFile = req.files.promoImage;
+            const newUploadFileName = replaceFileNameSpacesWithHyphen(
+                uploadedFile.name,
+                req.body.promoName,
+            );
 
-            
-        });
+            uploadPath = staticsPath + '/images/promos/' + newUploadFileName;
+
+            // stat(uploadPath, (error, stats) => {
+            //     if (!error && stats.isFile()) {
+            //         // If a file with the same name exists in the path defined
+            //          TODO: Send error
+            //     } else if (error && error.code == 'ENOENT') {
+            //         // If the file does not exist
+            //         // Upload the file
+            //     } else {
+            //         // Other file error
+            //         res.render('promoCreate', {
+            //             title: 'Create a New Promo',
+            //             username: res.locals.user,
+            //             error: error,
+            //             // TODO: Pass following field values
+            //             promoName: req.body.promoName,
+            //             promoCaption: req.body.promoCaption,
+            //             promoDescription: req.body.promoDescription,
+            //             promoCategoryList: promoCategories,
+            //         });
+            //     }
+            // });
+
+            // Upload files on the server
+            uploadedFile.mv(uploadPath, async function (error) {
+                if (error) {
+                    console.log('e', error);
+                    res.render('promoCreate', {
+                        title: 'Create a New Promo',
+                        username: res.locals.user,
+                        error: error,
+                        // TODO: Pass following field values
+                        promoName: req.body.promoName,
+                        promoCaption: req.body.promoCaption,
+                        promoDescription: req.body.promoDescription,
+                        promoStatus: req.body.promoStatus,
+                        promoStartDate: req.body.promoStartDate,
+                        promoEndDate: req.body.promoEndDate,
+                        promoCategoryList: promoCategories,
+                    });
+                } else {
+                    // Create a promo object from the Promo model
+                    const promo = new Promo({
+                        name: trimMultipleWhiteSpaces(req.body.promoName),
+                        caption: {
+                            heading: trimMultipleWhiteSpaces(
+                                req.body.promoCaption,
+                            ),
+                            description: trimMultipleWhiteSpaces(
+                                req.body.promoDescription,
+                            ),
+                        },
+                        category: trimMultipleWhiteSpaces(
+                            promoCategories[req.body.promoCategory - 1].name,
+                        ),
+                        imageUrl: `api/promos/carousel/${newUploadFileName}`,
+                        status: trimMultipleWhiteSpaces(req.body.promoStatus),
+                        startsOn: trimMultipleWhiteSpaces(
+                            req.body.promoStartDate,
+                        ),
+                        endsOn: trimMultipleWhiteSpaces(req.body.promoEndDate),
+                    });
+
+                    let createdPromo;
+
+                    try {
+                        // Upload other details on the server
+                        createdPromo = await promo.save();
+                        if (createdPromo) {
+                            // Render the page
+                            res.render('promoCreate', {
+                                title: 'Create a New Promo',
+                                username: res.locals.user,
+                                success: 'File uploaded.',
+                                // TODO: Pass following field values
+                                promoName: '',
+                                promoCaption: '',
+                                promoDescription: '',
+                                promoCategoryList: promoCategories,
+                            });
+                        }
+                    } catch (error) {
+                        // Delete the uploaded file, if database error
+                        unlink(uploadPath, (error) => {
+                            // Delete the file
+                            if (error) throw error;
+                            console.log(
+                                `${uploadedFile.name} file was deleted`,
+                            );
+                        });
+                        // Rerender the page
+                        res.render('promoCreate', {
+                            title: 'Create a New Promo',
+                            username: res.locals.user,
+                            error: 'An error occured!',
+                            // TODO: Pass following field values
+                            promoName: req.body.promoName,
+                            promoCaption: req.body.promoCaption,
+                            promoDescription: req.body.promoDescription,
+                            promoCategoryList: promoCategories,
+                        });
+                    }
+                }
+            });
+        }
     } catch (error) {
         console.error(error);
         res.render('promoCreate', {

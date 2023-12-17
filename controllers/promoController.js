@@ -26,30 +26,28 @@ const getAllPromos = async (req, res, next) => {
         const allPromos =
             !req.body.promoCategory ||
             req.body.promoCategory.toLowerCase() === 'all'
-                ? await Promo.find()
-                      .populate({ path: 'category', select: 'name' })
-                      .sort({ name: 1 })
-                      .exec()
-                : await Promo.find({ promoCategory: req.body.promoCategory })
-                      .populate('category')
+                ? await Promo.find().sort({ name: 1 }).exec()
+                : await Promo.find({
+                      category: promoCategories[req.body.promoCategory - 1].name,
+                  })
                       .sort({ name: 1 })
                       .exec();
-
+        
         if (!allPromos || allPromos.length === 0) {
             res.render('promos', {
                 title: 'All Promos',
                 username: res.locals.user,
                 error: 'No promos found!',
                 promoCategoryList: promoCategories,
-                selectedCategory: req.body.promoCategory,
+                selectedPromoCategory: req.body.promoCategory,
             });
         } else {
             res.render('promos', {
                 title: 'All Promos',
                 username: res.locals.user,
-                allPromosList: allPromos,
+                promosList: allPromos,
                 promoCategoryList: promoCategories,
-                selectedCategory: req.body.promoCategory,
+                selectedPromoCategory: req.body.promoCategory,
             });
         }
     } catch (error) {
@@ -58,7 +56,7 @@ const getAllPromos = async (req, res, next) => {
             title: 'All Promos',
             username: res.locals.user,
             error: error,
-            allPromosList: null,
+            promosList: null,
         });
     }
 };
@@ -72,6 +70,7 @@ const getCreatePromo = async (req, res, next) => {
             promoCaption: '',
             promoDescription: '',
             promoCategoryList: promoCategories,
+            selectedPromoCategory: null
         });
     } catch (error) {
         console.error(error);
@@ -79,6 +78,7 @@ const getCreatePromo = async (req, res, next) => {
             title: 'Create a New Promo',
             username: res.locals.user,
             error: error,
+            selectedPromoCategory: null,
             promoCategoryList: promoCategories,
         });
     }
@@ -102,6 +102,7 @@ const postCreatePromo = async (req, res, next) => {
                 promoStatus: req.body.promoStatus,
                 promoStartDate: req.body.promoStartDate,
                 promoEndDate: req.body.promoEndDate,
+                selectedPromoCategory: req.body.promoCategory,
                 promoCategoryList: promoCategories,
             });
         }
@@ -127,6 +128,7 @@ const postCreatePromo = async (req, res, next) => {
                 promoStatus: req.body.promoStatus,
                 promoStartDate: req.body.promoStartDate,
                 promoEndDate: req.body.promoEndDate,
+                selectedPromoCategory: req.body.promoCategory,
                 promoCategoryList: promoCategories,
             });
         } else {
@@ -179,6 +181,7 @@ const postCreatePromo = async (req, res, next) => {
                         promoStatus: req.body.promoStatus,
                         promoStartDate: req.body.promoStartDate,
                         promoEndDate: req.body.promoEndDate,
+                        selectedPromoCategory: req.body.promoCategory,
                         promoCategoryList: promoCategories,
                     });
                 } else {
@@ -214,11 +217,15 @@ const postCreatePromo = async (req, res, next) => {
                             res.render('promoCreate', {
                                 title: 'Create a New Promo',
                                 username: res.locals.user,
-                                success: 'File uploaded.',
+                                success: 'Promo Created!',
                                 // TODO: Pass following field values
                                 promoName: '',
                                 promoCaption: '',
                                 promoDescription: '',
+                                promoStatus: '',
+                                promoStartDate: '',
+                                promoEndDate: '',
+                                selectedPromoCategory: null,
                                 promoCategoryList: promoCategories,
                             });
                         }
@@ -240,6 +247,10 @@ const postCreatePromo = async (req, res, next) => {
                             promoName: req.body.promoName,
                             promoCaption: req.body.promoCaption,
                             promoDescription: req.body.promoDescription,
+                            promoStatus: req.body.promoStatus,
+                            promoStartDate: req.body.promoStartDate,
+                            promoEndDate: req.body.promoEndDate,
+                            selectedPromoCategory: req.body.promoCategory,
                             promoCategoryList: promoCategories,
                         });
                     }
@@ -256,6 +267,10 @@ const postCreatePromo = async (req, res, next) => {
             promoName: req.body.promoName,
             promoCaption: req.body.promoCaption,
             promoDescription: req.body.promoDescription,
+            promoStatus: req.body.promoStatus,
+            promoStartDate: req.body.promoStartDate,
+            promoEndDate: req.body.promoEndDate,
+            selectedPromoCategory: req.body.promoCategory,
             promoCategoryList: promoCategories,
         });
     }

@@ -33,11 +33,11 @@
                         <label class="input-group-text" for="promoCategory">Promo Category</label>
                         <select class="form-select" id="promoCategory" name="promoCategory">
                             <option value="all">All</option>
-                            <!-- <% if(locals.promoCategoryList && promoCategoryList.length > 0) { %>
+                            <% if(locals.promoCategoryList && promoCategoryList.length > 0) { %>
                                 <% promoCategoryList.forEach((promoCategory=> { %>
-                                    <option value="<%= promoCategory._id %>" <% if(promoCategory._id == selectedCategory) { %> selected <% } %> ><%= promoCategory.name %></option>
+                                    <option value="<%= promoCategory.id %>" <% if(promoCategory.id == selectedPromoCategory) { %> selected <% } %> ><%= promoCategory.name %></option>
                                 <% })) %>
-                            <% } %> -->
+                            <% } %>
                         </select>
                         <button type="submit" class="btn btn-primary ">Get Promos</button>
                     </div>
@@ -54,36 +54,37 @@
                         Success: <%= success %>
                     </div>
                 <% } %>
-                <% if(locals.allPromosList && allPromosList.length > 0) { %>
+                <% if(locals.promosList && promosList.length > 0) { %>
                     <div class="container">
                         <div class="row">
                             <div class="col-1 border d-flex align-items-center justify-content-center py-2">S. No.</div>
-                            <div class="col-1 border d-flex align-items-center justify-content-center py-2">Name</div>
-                            <div class="col-3 border d-flex align-items-center justify-content-center py-2">Description</div>
-                            <div class="col-2 border d-flex align-items-center justify-content-center py-2">Category</div>
-                            <div class="col-1 border d-flex align-items-center justify-content-center py-2">Price</div>
-                            <div class="col-1 border d-flex align-items-center justify-content-center py-2">Stock</div>
-                            <div class="col-1 border d-flex align-items-center justify-content-center py-2">View</div>
+                            <div class="col-2 border d-flex align-items-center justify-content-center py-2">Name</div>
+                            <div class="col-2 border d-flex align-items-center justify-content-center py-2">Heading</div>
+                            <div class="col-2 border d-flex align-items-center justify-content-center py-2">Description</div>
+                            <div class="col-1 border d-flex align-items-center justify-content-center py-2">Category</div>
+                            <div class="col-1 border d-flex align-items-center justify-content-center py-2">Status</div>
+                            <div class="col-1 border d-flex align-items-center justify-content-center py-2">Start Date</div>
+                            <div class="col-1 border d-flex align-items-center justify-content-center py-2">End Date</div>
                             <div class="col-1 border d-flex align-items-center justify-content-center py-2">Edit</div>
-                            <div class="col-1 border d-flex align-items-center justify-content-center py-2">Del</div>
+                            <!-- <div class="col-1 border d-flex align-items-center justify-content-center py-2">Del</div> -->
                         </div>
                     </div>                    
-                    <!-- <% allPromosList.forEach( (product, index) => { %>
+                    <% promosList.forEach( (promo, index) => { %>
                         
                         <div class="container">
                             <div class="row">
                                 <div class="col-1 border d-flex align-items-center justify-content-center py-2"><%= index + 1 %></div>
-                                <div class="col-1 border d-flex align-items-center justify-content-center py-2"><%= product.name %></div>
-                                <div class="col-3 border d-flex align-items-center justify-content-left py-2"><%= product.description %></div>
-                                <div class="col-2 border d-flex align-items-center justify-content-center py-2"><%= product.category.name %></div>
-                                <div class="col-1 border d-flex align-items-center justify-content-center py-2"><%= product.price %></div>
-                                <div class="col-1 border d-flex align-items-center justify-content-center py-2"><%= product.stock %></div>
-                                <div class="col-1 border d-flex align-items-center justify-content-center py-2"><a href="<%= product.url %>" class="btn btn-primary">View</a></div>
-                                <div class="col-1 border d-flex align-items-center justify-content-center py-2"><a href="<%= product.url %>/edit" class="btn btn-primary">Edit</a></div>
-                                <div class="col-1 border d-flex align-items-center justify-content-center py-2"><a href="<%= product.url %>/delete" class="btn btn-primary">Del</a></div>
+                                <div class="col-2 border d-flex align-items-center justify-content-center py-2"><%= promo.name %></div>
+                                <div class="col-2 border d-flex align-items-center justify-content-left py-2"><%= promo.caption.heading %></div>
+                                <div class="col-2 border d-flex align-items-center justify-content-left py-2"><%= promo.caption.description %></div>
+                                <div class="col-1 border d-flex align-items-center justify-content-center py-2"><%= promo.category %></div>
+                                <div class="col-1 border d-flex align-items-center justify-content-center py-2"><%= promo.status %></div>
+                                <div class="col-1 border d-flex align-items-center justify-content-center py-2"><%= promo.startsOn %></div>
+                                <div class="col-1 border d-flex align-items-center justify-content-center py-2"><%= promo.endsOn %></div>
+                               <div class="col-1 border d-flex align-items-center justify-content-center py-2"><a href="<%= promo.url %>/edit" class="btn btn-primary">Edit</a></div>
                             </div>
                         </div>
-                    <% }); } %> -->
+                    <% }); } %>
                     </div>
                 </div>
 

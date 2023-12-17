@@ -64,7 +64,7 @@
                                 <option selected value='choose'>Choose Category...</option>
                                 <% if(locals.promoCategoryList && promoCategoryList.length > 0) { %>
                                     <% promoCategoryList.forEach((promoCategory=> { %>
-                                        <option value="<%= promoCategory.id %>" ><%= promoCategory.name %></option>
+                                        <option value="<%= promoCategory.id %>" <% if(promoCategory.id == selectedPromoCategory) { %> selected <% } %>  ><%= promoCategory.name %></option>
                                     <% })) %>
                                 <% } %>
                             </select>

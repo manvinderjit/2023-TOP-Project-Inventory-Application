@@ -49,7 +49,8 @@ const promoSchema = new mongoose.Schema(
         startsOn: {
             type: Date,
             required: true,
-            min: new Date(),
+            // TODO: Add validation
+            // min: new Date(),
             // validate: {
             //     validator: function (input) {
             //         return (
@@ -64,6 +65,7 @@ const promoSchema = new mongoose.Schema(
         endsOn: {
             type: Date,
             required: true,
+            // TODO: Add validation
             // min: new Date(),
             // validate: {
             //     validator: function (input) {

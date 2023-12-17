@@ -7,6 +7,9 @@ import { getAllPromos, getCreatePromo, postCreatePromo } from '../controllers/pr
 // GET request to fetch all promos
 promoRouter.get('/', getAllPromos);
 
+// GET request to fetch promos by category
+promoRouter.post('/', getAllPromos);
+
 // GET request to create a new promo
 promoRouter.get('/create', getCreatePromo);
 

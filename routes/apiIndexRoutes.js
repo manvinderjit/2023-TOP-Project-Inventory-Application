@@ -7,7 +7,7 @@ import { registerUser } from '../controllers/apiRegisterController.js';
 import { loginApiUser } from '../controllers/apiAuthController.js';
 import apiOrderRouter from './apiOrderRoutes.js';
 import { apiCreateOrder } from '../controllers/apiOrderController.js';
-import { apiGetCarousel } from '../controllers/apiCarouselController.js';
+// import { apiGetCarousel } from '../controllers/apiCarouselController.js';
 import { apiGetCarouselImage } from '../controllers/apiImageController.js';
 import apiPromosRouter from './apiPromosRoutes.js';
 
@@ -38,8 +38,8 @@ apiRouter.get('/', (req, res) => {
     });
 });
 
-// GET request to get all products
-apiRouter.get('/carousel', apiGetCarousel);
+// // GET request to get all products
+// apiRouter.get('/carousel', apiGetCarousel);
 
 // GET request to get all products
 apiRouter.get('/products', apiGetAllProducts);

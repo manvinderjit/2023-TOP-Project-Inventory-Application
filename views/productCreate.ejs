@@ -36,7 +36,7 @@
             </div>
 
             <div class="container w-50 m-auto">
-                <form method='POST' action="" >
+                <form method='POST' action="" encType="multipart/form-data" >
                     <fieldset>
                         <legend class="mb-4 ">Enter Product Details</legend>
                         <div class="mb-3">
@@ -49,6 +49,10 @@
                             <textarea class="form-control" type="text" id="productDescription" name="productDescription" minlength="5" maxlength="100" required><%= productDescription %></textarea>
                             <div id="productDescriptionError" aria-live="polite"></div>
                         </div >
+                        <div class="mb-3">
+                            <label class="form-label" for="productImage">Upload Product Image:</label>
+                            <input class="form-control" type="file" id="productImage" name="productImage" accept="image/png, image/jpeg" >
+                       </div>
                         <div class="input-group mb-3">
                             <label class="input-group-text" for="productCategory">Category</label>
                             <select class="form-select" id="productCategory" name="productCategory">

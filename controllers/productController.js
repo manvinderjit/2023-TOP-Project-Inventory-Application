@@ -7,6 +7,10 @@ import {
     validateDescription,
     validateIsMongoObjectId,
 } from '../utilities/validation.js';
+import { fileURLToPath } from 'url';
+import { replaceFileNameSpacesWithHyphen } from '../utilities/fileFormatting.js';
+
+const staticsPath = fileURLToPath(new URL('../public', import.meta.url));
 
 const getAllProducts = async (req, res, next) => {
     try {
@@ -124,14 +128,16 @@ const postCreateProduct = async (req, res, next) => {
     // Get all categories for select list
     const allCategories = await Category.find().sort({ name: 1 }).exec();
 
-    // Check if values are provided
+    let uploadedFile;
+
+    // If values are not provided, render page with corresponding error
     if (
         !req.body.productName ||
         !req.body.productDescription ||
         !req.body.productCategory ||
         !req.body.productPrice ||
         !req.body.productStock
-    ) {
+    ) {        
         res.render('productCreate', {
             username: res.locals.user,
             title: 'Create Product',
@@ -147,7 +153,7 @@ const postCreateProduct = async (req, res, next) => {
 
     // Check if values are empty
     if (
-        req.body.productName.trim() === '' || 
+        req.body.productName.trim() === '' ||
         req.body.productDescription.trim() === '' ||
         req.body.productCategory.trim() === '' ||
         req.body.productPrice.trim() === '' ||
@@ -165,15 +171,30 @@ const postCreateProduct = async (req, res, next) => {
             categoryList: allCategories,
         });
     }
-   
+
+    // If no file is uploaded
+    if (!req.files || Object.keys(req.files).length === 0) {        
+        res.render('productCreate', {
+            username: res.locals.user,
+            title: 'Create Product',
+            error: 'No files were uploaded.',
+            productName: req.body.productName,
+            productDescription: req.body.productDescription,
+            productCategory: req.body.productCategory,
+            productPrice: req.body.productPrice,
+            productStock: req.body.productStock,
+            categoryList: allCategories,
+        });
+    }
+
     // Check if values are valid
     if (
-        !validateName(req.body.productName.trim())||
+        !validateName(req.body.productName.trim()) ||
         !validateDescription(req.body.productDescription.trim()) ||
         !validateIsMongoObjectId(req.body.productCategory.trim()) ||
         !validateIsNumber(req.body.productPrice.trim()) ||
         !validateIsNumber(req.body.productStock.trim())
-    ) {
+    ) {        
         res.render('productCreate', {
             username: res.locals.user,
             title: 'Create Product',
@@ -187,31 +208,87 @@ const postCreateProduct = async (req, res, next) => {
         });
     }
 
-    try {
-        const product = new Product({
-            name: trimMultipleWhiteSpaces(req.body.productName),
-            description: trimMultipleWhiteSpaces(req.body.productDescription),
-            category: trimMultipleWhiteSpaces(req.body.productCategory),
-            price: trimMultipleWhiteSpaces(req.body.productPrice),
-            stock: trimMultipleWhiteSpaces(req.body.productStock),
+    try {        
+        
+        uploadedFile = req.files.productImage;
+
+        const newUploadFileName = replaceFileNameSpacesWithHyphen(
+            uploadedFile.name,
+            req.body.productName,
+        );
+
+        const uploadPath =
+            staticsPath + '/images/products/' + newUploadFileName;
+
+        // Upload the file on the server
+        uploadedFile.mv(uploadPath, async function (error) {
+            if(error) {
+                console.log(error);
+                res.render('productCreate', {
+                    username: res.locals.user,
+                    title: 'Create Product',
+                    error: error,
+                    productName: req.body.productName,
+                    productDescription: req.body.productDescription,
+                    productCategory: req.body.productCategory,
+                    productPrice: req.body.productPrice,
+                    productStock: req.body.productStock,
+                    categoryList: allCategories,
+                });
+            } else {
+                const product = new Product({
+                    name: trimMultipleWhiteSpaces(req.body.productName),
+                    description: trimMultipleWhiteSpaces(
+                        req.body.productDescription,
+                    ),
+                    imageUrl: `api/images/products/${newUploadFileName}`,
+                    imageFilename: newUploadFileName,
+                    category: trimMultipleWhiteSpaces(req.body.productCategory),
+                    price: trimMultipleWhiteSpaces(req.body.productPrice),
+                    stock: trimMultipleWhiteSpaces(req.body.productStock),
+                });
+
+                let createdProduct;
+
+                try {
+                    createdProduct = await product.save();
+                    if (createdProduct) {
+                        res.render('productCreate', {
+                            username: res.locals.user,
+                            title: 'Create Product',
+                            success: `Product created with name ${createdProduct.name}`,
+                            productName: '',
+                            productDescription: '',
+                            productCategory: '',
+                            productPrice: '',
+                            productStock: '',
+                            categoryList: allCategories,
+                        });
+                    }
+                } catch (error) {
+                    // Delete the uploaded file, if database error
+                    unlink(uploadPath, (error) => {
+                        // Delete the file
+                        if (error) throw error;
+                        console.log(`${uploadedFile.name} file was deleted`);
+                    });
+                    // Rerender the page
+                    res.render('productCreate', {
+                        username: res.locals.user,
+                        title: 'Create Product',
+                        error: error,
+                        productName: req.body.productName,
+                        productDescription: req.body.productDescription,
+                        productCategory: req.body.productCategory,
+                        productPrice: req.body.productPrice,
+                        productStock: req.body.productStock,
+                        categoryList: allCategories,
+                    });
+                }
+            }
         });        
-        const createdProduct = await product.save();
-
-        res.render('productCreate', {
-            username: res.locals.user,
-            title: 'Create Product',
-            success: `Product created with name ${createdProduct.name}`,
-            productName: '',
-            productDescription: '',
-            productCategory: '',
-            productPrice: '',
-            productStock: '',
-            categoryList: allCategories,
-        });
-
+        
     } catch (error) {
-        console.error(error);
-
         res.render('productCreate', {
             username: res.locals.user,
             title: 'Create Product',

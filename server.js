@@ -9,12 +9,14 @@ import indexRouter from './routes/index.js';
 import mongoose from 'mongoose';
 import apiRouter from './routes/apiIndexRoutes.js';
 import cors from 'cors';
+import path from 'path';
 
 const port = process.env.PORT || 5000;
 const app = express();
 
 const viewsPath = fileURLToPath(new URL('views', import.meta.url));
-const staticsPath = fileURLToPath(new URL('public', import.meta.url));
+// const staticsPath = fileURLToPath(new URL('public', import.meta.url));
+const staticsPath = fileURLToPath(new URL('.', import.meta.url));
 
 app.set('views', viewsPath);
 app.set('view engine', 'ejs');
@@ -36,7 +38,7 @@ app.use(
 );
 
 app.use(express.json());
-app.use(express.static(staticsPath));
+app.use(express.static(path.join(staticsPath, './public')));
 app.use(express.urlencoded({ extended: true }));
 
 // Makes userId available for all routes

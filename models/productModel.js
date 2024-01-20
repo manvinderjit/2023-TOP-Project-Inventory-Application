@@ -17,6 +17,14 @@ const productSchema = new mongoose.Schema(
             minLength: 10,
             trim: true,
         },
+        imageUrl: {
+            type: String,
+            trim: true,
+        },
+        imageFilename: {
+            type: String,
+            trim: true,
+        },
         category: {
             type: Schema.Types.ObjectId,
             ref: 'Category',

@@ -10,6 +10,7 @@ import {
     getDeleteProduct,
     postDeleteProduct,
 } from '../controllers/productController.js';
+import fileUpload from 'express-fileupload';
 
 // productRouter.get('/',(req,res) => {    
 //     req.params.id
@@ -27,7 +28,7 @@ productRouter.post('/', getAllProducts);
 productRouter.get('/create', getCreateProduct);
 
 // POST request to create a product
-productRouter.post('/create', postCreateProduct);
+productRouter.post('/create', fileUpload(), postCreateProduct);
 
 // GET request to view a product's details
 productRouter.get('/:id', getOneProduct);

@@ -39,12 +39,6 @@ apiRouter.get('/', (req, res) => {
     });
 });
 
-// // GET request to get all products
-// apiRouter.get('/carousel', apiGetCarousel);
-
-// GET request to get all products
-// apiRouter.get('/products', apiGetAllProducts);
-
 // GET request to get all promo images
 apiRouter.get('/promoimage', apiGetCarouselImage);
 

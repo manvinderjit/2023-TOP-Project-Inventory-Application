@@ -9,6 +9,7 @@ import {
 } from '../utilities/validation.js';
 import { fileURLToPath } from 'url';
 import { replaceFileNameSpacesWithHyphen } from '../utilities/fileFormatting.js';
+import { fetchProductNameById } from '../utilities/dataFunctions.js';
 
 const staticsPath = fileURLToPath(new URL('../public', import.meta.url));
 
@@ -336,6 +337,7 @@ const getEditProduct = async (req, res) => {
                 productName: product.name,
                 productDescription: product.description,
                 productCategory: product.category,
+                productImage: product.imageFilename,
                 productPrice: product.price,
                 productStock: product.stock,
                 productUrl: product.url,
@@ -351,6 +353,7 @@ const getEditProduct = async (req, res) => {
             productName: req.body.productName,
             productDescription: req.body.productDescription,
             productCategory: req.body.productCategory,
+            productImage: req.body.productImage,
             productPrice: req.body.productPrice,
             productStock: req.body.productStock,
             categoryList: allCategories,
@@ -359,6 +362,7 @@ const getEditProduct = async (req, res) => {
 };
 
 const postEditProduct =  async (req, res, next) => {
+
     // Get all categories for select list
     const allCategories = await Category.find().sort({ name: 1 }).exec();
 
@@ -371,6 +375,7 @@ const postEditProduct =  async (req, res, next) => {
             productName: req.body.productName,
             productDescription: req.body.productDescription,
             productCategory: req.body.productCategory,
+            productImage: req.body.productImage,
             productPrice: req.body.productPrice,
             productStock: req.body.productStock,
             categoryList: allCategories,
@@ -392,6 +397,7 @@ const postEditProduct =  async (req, res, next) => {
             productName: req.body.productName,
             productDescription: req.body.productDescription,
             productCategory: req.body.productCategory,
+            productImage: req.body.productImage,
             productPrice: req.body.productPrice,
             productStock: req.body.productStock,
             categoryList: allCategories,
@@ -413,6 +419,7 @@ const postEditProduct =  async (req, res, next) => {
             productName: req.body.productName,
             productDescription: req.body.productDescription,
             productCategory: req.body.productCategory,
+            productImage: req.body.productImage,
             productPrice: req.body.productPrice,
             productStock: req.body.productStock,
             categoryList: allCategories,
@@ -434,6 +441,7 @@ const postEditProduct =  async (req, res, next) => {
             productName: req.body.productName,
             productDescription: req.body.productDescription,
             productCategory: req.body.productCategory,
+            productImage: req.body.productImage,
             productPrice: req.body.productPrice,
             productStock: req.body.productStock,
             categoryList: allCategories,
@@ -441,13 +449,13 @@ const postEditProduct =  async (req, res, next) => {
     }
 
     try {
-        const updatedProductDetails = {            
+        const updatedProductDetails = {
             name: trimMultipleWhiteSpaces(req.body.productName),
             description: trimMultipleWhiteSpaces(req.body.productDescription),
-            category: trimMultipleWhiteSpaces(req.body.productCategory),
+            category: trimMultipleWhiteSpaces(req.body.productCategory),            
             price: trimMultipleWhiteSpaces(req.body.productPrice),
             stock: trimMultipleWhiteSpaces(req.body.productStock),
-        };
+        };        
 
         const createdProduct = await Product.findByIdAndUpdate(
             req.params.id,
@@ -465,6 +473,7 @@ const postEditProduct =  async (req, res, next) => {
             productName: req.body.productName,
             productDescription: req.body.productDescription,
             productCategory: req.body.productCategory,
+            productCategory: req.body.productImage,
             productPrice: req.body.productPrice,
             productStock: req.body.productStock,
             categoryList: allCategories,
@@ -544,6 +553,154 @@ const postDeleteProduct = async (req, res) => {
     }
 };
 
+const getEditProductImage = async (req,res) => {
+    
+    try {
+        // Check if there is an id for a product in the request
+        if (!req.params.id || !validateIsMongoObjectId(req.params.id)) {
+            res.render('404', {
+                title: 'Error: Not Found!',
+                username: res.locals.user,
+                error: 'No product provided or invalid product!',
+            });
+        } else {
+            const product = await Product.findById(req.params.id)
+                .populate('category')
+                .sort({ name: 1 })
+                .exec();
+
+            if (!product || product === null) {
+                res.render('404', {
+                    title: 'Error: Not Found!',
+                    username: res.locals.user,
+                    error: 'No product found!',
+                });
+            } else {
+                res.render('productImageEdit', {
+                    title: 'Edit Product Image',
+                    username: res.locals.user,
+                    productName: product.name,
+                    productImage: product.imageFilename,
+                    productUrl: product.url,
+                });
+            }
+        }
+        
+    } catch (error) {
+        res.render('404', {
+            title: 'Product Image Edit',
+            username: res.locals.user,
+            error: error,
+        });
+    }
+}
+
+const postEditProductImage = async (req,res) => {
+
+    try {
+        
+        // Check if there is an id for a product in the request
+        if (!req.params.id || !validateIsMongoObjectId(req.params.id)) {
+            res.render('productImageEdit', {
+                title: 'Error: Not Found!',
+                username: res.locals.user,
+                error: 'No product provided or invalid product!',
+                productName: req.body.productName,
+                productImage: req.body.imageFilename,
+                productUrl: req.body.productUrl,
+            });
+        }
+
+        // If no file is uploaded, send 'upload file' error
+        else if (!req.files || Object.keys(req.files).length === 0) {
+            res.render('productImageEdit', {
+                title: 'Edit Product Image!',
+                username: res.locals.user,
+                error: 'No file uploaded! Please upload a file.',
+                productName: req.body.productName,
+                productImage: req.body.imageFilename,
+                productUrl: req.body.productUrl,
+            });
+        } else {
+            
+            let uploadedFile;
+            
+            // Upload and replace the old file
+            try {
+                uploadedFile = req.files.productImage;
+
+                const productNameInDatabase = await fetchProductNameById(
+                    req.params.id,
+                );
+
+                const newUploadFileName = replaceFileNameSpacesWithHyphen(
+                    uploadedFile.name,
+                    productNameInDatabase
+                );
+                
+                const uploadPath =
+                    staticsPath + '/images/products/' + newUploadFileName;
+                
+                // Upload the file on the server
+                uploadedFile.mv(uploadPath, async function (error) {
+                    if (error) {
+                        console.log(error);
+                        res.render('productImageEdit', {
+                            title: 'Edit Product Image',
+                            username: res.locals.user,
+                            error: error,
+                            productName: req.body.productName,
+                            productImage: req.body.imageFilename,
+                            productUrl: req.body.productUrl,
+                        });
+                    } else {
+
+                        // Upload filename in the database
+                        const newProductDetails = {
+                            imageFilename: trimMultipleWhiteSpaces(newUploadFileName),
+                        }
+
+                        const updatedProductDetails =
+                            await Product.findByIdAndUpdate(
+                                req.params.id,
+                                newProductDetails,
+                            );
+
+                        // Render the page
+                        res.redirect(
+                            `/allProducts/${req.params.id}/edit/image`,
+                        );
+                    }
+                });
+            } catch (error) {
+                console.log(error);
+                // Delete the uploaded file, if error
+                unlink(uploadPath, (error) => {
+                    // Delete the file
+                    if (error) throw error;
+                    console.log(`${uploadedFile.name} file was deleted`);
+                });
+                res.render('productImageEdit', {
+                    title: 'Edit Product Image',
+                    username: res.locals.user,
+                    error: error,
+                    productName: req.body.productName,
+                    productImage: req.body.imageFilename,
+                    productUrl: req.body.productUrl,
+                });
+            }
+        }
+
+    } catch (error) {
+        res.render('productImageEdit', {
+            title: 'Product Image Edit',
+            username: res.locals.user,
+            error: error,            
+        });
+    }
+
+}
+
 export {
     getAllProducts,
     getCreateProduct,
@@ -551,6 +708,8 @@ export {
     getOneProduct,
     getEditProduct,
     postEditProduct,
+    getEditProductImage,
+    postEditProductImage,
     getDeleteProduct,
     postDeleteProduct,
 };

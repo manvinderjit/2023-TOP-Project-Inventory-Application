@@ -1,0 +1,77 @@
+<%- include('./partials/headerProtected'); -%>
+
+            <li class="nav-item"><a href="/" class="nav-link ">Dashboard</a></li>
+            <li class="nav-item"><a href="/categories" class="nav-link  ">Categories</a></li>      
+            <li class="nav-item"><a href="/allproducts" class="nav-link  active">Products</a></li>
+        </ul>
+    </header>
+
+    <main class="flex-shrink-0">
+        <div class="container py-3  ">
+            
+            <p>Welcome, <%= username %> !</p>
+
+            <form method="POST" action="/logout">
+                <button class="btn btn-outline-primary me-2">Logout</button>        
+            </form>
+
+        </div>
+        <hr>
+        <div class="container">
+            <h2 class="py-2 text-center "><%= title %></h2>            
+        </div>
+        <hr>
+        <div class="container">
+            <div class="row row-cols-1 row-cols-md-3 g-4 m-3">
+
+                <% if(locals.error && error !=='' && error !== undefined) { %>
+                    <div class="alert alert-warning w-50 m-auto" role="alert">
+                        Error: <%= error %>
+                    </div>        
+                <% } else if (locals.success && success !=='' && success !== undefined) { %>
+                    <div class="alert alert-success w-50 m-auto" role="alert">
+                        Success: <%= success %>
+                    </div>
+                <% } %>
+            </div>
+
+            <div class="container w-50 m-auto">
+                <form method='POST' action="" encType="multipart/form-data">
+                    <fieldset>
+                        <legend class="mb-4 ">Upload Product Image</legend>
+                        <div class="mb-3">
+                            <div class="form-label" ><strong> Product Name:</strong> <%= productName %></div>
+                        </div >
+                        <div class="mb-3">
+                            <div class="form-label" ><strong>Current Product Image:</strong> </div>
+                            <img id="currentProductImage" src="/images/products/<%= productImage %> " class="img-fluid rounded">                            
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label" for="productImage"><strong>Upload New Product Image: </strong></label>
+                            <input class="form-control" type="file" id="productImage" name="productImage" accept="image/png, image/jpeg" >
+                            <div id="productImageError" aria-live="polite"></div>
+                        </div>
+                    </fieldset>
+                    <div class="mb-3 d-flex justify-content-center">
+                        <button type="submit" class="btn btn-primary">Update Product Image</button>
+                    </div>
+                </form>
+            </div>
+            <hr>
+            <div class="card-body text-center">
+                <a href="<%= `${productUrl}/edit` %>" class="btn btn-primary ">Edit <%= productName %></a>
+            </div>
+            <div class="card-body text-center">
+                <a href=<%= `${productUrl}` %> class="btn btn-primary ">View <%= productName %></a>
+                <a href=<%= `${productUrl}/delete` %> class="btn btn-primary ">Delete <%= productName %></a>
+            </div>
+            <hr>
+            <div class="card-body  text-center">
+                <a href="/allProducts" class="btn btn-primary ">Back To All Products</a>
+            </div>
+            
+        </div>
+    </main>
+    
+    
+<%- include('./partials/footer'); -%>

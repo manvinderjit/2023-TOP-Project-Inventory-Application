@@ -40,4 +40,32 @@ const apiGetCarouselImageByParams = async (req, res, next) => {
     });
 };
 
-export { apiGetCarouselImage, apiGetCarouselImageByParams };
+const apiGetProductImageByParams = async (req, res, next) => {
+    try {
+        if (!req.params.name) {
+            res.sendStatus(404);
+        } else {
+            const options = {
+                root: staticsPath,
+            };
+
+            const imgFileName = `/images/products/${req.params.name}`;
+
+            res.sendFile(imgFileName, options, function (err) {
+                if (err) {
+                    next(err);
+                } else {
+                    console.log('Sent:', imgFileName);
+                }
+            });
+        }
+
+    } catch (error) {
+        console.error(error);
+        res.status(400).send({
+            error: `Something went wrong!`,
+        });
+    }
+};
+
+export { apiGetCarouselImage, apiGetCarouselImageByParams, apiGetProductImageByParams };

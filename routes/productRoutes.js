@@ -7,6 +7,8 @@ import {
     getOneProduct,
     getEditProduct,
     postEditProduct,
+    getEditProductImage,
+    postEditProductImage,
     getDeleteProduct,
     postDeleteProduct,
 } from '../controllers/productController.js';
@@ -38,6 +40,12 @@ productRouter.get('/:id/edit', getEditProduct);
 
 // POST request to edit a product's details
 productRouter.post('/:id/edit', postEditProduct);
+
+// GET request to edit a product's image
+productRouter.get('/:id/edit/image', getEditProductImage);
+
+// POST request to edit a product's image
+productRouter.post('/:id/edit/image', fileUpload(), postEditProductImage);
 
 // GET request to delete a product's details
 productRouter.get('/:id/delete', getDeleteProduct);

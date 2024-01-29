@@ -71,6 +71,10 @@
                             <input class="form-control"  type="number" id="productStock" name="productStock" min="0" step="1" required value="<%= productStock %>"/>
                             <div id="productStockError" aria-live="polite"></div>
                         </div>
+                        <div class="mb-3">
+                            <div class="form-label" >Current Product Image: </div>
+                            <img id="currentProductImage" src="/images/products/<%= productImage %> " class="img-fluid rounded">                            
+                        </div>                        
                     </fieldset>
                     <div class="mb-3 d-flex justify-content-center">
                         <button type="submit" class="btn btn-primary">Update Product</button>
@@ -78,6 +82,9 @@
                 </form>
             </div>
             <hr>
+            <div class="card-body text-center">
+                <a href="<%= `${productUrl}/edit/image` %>" class="btn btn-primary ">Change Image: <%= productName %></a>
+            </div>
             <div class="card-body text-center">
                 <a href=<%= `${productUrl}` %> class="btn btn-primary ">View <%= productName %></a>
                 <a href=<%= `${productUrl}/delete` %> class="btn btn-primary ">Delete <%= productName %></a>

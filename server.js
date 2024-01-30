@@ -15,7 +15,6 @@ const port = process.env.PORT || 5000;
 const app = express();
 
 const viewsPath = fileURLToPath(new URL('views', import.meta.url));
-// const staticsPath = fileURLToPath(new URL('public', import.meta.url));
 const staticsPath = fileURLToPath(new URL('.', import.meta.url));
 
 app.set('views', viewsPath);

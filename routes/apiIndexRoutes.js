@@ -2,13 +2,10 @@ import express from 'express';
 import { protectRoutes } from '../middleware/apiAuthMiddleware.js';
 const apiRouter = express.Router();
 import apiUserRouter from './apiUserRoutes.js';
-import { apiGetAllProducts } from '../controllers/apiProductController.js';
 import { registerUser } from '../controllers/apiRegisterController.js';
 import { loginApiUser } from '../controllers/apiAuthController.js';
 import apiOrderRouter from './apiOrderRoutes.js';
 import { apiCreateOrder } from '../controllers/apiOrderController.js';
-// import { apiGetCarousel } from '../controllers/apiCarouselController.js';
-import { apiGetCarouselImage } from '../controllers/apiImageController.js';
 import apiPromosRouter from './apiPromosRoutes.js';
 import apiProductsRouters from './apiProductRoutes.js';
 
@@ -38,9 +35,6 @@ apiRouter.get('/', (req, res) => {
         message: 'Welcome to the api index!',
     });
 });
-
-// GET request to get all promo images
-apiRouter.get('/promoimage', apiGetCarouselImage);
 
 apiRouter.use('/products', apiProductsRouters);
 

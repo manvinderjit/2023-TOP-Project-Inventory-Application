@@ -14,12 +14,6 @@ import {
 } from '../controllers/productController.js';
 import fileUpload from 'express-fileupload';
 
-// productRouter.get('/',(req,res) => {    
-//     req.params.id
-//         ? res.send(`All products for category ${req.params.id}`)
-//         : getAllProducts;
-// });
-
 // GET request to fetch all products
 productRouter.get('/', getAllProducts);
 

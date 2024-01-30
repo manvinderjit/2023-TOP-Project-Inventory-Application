@@ -36,7 +36,7 @@ categoryRouter.get('/:id/delete', getDeleteCategory);
 // POST request to delete category by :id
 categoryRouter.post('/:id/delete', postDeleteCategory);
 
-// Use 
+// Use product router
 categoryRouter.use('/:id/products', productRouter);
 
 export default categoryRouter;

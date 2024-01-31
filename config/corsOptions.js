@@ -1,4 +1,4 @@
-const allowedOrigins = ['http://developer2.com', 'http://localhost:5173', 'http://localhost:5000'];
+const allowedOrigins = process.env.ALLOWED_ORIGINS.split(", ");
 
 export const credentials = (req, res, next) => {
     const origin = req.headers.origin;

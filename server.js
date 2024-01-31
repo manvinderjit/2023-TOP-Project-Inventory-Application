@@ -10,6 +10,7 @@ import mongoose from 'mongoose';
 import apiRouter from './routes/apiIndexRoutes.js';
 import cors from 'cors';
 import path from 'path';
+import corsOptions from './config/corsOptions.js';
 
 const port = process.env.PORT || 5000;
 const app = express();

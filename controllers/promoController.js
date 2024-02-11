@@ -212,7 +212,7 @@ const postCreatePromo = async (req, res, next) => {
                         unlink(uploadPath, (error) => {
                             // Delete the file
                             if (error) throw error;
-                            console.log(
+                            console.log(error, 
                                 `${uploadedFile.name} file was deleted`,
                             );
                         });

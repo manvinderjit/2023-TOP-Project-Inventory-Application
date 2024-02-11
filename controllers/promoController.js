@@ -220,7 +220,7 @@ const postCreatePromo = async (req, res, next) => {
                         res.render('promoCreate', {
                             title: 'Create a New Promo',
                             username: res.locals.user,
-                            error: 'An error occured!',
+                            error: error,
                             // TODO: Pass following field values
                             promoName: req.body.promoName,
                             promoCaption: req.body.promoCaption,

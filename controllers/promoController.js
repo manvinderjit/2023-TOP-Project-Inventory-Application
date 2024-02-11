@@ -144,28 +144,6 @@ const postCreatePromo = async (req, res, next) => {
 
             uploadPath = staticsPath + '/images/promos/' + newUploadFileName;
 
-            // stat(uploadPath, (error, stats) => {
-            //     if (!error && stats.isFile()) {
-            //         // If a file with the same name exists in the path defined
-            //          TODO: Send error
-            //     } else if (error && error.code == 'ENOENT') {
-            //         // If the file does not exist
-            //         // Upload the file
-            //     } else {
-            //         // Other file error
-            //         res.render('promoCreate', {
-            //             title: 'Create a New Promo',
-            //             username: res.locals.user,
-            //             error: error,
-            //             // TODO: Pass following field values
-            //             promoName: req.body.promoName,
-            //             promoCaption: req.body.promoCaption,
-            //             promoDescription: req.body.promoDescription,
-            //             promoCategoryList: promoCategories,
-            //         });
-            //     }
-            // });
-
             // Upload files on the server
             uploadedFile.mv(uploadPath, async function (error) {
                 if (error) {
@@ -199,7 +177,7 @@ const postCreatePromo = async (req, res, next) => {
                         category: trimMultipleWhiteSpaces(
                             promoCategories[req.body.promoCategory - 1].name,
                         ),
-                        imageUrl: `api/promos/carousel/${newUploadFileName}`,
+                        imageUrl: `promos/carousel/${newUploadFileName}`,
                         status: trimMultipleWhiteSpaces(req.body.promoStatus),
                         startsOn: trimMultipleWhiteSpaces(
                             req.body.promoStartDate,

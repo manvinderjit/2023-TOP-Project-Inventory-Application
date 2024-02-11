@@ -184,6 +184,7 @@ const postCreatePromo = async (req, res, next) => {
                         ),
                         endsOn: trimMultipleWhiteSpaces(req.body.promoEndDate),
                     });
+                    console.log(promo);
 
                     let createdPromo;
 
@@ -208,6 +209,7 @@ const postCreatePromo = async (req, res, next) => {
                             });
                         }
                     } catch (error) {
+                        console.log(error);
                         // Delete the uploaded file, if database error
                         unlink(uploadPath, (error) => {
                             // Delete the file

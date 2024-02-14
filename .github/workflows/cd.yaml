@@ -36,7 +36,7 @@ jobs:
           context: .
           platforms: linux/amd64,linux/arm64
           push: true
-          tags: ${{ secrets.DOCKERHUB_TAGS }}amd-arm
+          tags: ${{ secrets.DOCKERHUB_TAGS }}amd-arm-https
   
   deploy:    
     needs: build

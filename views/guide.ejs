@@ -7,34 +7,117 @@
     </header>
 
     <main class="flex-shrink-0">
-        <div class="container w-25">
+        <div class="container w-100">
             
-            <h2 class="mt-5 mb-4 py-3 border-bottom"><%= title %></h2>            
+            <h2 class="py-3 border-bottom"><%= title %></h2>            
             <% if(error == '') { '' } else { %>
                 <div class="alert alert-danger" role="alert">
                     <%= error %>
                 </div>
             <% } %>
               
-            <form method='POST' action="/login" >
-                <fieldset>
-                    <legend class="mb-4 ">Enter Your Information</legend>
-                    <div class="mb-3">
-                        <label class="form-label" for="email">Email Address: </label>
-                        <input class="form-control" type="email" id="email" name="email" required minlength="3" maxlength="30" value=<%= email %> >
-                        <div id="emailError" aria-live="polite"></div>
-                    </div >
-                    <div class="mb-3">
-                        <label class="form-label" for="password">Password: </label>
-                        <input class="form-control" type="password" id="password" name="password" minlength="5" pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{5,}" required>       
-                        <div id="passwordError" aria-live="polite"></div>
-                    </div >
-                </fieldset>
-                <div class="mb-3  d-flex justify-content-center">
-                    <button type="submit" class="btn btn-primary">Login</button>
+            <div>
+                <p>
+                    This is a quick walkthrough guide to take you through the workings of the <i><strong>Inventory App.</strong></i>                     
+                </p>
+                <div>
+                    <h4>Step 1: Register and Login</h4>
+                    <p>
+                        <ol>
+                            <li>Create an account by providing your email and password on the Register page. <br/> Password must contain at least one number and one uppercase and lowercase letter, and at least 5 or more characters. <br/>  Using your actual email address is neither recommended nor required because no email registration link will be sent for account activation. <br/><br/>
+                            <strong>Alternatively:</strong> Use these demo credentials <ul><li>email: <i><strong>e@abc.com</strong></i></li> <li> password: <i><strong>Admin1</strong></i></li></ul></li><br/>
+                            <li>
+                                Log in to the account using your or the demo credentials.
+                            </li>
+                        </ol>
+                    </p>
                 </div>
-            </form>
-            
+                <div>
+                    <h4>Step 2: Create a Category (<i><strong>Optional </strong></i>) and Add a Product</h4>
+                    <p>
+                        After logging in, you will be redirected to the dashboard. There are links for managing the following:
+                        <ul>
+                            <li>Categories</li>
+                            <li>Products</li>
+                            <li>Promos</li>
+                            <li>Orders</li>
+                        </ul>
+                        You can create a new <i><strong>Category</strong></i> on the Categories Page or use an existing one for convenience. We will demonstrate the process of creating a new Product.
+                    </p>
+                    <p>
+                        <ol>
+                            <li>
+                                Click on the <i><strong>Manage Products</strong></i> link from the Dashboard. You will be taken to the <i><strong>All Products</strong></i> page. It will list all the existing products with links to <i><strong>View</strong></i>, <i><strong>Edit</strong></i>, and <i><strong>Delete</strong></i> them.
+                            </li>
+                            <li>
+                                Click on the <i><strong>Add a New Product</strong></i> link to add a new product. You will be directed to the <i><strong>Create Product</strong></i> page.
+                            </li>
+                            <li>
+                                Enter all the required product details, upload an image, and choose a category for the product.
+                            </li>
+                            <li>
+                                Click on the <i><strong>Add Product</strong></i> button to create the product. If everything goes well, a success message will show. In case of errors, respond accordingly.
+                            </li>                            
+                        </ol>
+                    </p>
+                    <p>
+                        Checking the newly create product:
+                        <ul>                            
+                            <li>Go to the <i><strong><a href="https://2023-top-project-shopping-cart.pages.dev/" target=”_blank”>Shopping Cart App</a></strong></i>. The new product should now be sold on the home page and available for purchase by customers.</li>
+                            <li>Go to the <i><strong>All Products</strong></i> page. The new product should be visible in the list.</li>
+                        </ul>
+                    </p>
+                </div>
+            </div>
+            <div>
+                <h4>Step 3: Create a Promo</h4>
+                <p>
+                    This <i><strong>Inventory App</strong></i> allows you to manage carousel promos shown on the home page of <i><strong>Shopping Cart</strong></i> app. Let's create a new carousel promo:
+                    <ol>
+                        <li>Click on the <i><strong>Manage Promos</strong></i> link from the Dashboard. You will be taken to the <i><strong>All Promos</strong></i> page. It will list all the existing promos with links to <i><strong>View</strong></i>, <i><strong>Edit</strong></i>, and <i><strong>Delete</strong></i> them. You can select Promos for a particular category by selecting it from the DropDown list and clicking the <i><strong>Get Promos</strong></i> button.</li>
+                        <li>
+                            Click on the <i><strong>Add a New Promo</strong></i> button to add a new promo. You will be directed to the <i><strong>Create Promo</strong></i> page.
+                        </li>
+                        <li>
+                            Enter all the required promo details, upload an image, choose <i><strong>Carousel</strong></i> as the category for the promo, and a start date and end date that is at least 48 hours ahead of today.
+                        </li>
+                        <li>
+                            Click on the <i><strong>Add Promo</strong></i> button to create the promo. If everything goes well, a success message will show. In case of errors, respond accordingly.
+                        </li>
+                    </ol>                        
+                </p>
+                <p>
+                    Checking the newly created promo:
+                    <ul>                            
+                        <li>Go to the <i><strong><a href="https://2023-top-project-shopping-cart.pages.dev/" target=”_blank”>Shopping Cart App</a></strong></i>. The new promo should now be visible at the ned of the carousel on the home page.</li>
+                        <li>Go to the <i><strong>All Promos</strong></i> page. The new promo should be visible in the list.</li>
+                    </ul>
+                </p>
+            </div>
+             <div>
+                <h4>Step 4: Fulfill an Order</h4>
+                <p>
+                    This <i><strong>Inventory App</strong></i> allows you to fulfill orders placed by the customers on the <i><strong>Shopping Cart</strong></i> app.
+                    <h5>Create an Order on the <i><strong><a href="https://2023-top-project-shopping-cart.pages.dev/" target=”_blank”>Shopping Cart App</a></strong></i></h5> 
+                    <ol>
+                        <li>Go to the <i><strong><a href="https://2023-top-project-shopping-cart.pages.dev/" target=”_blank”>Shopping Cart App</a></strong></i>. 
+                        <li>Log in using demo or your credentials.</li>
+                        <li>Add any of the items to the cart and then checkout.</li>
+                        <li>Place the order</li>
+                        <li>You will be redirected to the <i><strong>Orders Page</strong></i> on the <i><strong>Shopping Cart </strong></i>app.</li>
+                        
+                    </ol>
+                </p>
+                
+                <p>
+                    <h5>Fulfill the Order on this <i><strong>Inventory App</strong></i></h5>
+                    Checking the newly created promo:
+                    <ul>                            
+                        <li>Go to the <i><strong><a href="https://2023-top-project-shopping-cart.pages.dev/" target=”_blank”>Shopping Cart App</a></strong></i>. The new promo should now be visible at the ned of the carousel on the home page.</li>
+                        <li>Go to the <i><strong>All Promos</strong></i> page. The new promo should be visible in the list.</li>
+                    </ul>
+                </p>
+            </div>
         </div>
     </main>
 

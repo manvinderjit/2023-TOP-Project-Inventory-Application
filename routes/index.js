@@ -47,4 +47,12 @@ indexRouter.post('/register', registerEmployee);
 
 indexRouter.post('/logout', redirectToLogin, logoutEmployee);
 
+indexRouter.get('/guide', (req, res) => {
+    res.render('guide', {
+        title: 'Walkthrough Guide',
+        email: '',
+        error: '',
+    });
+});
+
 export default indexRouter;

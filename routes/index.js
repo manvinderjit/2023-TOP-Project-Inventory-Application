@@ -48,7 +48,20 @@ indexRouter.post('/register', registerEmployee);
 indexRouter.post('/logout', redirectToLogin, logoutEmployee);
 
 indexRouter.get('/guide', (req, res) => {
+    const navMenuItems =
+        req.session?.userId && req.session.authorized === true
+            ? [
+                  { name: 'Dashboard', link: '/' },
+                  { name: 'Categories', link: 'categories' },
+                  { name: 'Products', link: 'allproducts' },
+                  { name: 'Promos', link: 'promos' },
+              ]
+            : [
+                  { name: 'Login', link: 'login' },
+                  { name: 'Register', link: 'register' },
+              ];
     res.render('guide', {
+        navMenuItems: navMenuItems,
         title: 'Walkthrough Guide',
         email: '',
         error: '',

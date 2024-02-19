@@ -35,7 +35,10 @@ const promoSchema = new mongoose.Schema(
         },
         imageUrl: {
             type: String,
-            required: true,
+            trim: true,
+        },
+        imageFilename: {
+            type: String,
             trim: true,
         },
         status: {
@@ -49,6 +52,7 @@ const promoSchema = new mongoose.Schema(
         startsOn: {
             type: Date,
             required: true,
+            get: (date) => date.toLocaleDateString(),
             // TODO: Add validation
             // min: new Date(),
             // validate: {
@@ -65,6 +69,7 @@ const promoSchema = new mongoose.Schema(
         endsOn: {
             type: Date,
             required: true,
+            get: (date) => date.toLocaleDateString(),
             // TODO: Add validation
             // min: new Date(),
             // validate: {
@@ -81,13 +86,14 @@ const promoSchema = new mongoose.Schema(
     },
     {
         timestamps: true,
+        toJSON: { getters: true },
     },
 );
 
 // Virtual for promo's URL
 const promoURL = promoSchema.virtual('url');
 promoURL.get(function () {
-    return `/promo/${this._id}`;
+    return `/promos/${this._id}`;
 });
 
 const Promo = mongoose.model('Promo', promoSchema);

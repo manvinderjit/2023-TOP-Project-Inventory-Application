@@ -59,15 +59,15 @@
                     <div class="container">
                         <div class="row">
                             <div class="col-1 border d-flex align-items-center justify-content-center py-2">S. No.</div>
-                            <div class="col-2 border d-flex align-items-center justify-content-center py-2">Name</div>
-                            <div class="col-2 border d-flex align-items-center justify-content-center py-2">Heading</div>
+                            <div class="col-1 border d-flex align-items-center justify-content-center py-2">Name</div>
+                            <div class="col-1 border d-flex align-items-center justify-content-center py-2">Heading</div>
                             <div class="col-2 border d-flex align-items-center justify-content-center py-2">Description</div>
+                            <div class="col-2 border d-flex align-items-center justify-content-center py-2">Image</div>
                             <div class="col-1 border d-flex align-items-center justify-content-center py-2">Category</div>
                             <div class="col-1 border d-flex align-items-center justify-content-center py-2">Status</div>
                             <div class="col-1 border d-flex align-items-center justify-content-center py-2">Start Date</div>
-                            <div class="col-1 border d-flex align-items-center justify-content-center py-2">End Date</div>
-                            <div class="col-1 border d-flex align-items-center justify-content-center py-2">Edit</div>
-                            <!-- <div class="col-1 border d-flex align-items-center justify-content-center py-2">Del</div> -->
+                            <div class="col-1 border d-flex align-items-center justify-content-center py-2">End Date</div>                            
+                            <div class="col-1 border d-flex align-items-center justify-content-center py-2">Manage</div>
                         </div>
                     </div>                    
                     <% promosList.forEach( (promo, index) => { %>
@@ -75,14 +75,23 @@
                         <div class="container">
                             <div class="row">
                                 <div class="col-1 border d-flex align-items-center justify-content-center py-2"><%= index + 1 %></div>
-                                <div class="col-2 border d-flex align-items-center justify-content-center py-2"><%= promo.name %></div>
-                                <div class="col-2 border d-flex align-items-center justify-content-left py-2"><%= promo.caption.heading %></div>
+                                <div class="col-1 border d-flex align-items-center justify-content-center py-2"><%= promo.name %></div>
+                                <div class="col-1 border d-flex align-items-center justify-content-left py-2"><%= promo.caption.heading %></div>
                                 <div class="col-2 border d-flex align-items-center justify-content-left py-2"><%= promo.caption.description %></div>
+                                <div class="col-2 border d-flex align-items-center justify-content-left py-2">
+                                    <img src="/images/promos/<%= promo.imageFilename %>" class="img-fluid" alt="<%= promo.Name %>">
+                                </div>
                                 <div class="col-1 border d-flex align-items-center justify-content-center py-2"><%= promo.category %></div>
                                 <div class="col-1 border d-flex align-items-center justify-content-center py-2"><%= promo.status %></div>
                                 <div class="col-1 border d-flex align-items-center justify-content-center py-2"><%= promo.startsOn %></div>
                                 <div class="col-1 border d-flex align-items-center justify-content-center py-2"><%= promo.endsOn %></div>
-                               <div class="col-1 border d-flex align-items-center justify-content-center py-2"><a href="<%= promo.url %>/edit" class="btn btn-primary">Edit</a></div>
+                                <div class="col-1 border d-flex align-items-center justify-content-center py-2">
+                                    <div class="row h-100 col-12 d-flex flex-column justify-content-between">
+                                        <a href="<%= promo.url %>" class="btn btn-primary my-1">View</a>
+                                        <a href="<%= promo.url %>/edit" class="btn btn-primary my-1">Edit</a>
+                                        <a href="<%= promo.url %>/delete" class="btn btn-primary my-1">Delete</a>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     <% }); } %>

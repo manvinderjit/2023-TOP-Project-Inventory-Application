@@ -1,0 +1,85 @@
+<%- include('./partials/headerProtected'); -%>
+
+            <li class="nav-item"><a href="/" class="nav-link ">Dashboard</a></li>
+            <li class="nav-item"><a href="/categories" class="nav-link ">Categories</a></li>      
+            <li class="nav-item"><a href="/allproducts" class="nav-link ">Products</a></li>
+            <li class="nav-item"><a href="/promos" class="nav-link active">Promos</a></li>
+            <li class="nav-item"><a href="/guide" class="nav-link">Guide</a></li>
+        </ul>
+    </header>
+
+    <main class="flex-shrink-0">
+        <div class="container py-3  ">
+            
+            <p>Welcome, <%= username %> !</p>
+
+            <form method="POST" action="/logout">
+                <button class="btn btn-outline-primary me-2">Logout</button>        
+            </form>
+
+        </div>
+        <hr>
+        <div class="container">
+            <h2 class="py-2 text-center "><%= title %></h2>            
+        </div>
+        <hr>
+        <div class="container">
+            <div class="row row-cols-1 row-cols-md-3 g-4 m-3">
+
+                <% if(locals.error && error !=='' && error !== undefined) { %>
+                    <div class="alert alert-warning w-50 m-auto" role="alert">
+                        Error: <%= error %>
+                    </div>        
+                <% } else if (locals.success && success !=='' && success !== undefined) { %>
+                    <div class="alert alert-success w-50 m-auto" role="alert">
+                        Success: <%= success %>
+                    </div>
+                <% } %>
+            </div>
+
+            <div class="container w-50 m-auto">
+                <form method='POST' action="" encType="multipart/form-data">
+                    <fieldset>
+                        <legend class="mb-4 ">Upload Promo Image</legend>
+                        <div class="mb-3">
+                            <div class="form-label" ><strong> Promo Name:</strong> <%= promoName %></div>
+                        </div >
+                        <div class="mb-3">
+                            <div class="form-label" ><strong> Promo Caption:</strong> <%= promoCaption %></div>
+                        </div >
+                        <div class="mb-3">
+                            <div class="form-label" ><strong> Promo Description:</strong> <%= promoDescription %></div>
+                        </div >
+                        <div class="mb-3">
+                            <div class="form-label" ><strong>Current Promo Image:</strong> </div>
+                            <img id="currentpromoImage" src="/images/promos/<%= promoImage %> " class="img-fluid rounded">                            
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label" for="promoImage"><strong>Upload New promo Image: </strong></label>
+                            <input class="form-control" type="file" id="promoImage" name="promoImage" accept="image/png, image/jpeg" >
+                            <div id="promoImageError" aria-live="polite"></div>
+                        </div>
+                    </fieldset>
+                    <div class="mb-3 d-flex justify-content-center">
+                        <button type="submit" class="btn btn-primary">Update Promo Image</button>
+                    </div>
+                </form>
+            </div>
+            <hr>
+            <div class="card-body text-center">
+                <a href="<%= `${promoUrl}/edit` %>" class="btn btn-primary ">Edit <%= promoName %></a>
+            </div>
+            <div class="card-body text-center">
+                <a href=<%= `${promoUrl}` %> class="btn btn-primary ">View <%= promoName %></a>
+                <a href=<%= `${promoUrl}/delete` %> class="btn btn-primary ">Delete <%= promoName %></a>
+            </div>
+            <hr>
+            <div class="card-body  text-center">
+                <a href="/promos" class="btn btn-primary ">Back To All Promos</a>
+            </div>
+            
+        </div>
+    </main>
+    
+    
+<%- include('./partials/footer'); -%>

@@ -5,3 +5,6 @@ echo $(aws ssm get-parameter --name "docker-creds-token" --query "Parameter.Valu
 
 # Get Docker Image from repo
 docker pull "$(aws ssm get-parameter --name "docker-image-name-inventory-app" --query "Parameter.Value" --output text)amd-arm"
+
+# Run the Code Deploy Agent
+sudo systemctl start codedeploy-agent

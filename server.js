@@ -11,15 +11,9 @@ import apiRouter from './routes/apiIndexRoutes.js';
 import cors from 'cors';
 import path from 'path';
 import corsOptions from './config/corsOptions.js';
-import https from 'https';
 
 const port = process.env.PORT || 5000;
 const app = express();
-
-const httpsOptions = {
-    key: Buffer.from(process.env.SSL_KEY, 'base64').toString('ascii'),
-    cert: Buffer.from(process.env.SSL_CERT, 'base64').toString('ascii')
-};
 
 const viewsPath = fileURLToPath(new URL('views', import.meta.url));
 const staticsPath = fileURLToPath(new URL('.', import.meta.url));
@@ -28,10 +22,6 @@ app.set('views', viewsPath);
 app.set('view engine', 'ejs');
 
 connectDB().catch((err) => console.log(err));
-
-app.use((req, res, next) => {
-    req.secure ? next() : res.redirect('https://' + req.headers.host + req.url);
-});
 
 app.use(
     session({
@@ -67,8 +57,6 @@ app.use('/api', apiRouter);
 
 app.use(errorHandler);
 
-const httpsServer = https.createServer(httpsOptions, app);
-
-httpsServer.listen(port, () => {
+app.listen(port, () => {
     console.log(`App server listening on port ${port}`);
 });

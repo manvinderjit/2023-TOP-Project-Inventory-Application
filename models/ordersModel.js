@@ -24,7 +24,7 @@ const orderSchema = new mongoose.Schema(
                 itemPrice: {
                     type: Number,
                     required: true,
-                }
+                },
             },
         ],
         totalAmount: {
@@ -69,6 +69,8 @@ const orderSchema = new mongoose.Schema(
             },
             default: 'Ordered',
         },
+        createdAt: { type: Date, get: (date) => date.toLocaleDateString() },
+        updatedAt: { type: Date, get: (date) => date.toLocaleDateString() },
     },
     {
         toJSON: { getters: true },

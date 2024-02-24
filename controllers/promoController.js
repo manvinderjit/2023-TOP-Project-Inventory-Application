@@ -281,7 +281,7 @@ const getEditPromo = async (req, res) => {
                 res.render('404', {
                     title: 'Error: Not Found!',
                     username: res.locals.user,
-                    error: 'Promo was found!',
+                    error: 'Promo not found!',
                 });
             } else {
                 // Render the Promo Edit page

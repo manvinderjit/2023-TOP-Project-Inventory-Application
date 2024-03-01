@@ -1,6 +1,6 @@
 import express from 'express';
 const ordersRouter = express.Router();
-import { getAllOrders, getOrderById } from '../controllers/orderController.js';
+import { getAllOrders, getOrderById, postFulfillOrder } from '../controllers/orderController.js';
 
 // GET route to get all orders
 ordersRouter.get('/', getAllOrders);
@@ -8,7 +8,10 @@ ordersRouter.get('/', getAllOrders);
 // POST route to get all orders by order status
 ordersRouter.post('/', getAllOrders);
 
-// GET route to get an order by id
+// GET route to fulfill an order by id
 ordersRouter.get('/:id', getOrderById);
+
+// POST route to fulfill an order by id
+ordersRouter.post('/:id', postFulfillOrder);
 
 export default ordersRouter;

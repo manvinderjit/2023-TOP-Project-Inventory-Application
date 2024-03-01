@@ -77,6 +77,10 @@ const getOrderById = async (req, res)  => {
         } else {
             // Fetch order details from the database
             const orderDetails = await Order.findById(req.params.id)
+                .populate({
+                    path: 'items.itemDetails',
+                    select: 'name description',
+                })
                 .sort({ name: 1 })
                 .exec();
 
@@ -89,11 +93,12 @@ const getOrderById = async (req, res)  => {
                 });
             } else {
                 // Render the order details page
-                // res.render('orderView', {
-                //     title: 'Customer Order Details',
-                //     username: res.locals.user,
-                // });
-                res.send(orderDetails);
+                res.render('orderView', {
+                    title: 'Customer Order Details',
+                    username: res.locals.user,
+                    orderDetails: orderDetails,
+                    orderStatusList: orderCategoryList
+                });
             }
         }
     } catch (error) {
@@ -106,4 +111,63 @@ const getOrderById = async (req, res)  => {
     }
 }
 
-export { getAllOrders, getOrderById };
+const postFulfillOrder = async (req, res)  => {
+    try {
+        // Check if there is a vaild order id in the request
+        if (!req.params.id || !validateIsMongoObjectId(req.params.id)) {
+            // If no or invalid order id, render 404
+            res.render('404', {
+                title: 'Error: Can not fulfill order!',
+                username: res.locals.user,
+                error: 'No order id provided or invalid order id!',
+            });
+            
+        // Check if new order status is provided in the request and its not empty
+        } else if (!req.body.newOrderStatus || req.body.newOrderStatus.trim() === '') {
+            // Fetch order details from the database
+            const orderDetails = await Order.findById(req.params.id)
+                .populate({
+                    path: 'items.itemDetails',
+                    select: 'name description',
+                })
+                .sort({ name: 1 })
+                .exec();
+            
+                // If order not found, render 404
+            if (!orderDetails || orderDetails === null) {
+                res.render('404', {
+                    title: 'Error: Not Found!',
+                    username: res.locals.user,
+                    error: 'Order not found!',
+                });
+                
+            } else {
+                // Render the order details page with error
+                res.render('orderView', {
+                    title: 'Error: Can not fulfill order!',
+                    username: res.locals.user,
+                    error: 'No order status provided or invalid order status!',
+                    orderDetails: orderDetails,
+                    orderStatusList: orderCategoryList,
+                });
+            }
+        } // Update order status
+        else {
+            const updatedOrder = await Order.findByIdAndUpdate(
+                req.params.id,
+                { status: orderCategoryList[req.body.newOrderStatus - 1].name },
+            );
+            res.redirect(`/orders/${req.params.id}`);
+        }
+
+    } catch (error) {
+        console.log('error');
+        res.render('404', {
+            title: 'Error: Order Fulfill Error!',
+            username: res.locals.user,
+            error: error,
+        });
+    }
+}
+
+export { getAllOrders, getOrderById, postFulfillOrder };

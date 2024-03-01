@@ -59,6 +59,7 @@ indexRouter.get('/guide', (req, res) => {
                   { name: 'Categories', link: '/categories' },
                   { name: 'Products', link: '/allproducts' },
                   { name: 'Promos', link: '/promos' },
+                  { name: 'Orders', link: '/orders' },
               ]
             : [
                   { name: 'Login', link: '/login' },

@@ -9,7 +9,10 @@ export const registerUser = async (req, res) => {
 
         if (!userEmail || !userPassword) {
             res.status(400).json({ error: 'Please provide all fields. ' });
-        } else if (!validateEmail(userEmail) || !validatePassword(userPassword)) {
+        } else if (
+            !validateEmail(userEmail) ||
+            !validatePassword(userPassword)
+        ) {
             res.status(400).json({ error: 'Username or Password is invalid.' });
         } else {
             // Check if user exists

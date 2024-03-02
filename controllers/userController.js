@@ -72,7 +72,7 @@ export const loginUser = async (req, res, next) => {
             res.status(201).json({
                 _id: user._id,
                 username: user.email,
-                token: generateToken(user._id),                
+                token: generateToken(user._id),
             });
         } else {
             res.status(400).send({
@@ -83,8 +83,6 @@ export const loginUser = async (req, res, next) => {
         console.error(error);
     }
 };
-
-
 
 export const getUser = async (req, res, next) => {
     try {

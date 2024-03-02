@@ -1,6 +1,10 @@
 import express from 'express';
 const ordersRouter = express.Router();
-import { getAllOrders, getOrderById, postFulfillOrder } from '../controllers/orderController.js';
+import {
+    getAllOrders,
+    getOrderById,
+    postFulfillOrder,
+} from '../controllers/orderController.js';
 
 // GET route to get all orders
 ordersRouter.get('/', getAllOrders);

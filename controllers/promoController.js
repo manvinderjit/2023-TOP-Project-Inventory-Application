@@ -1,22 +1,26 @@
-import Promo from '../models/promoModel.js'
+import Promo from '../models/promoModel.js';
 import { trimMultipleWhiteSpaces } from '../utilities/stringFormatting.js';
 import { access, constants, unlink, stat } from 'node:fs';
 import { fileURLToPath } from 'url';
 import { replaceFileNameSpacesWithHyphen } from '../utilities/fileFormatting.js';
-import { validateName, validateDescription, validateIsMongoObjectId } from '../utilities/validation.js';
+import {
+    validateName,
+    validateDescription,
+    validateIsMongoObjectId,
+} from '../utilities/validation.js';
 import { fetchPromoNameById } from '../utilities/dataFunctions.js';
 
 const staticsPath = fileURLToPath(new URL('../public', import.meta.url));
 
 const promoCategories = [
-    { 
+    {
         id: 1,
-        name: 'Carousel' 
-    }, 
-    { 
+        name: 'Carousel',
+    },
+    {
         id: 2,
-        name: 'Others'
-    }
+        name: 'Others',
+    },
 ];
 
 const getAllPromos = async (req, res, next) => {
@@ -29,11 +33,12 @@ const getAllPromos = async (req, res, next) => {
             req.body.promoCategory.toLowerCase() === 'all'
                 ? await Promo.find().sort({ name: 1 }).exec()
                 : await Promo.find({
-                      category: promoCategories[req.body.promoCategory - 1].name,
+                      category:
+                          promoCategories[req.body.promoCategory - 1].name,
                   })
                       .sort({ name: 1 })
                       .exec();
-        
+
         if (!allPromos || allPromos.length === 0) {
             res.render('promos', {
                 title: 'All Promos',
@@ -71,7 +76,7 @@ const getCreatePromo = async (req, res, next) => {
             promoCaption: '',
             promoDescription: '',
             promoCategoryList: promoCategories,
-            selectedPromoCategory: null
+            selectedPromoCategory: null,
         });
     } catch (error) {
         console.error(error);
@@ -133,7 +138,6 @@ const postCreatePromo = async (req, res, next) => {
                 promoCategoryList: promoCategories,
             });
         } else {
-            
             // TODO: Check if all values are valid
 
             // The name of the input field (i.e. "promoImage") is used to retrieve the uploaded file
@@ -216,7 +220,8 @@ const postCreatePromo = async (req, res, next) => {
                         unlink(uploadPath, (error) => {
                             // Delete the file
                             if (error) throw error;
-                            console.log(error, 
+                            console.log(
+                                error,
                                 `${uploadedFile.name} file was deleted`,
                             );
                         });
@@ -260,10 +265,8 @@ const postCreatePromo = async (req, res, next) => {
 
 const getEditPromo = async (req, res) => {
     try {
-        
         // Check if there is a promo id in the request
         if (!req.params.id || !validateIsMongoObjectId(req.params.id)) {
-            
             // If no or invalid promo id, render 404
             res.render('404', {
                 title: 'Error: Not Found!',
@@ -275,7 +278,7 @@ const getEditPromo = async (req, res) => {
             const promo = await Promo.findById(req.params.id)
                 .sort({ name: 1 })
                 .exec();
-                
+
             // If promo not found, render 404
             if (!promo || promo === null) {
                 res.render('404', {
@@ -302,7 +305,6 @@ const getEditPromo = async (req, res) => {
                 });
             }
         }
-
     } catch (error) {
         console.error(error);
         res.render('404', {
@@ -324,16 +326,22 @@ const postEditPromo = async (req, res) => {
                 username: res.locals.user,
                 error: 'No promo id provided or invalid promo id!',
             });
-
         } else if (
             // Check if all the values are provided and not empty
-            !req.body.promoName         || req.body.promoName.trim() === '' ||
-            !req.body.promoCaption      || req.body.promoCaption.trim() === '' ||
-            !req.body.promoDescription  || req.body.promoDescription.trim() === '' ||
-            !req.body.promoCategory     || req.body.promoCategory.trim() === '' ||
-            !req.body.promoStatus       || req.body.promoStatus.trim() === '' ||
-            !req.body.promoStartDate    || req.body.promoStartDate.trim() === '' ||
-            !req.body.promoEndDate      || req.body.promoEndDate.trim() === ''
+            !req.body.promoName ||
+            req.body.promoName.trim() === '' ||
+            !req.body.promoCaption ||
+            req.body.promoCaption.trim() === '' ||
+            !req.body.promoDescription ||
+            req.body.promoDescription.trim() === '' ||
+            !req.body.promoCategory ||
+            req.body.promoCategory.trim() === '' ||
+            !req.body.promoStatus ||
+            req.body.promoStatus.trim() === '' ||
+            !req.body.promoStartDate ||
+            req.body.promoStartDate.trim() === '' ||
+            !req.body.promoEndDate ||
+            req.body.promoEndDate.trim() === ''
         ) {
             // TODO: Check if all the values are valid
 
@@ -350,7 +358,7 @@ const postEditPromo = async (req, res) => {
                 promoImageName: req.body.promoImageName,
                 promoStatus: req.body.promoStatus,
                 promoStartDate: req.body.promoStartDate,
-                promoEndDate: req.body.promoEndDate,                
+                promoEndDate: req.body.promoEndDate,
                 promoUrl: req.body.promoUrl,
                 promoCategoryList: promoCategories,
             });
@@ -367,7 +375,7 @@ const postEditPromo = async (req, res) => {
                     },
                     category: trimMultipleWhiteSpaces(
                         promoCategories[req.body.promoCategory - 1].name,
-                    ),                    
+                    ),
                     status: trimMultipleWhiteSpaces(req.body.promoStatus),
                     startsOn: trimMultipleWhiteSpaces(req.body.promoStartDate),
                     endsOn: trimMultipleWhiteSpaces(req.body.promoEndDate),
@@ -377,10 +385,9 @@ const postEditPromo = async (req, res) => {
                     req.params.id,
                     updatePromoDetails,
                 );
-                
+
                 // res.redirect(`/promos/${req.params.id}`);
                 res.redirect(`/promos`);
-
             } catch (error) {
                 // Render the Edit Promo page with errors
                 res.render('promoEdit', {
@@ -391,7 +398,8 @@ const postEditPromo = async (req, res) => {
                     promoName: req.body.promoName,
                     promoCaption: req.body.promoCaption,
                     promoDescription: req.body.promoDescription,
-                    promoCategory: promoCategories[req.body.promoCategory - 1].name,
+                    promoCategory:
+                        promoCategories[req.body.promoCategory - 1].name,
                     promoImageName: req.body.promoImageName,
                     promoStatus: req.body.promoStatus,
                     promoStartDate: req.body.promoStartDate,
@@ -410,7 +418,7 @@ const postEditPromo = async (req, res) => {
             promosList: null,
         });
     }
-}
+};
 
 const getViewPromo = async (req, res) => {
     try {
@@ -450,7 +458,7 @@ const getViewPromo = async (req, res) => {
             error: error,
         });
     }
-}
+};
 
 const getDeletePromo = async (req, res) => {
     try {
@@ -464,8 +472,7 @@ const getDeletePromo = async (req, res) => {
             });
         } else {
             // Fetch promo details from the database
-            const promoDetails = await Promo.findById(req.params.id)                
-                .exec();
+            const promoDetails = await Promo.findById(req.params.id).exec();
 
             if (!promoDetails || promoDetails === null) {
                 res.render('404', {
@@ -489,7 +496,7 @@ const getDeletePromo = async (req, res) => {
             error: error,
         });
     }
-}
+};
 
 const postDeletePromo = async (req, res) => {
     try {
@@ -508,7 +515,8 @@ const postDeletePromo = async (req, res) => {
                 .select({ imageFilename: 1, _id: 0 })
                 .exec();
 
-            let uploadPath = staticsPath + '/images/promos/' + promoDetails.imageFilename;
+            let uploadPath =
+                staticsPath + '/images/promos/' + promoDetails.imageFilename;
             // Delete image
             unlink(uploadPath, (error) => {
                 // Delete the file
@@ -542,8 +550,7 @@ const getEditPromoImage = async (req, res) => {
             });
         } else {
             // Get Promo Details
-            const promoDetails = await Promo.findById(req.params.id)                
-                .exec();     
+            const promoDetails = await Promo.findById(req.params.id).exec();
 
             if (!promoDetails || promoDetails === null) {
                 res.render('404', {
@@ -558,10 +565,10 @@ const getEditPromoImage = async (req, res) => {
                     promoName: promoDetails.name,
                     promoImage: promoDetails.imageFilename,
                     promoCaption: promoDetails.caption.heading,
-                    promoDescription: promoDetails.caption.description,                    
+                    promoDescription: promoDetails.caption.description,
                     promoUrl: promoDetails.url,
                 });
-            }            
+            }
         }
     } catch (error) {
         res.render('404', {
@@ -570,7 +577,7 @@ const getEditPromoImage = async (req, res) => {
             error: error,
         });
     }
-}
+};
 
 const postEditPromoImage = async (req, res) => {
     try {
@@ -667,10 +674,9 @@ const postEditPromoImage = async (req, res) => {
         res.render('promoImageEdit', {
             title: 'Edit Promo Image',
             username: res.locals.user,
-            error: error,            
+            error: error,
         });
     }
-    
 };
 
 export {
@@ -683,5 +689,5 @@ export {
     getDeletePromo,
     postDeletePromo,
     getEditPromoImage,
-    postEditPromoImage
+    postEditPromoImage,
 };

@@ -2,7 +2,7 @@ import express from 'express';
 const cmsRouter = express.Router();
 import {
     getUploadGuideImage,
-    postUploadGuideImage
+    postUploadGuideImage,
 } from '../controllers/cmsController.js';
 import fileUpload from 'express-fileupload';
 

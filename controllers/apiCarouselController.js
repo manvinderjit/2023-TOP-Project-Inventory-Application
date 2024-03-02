@@ -1,4 +1,4 @@
-import Promo from "../models/promoModel.js";
+import Promo from '../models/promoModel.js';
 
 const apiGetCarouselPromos = async (req, res, next) => {
     try {
@@ -16,15 +16,14 @@ const apiGetCarouselPromos = async (req, res, next) => {
             });
         } else {
             res.status(200).send({
-                carouselPromos
+                carouselPromos,
             });
         }
-
     } catch (error) {
         res.status(400).send({
             error: 'Something went wrong!',
         });
     }
-}
+};
 
 export { apiGetCarouselPromos };

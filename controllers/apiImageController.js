@@ -59,7 +59,6 @@ const apiGetProductImageByParams = async (req, res, next) => {
                 }
             });
         }
-
     } catch (error) {
         console.error(error);
         res.status(400).send({
@@ -68,4 +67,8 @@ const apiGetProductImageByParams = async (req, res, next) => {
     }
 };
 
-export { apiGetCarouselImage, apiGetCarouselImageByParams, apiGetProductImageByParams };
+export {
+    apiGetCarouselImage,
+    apiGetCarouselImageByParams,
+    apiGetProductImageByParams,
+};

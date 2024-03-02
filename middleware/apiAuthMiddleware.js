@@ -14,15 +14,21 @@ const protectRoutes = async (req, res, next) => {
                 console.log('token: ' + token);
                 console.log(req.cookies);
                 // Verify Token
-                jwt.verify(token, process.env.JWT_SECRET, async (error, decodedToken) => {
-                    if(error) return res.status(403).send({ error: 'Login expired!'});
-                    req.user = await User.findById(decodedToken.id)
-                        .select('-password')
-                        .exec();
-                    next();
-                });                
-                
-            } catch (error) {                
+                jwt.verify(
+                    token,
+                    process.env.JWT_SECRET,
+                    async (error, decodedToken) => {
+                        if (error)
+                            return res
+                                .status(403)
+                                .send({ error: 'Login expired!' });
+                        req.user = await User.findById(decodedToken.id)
+                            .select('-password')
+                            .exec();
+                        next();
+                    },
+                );
+            } catch (error) {
                 res.status(401).json({
                     error: 'You are not authorized to do that.',
                 });
@@ -42,12 +48,11 @@ const protectRoutes = async (req, res, next) => {
 };
 
 const checkSessionStatus = (req, res, next) => {
-    
-    if (!req.session.userId || req.session.authorized !== true ) {
+    if (!req.session.userId || req.session.authorized !== true) {
         res.redirect('/login');
     } else {
         next();
     }
-}
+};
 
 export { protectRoutes, checkSessionStatus };

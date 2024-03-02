@@ -13,7 +13,6 @@ const getAllCategoriesList = async (req, res, next) => {
             username: res.locals.user,
             allCategoriesList: allCategories,
         });
-
     } catch (error) {
         console.error(error);
         res.render('categoryView', {
@@ -27,8 +26,7 @@ const getAllCategoriesList = async (req, res, next) => {
 // Display details for one category
 const getCategoryDetail = async (req, res, next) => {
     try {
-
-        if(!req.params.id){
+        if (!req.params.id) {
             res.render('categoryView', {
                 username: res.locals.user,
                 title: 'Error! Not found.',
@@ -53,7 +51,6 @@ const getCategoryDetail = async (req, res, next) => {
                 url: categoryDetails.url,
             });
         }
-
     } catch (error) {
         console.error(error);
         res.render('categoryView', {
@@ -87,12 +84,13 @@ const getCreateCategory = async (req, res, next) => {
 // Add a New Category
 const postCreateCategory = async (req, res, next) => {
     try {
-        
         const categoryName = trimMultipleWhiteSpaces(req.body.categoryName);
-        const categoryDescription = trimMultipleWhiteSpaces(req.body.categoryDescription);
+        const categoryDescription = trimMultipleWhiteSpaces(
+            req.body.categoryDescription,
+        );
 
         // Validate categoryName & categoryDescription
-        if(!categoryName || !categoryDescription){
+        if (!categoryName || !categoryDescription) {
             res.render('categoryCreate', {
                 username: res.locals.user,
                 title: 'Create Category',
@@ -100,7 +98,10 @@ const postCreateCategory = async (req, res, next) => {
                 categoryName: categoryName,
                 categoryDescription: categoryDescription,
             });
-        } else if(validateName(categoryName) && validateDescription(categoryDescription)){
+        } else if (
+            validateName(categoryName) &&
+            validateDescription(categoryDescription)
+        ) {
             const category = new Category({
                 name: categoryName,
                 description: categoryDescription,
@@ -122,7 +123,6 @@ const postCreateCategory = async (req, res, next) => {
                 categoryDescription: categoryDescription,
             });
         }
-
     } catch (error) {
         console.error(error);
         res.render('categoryCreate', {
@@ -137,7 +137,6 @@ const postCreateCategory = async (req, res, next) => {
 
 // Display details for the category to be edited
 const getEditCategory = async (req, res, next) => {
-   
     try {
         let responseRenderObject = {
             username: res.locals.user,
@@ -149,7 +148,7 @@ const getEditCategory = async (req, res, next) => {
         };
 
         // If no category ID was supplied
-        if(!req.params.id){
+        if (!req.params.id) {
             responseRenderObject = {
                 username: res.locals.user,
                 title: 'Edit Category',
@@ -162,9 +161,9 @@ const getEditCategory = async (req, res, next) => {
 
         // Get details for the category to be edited
         const categoryDetails = await Category.findById(req.params.id).exec();
-        
+
         // If search for category details returned empty
-        if(categoryDetails === null){            
+        if (categoryDetails === null) {
             responseRenderObject = {
                 username: res.locals.user,
                 title: 'Edit Category',
@@ -185,7 +184,6 @@ const getEditCategory = async (req, res, next) => {
         }
 
         res.render('categoryEdit', responseRenderObject);
-        
     } catch (error) {
         console.error(error);
         res.render('categoryEdit', {
@@ -197,13 +195,11 @@ const getEditCategory = async (req, res, next) => {
             categoryDescription: '',
         });
     }
-}
+};
 
 // Edit and update the category
 const postEditCategory = async (req, res, next) => {
-   
     try {
-        
         // If no category ID was supplied
         if (!req.params.id) {
             res.render('categoryEdit', {
@@ -213,33 +209,37 @@ const postEditCategory = async (req, res, next) => {
                 id: '',
                 categoryName: '',
                 categoryDescription: '',
-            })
+            });
         }
 
         const categoryName = trimMultipleWhiteSpaces(req.body.categoryName);
-        const categoryDescription = trimMultipleWhiteSpaces(req.body.categoryDescription);
+        const categoryDescription = trimMultipleWhiteSpaces(
+            req.body.categoryDescription,
+        );
 
         // Validate categoryName & categoryDescription
         if (!categoryName || !categoryDescription) {
             res.render('categoryEdit', {
                 username: res.locals.user,
                 title: 'Edit Category',
-                error: 'Please provide all fields',                
+                error: 'Please provide all fields',
                 categoryName: categoryName,
                 categoryDescription: categoryDescription,
-            })
+            });
         } else if (
             validateName(categoryName) &&
             validateDescription(categoryDescription)
         ) {
-            const updatedCategoryDetails = {                
+            const updatedCategoryDetails = {
                 name: categoryName,
                 description: categoryDescription,
             };
-            const updatedCategory = await Category.findByIdAndUpdate(req.params.id, updatedCategoryDetails);
+            const updatedCategory = await Category.findByIdAndUpdate(
+                req.params.id,
+                updatedCategoryDetails,
+            );
             res.redirect(updatedCategory.url);
         }
-        
     } catch (error) {
         console.error(error);
         res.render('categoryEdit', {
@@ -251,7 +251,7 @@ const postEditCategory = async (req, res, next) => {
             categoryDescription: req.body.categoryDescription,
         });
     }
-}
+};
 
 // Display details for one category to be deleted
 const getDeleteCategory = async (req, res, next) => {
@@ -265,7 +265,7 @@ const getDeleteCategory = async (req, res, next) => {
                 name: '',
                 description: '',
                 url: '',
-                error: 'Category Not Found'
+                error: 'Category Not Found',
             });
         } else {
             res.render('categoryDelete', {
@@ -306,12 +306,14 @@ const postDeleteCategory = async (req, res, next) => {
             });
         }
 
-        const allProductsInCategory = await Product.find({ category: req.body.categoryId }, 'name, description').exec();
-        if(allProductsInCategory.length === 0){
+        const allProductsInCategory = await Product.find(
+            { category: req.body.categoryId },
+            'name, description',
+        ).exec();
+        if (allProductsInCategory.length === 0) {
             await Category.findByIdAndRemove(req.body.categoryId);
             res.redirect('/categories');
-
-        } else{
+        } else {
             res.render('categoryDelete', {
                 username: res.locals.user,
                 title: 'Delete Category',
@@ -321,7 +323,6 @@ const postDeleteCategory = async (req, res, next) => {
                 categoryDescription: '',
             });
         }
-        
     } catch (error) {
         console.error(error);
         res.render('categoryDelete', {

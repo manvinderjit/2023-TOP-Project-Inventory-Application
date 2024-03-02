@@ -16,11 +16,15 @@ const staticsPath = fileURLToPath(new URL('../public', import.meta.url));
 const getAllProducts = async (req, res, next) => {
     try {
         // Get all categories for select list
-        const categories = await Category.find().sort({ name: 1 }).exec();        
-        
+        const categories = await Category.find().sort({ name: 1 }).exec();
+
         const allProducts =
-            (!req.body.productCategory || (req.body.productCategory).toLowerCase() === 'all')
-                ? await Product.find().populate({path: 'category',select: 'name'}).sort({ name: 1 }).exec()
+            !req.body.productCategory ||
+            req.body.productCategory.toLowerCase() === 'all'
+                ? await Product.find()
+                      .populate({ path: 'category', select: 'name' })
+                      .sort({ name: 1 })
+                      .exec()
                 : await Product.find({ category: req.body.productCategory })
                       .populate('category')
                       .sort({ name: 1 })
@@ -52,11 +56,10 @@ const getAllProducts = async (req, res, next) => {
             allProductsList: null,
         });
     }
-}
+};
 
 const getOneProduct = async (req, res) => {
-    try {        
-
+    try {
         // Check if there is an id in the request
         if (!req.params.id || !validateIsMongoObjectId(req.params.id)) {
             res.render('404', {
@@ -67,20 +70,20 @@ const getOneProduct = async (req, res) => {
         }
 
         const product = await Product.findById(req.params.id)
-                      .populate('category')
-                      .sort({ name: 1 })
-                      .exec();
+            .populate('category')
+            .sort({ name: 1 })
+            .exec();
 
-        if (!product || product === null ) {
+        if (!product || product === null) {
             res.render('404', {
                 title: 'Error: Not Found!',
                 username: res.locals.user,
                 error: 'No product provided or invalid product!',
-            });   
+            });
         } else {
             res.render('productView', {
                 title: 'Product Details',
-                username: res.locals.user,                
+                username: res.locals.user,
                 productDetails: product,
             });
         }
@@ -89,7 +92,7 @@ const getOneProduct = async (req, res) => {
         res.render('productView', {
             title: 'Product Details',
             username: res.locals.user,
-            error: error,            
+            error: error,
         });
     }
 };
@@ -138,7 +141,7 @@ const postCreateProduct = async (req, res, next) => {
         !req.body.productCategory ||
         !req.body.productPrice ||
         !req.body.productStock
-    ) {        
+    ) {
         res.render('productCreate', {
             username: res.locals.user,
             title: 'Create Product',
@@ -174,7 +177,7 @@ const postCreateProduct = async (req, res, next) => {
     }
 
     // If no file is uploaded
-    if (!req.files || Object.keys(req.files).length === 0) {        
+    if (!req.files || Object.keys(req.files).length === 0) {
         res.render('productCreate', {
             username: res.locals.user,
             title: 'Create Product',
@@ -195,7 +198,7 @@ const postCreateProduct = async (req, res, next) => {
         !validateIsMongoObjectId(req.body.productCategory.trim()) ||
         !validateIsNumber(req.body.productPrice.trim()) ||
         !validateIsNumber(req.body.productStock.trim())
-    ) {        
+    ) {
         res.render('productCreate', {
             username: res.locals.user,
             title: 'Create Product',
@@ -209,8 +212,7 @@ const postCreateProduct = async (req, res, next) => {
         });
     }
 
-    try {        
-        
+    try {
         uploadedFile = req.files.productImage;
 
         const newUploadFileName = replaceFileNameSpacesWithHyphen(
@@ -223,7 +225,7 @@ const postCreateProduct = async (req, res, next) => {
 
         // Upload the file on the server
         uploadedFile.mv(uploadPath, async function (error) {
-            if(error) {
+            if (error) {
                 console.log(error);
                 res.render('productCreate', {
                     username: res.locals.user,
@@ -287,8 +289,7 @@ const postCreateProduct = async (req, res, next) => {
                     });
                 }
             }
-        });        
-        
+        });
     } catch (error) {
         res.render('productCreate', {
             username: res.locals.user,
@@ -323,13 +324,12 @@ const getEditProduct = async (req, res) => {
             .sort({ name: 1 })
             .exec();
 
-        if (!product || product === null) {            
+        if (!product || product === null) {
             res.render('404', {
                 title: 'Error: Not Found!',
                 username: res.locals.user,
                 error: 'No product found!',
             });
-            
         } else {
             res.render('productEdit', {
                 title: 'Product Edit',
@@ -357,12 +357,11 @@ const getEditProduct = async (req, res) => {
             productPrice: req.body.productPrice,
             productStock: req.body.productStock,
             categoryList: allCategories,
-        });        
+        });
     }
 };
 
-const postEditProduct =  async (req, res, next) => {
-
+const postEditProduct = async (req, res, next) => {
     // Get all categories for select list
     const allCategories = await Category.find().sort({ name: 1 }).exec();
 
@@ -452,17 +451,16 @@ const postEditProduct =  async (req, res, next) => {
         const updatedProductDetails = {
             name: trimMultipleWhiteSpaces(req.body.productName),
             description: trimMultipleWhiteSpaces(req.body.productDescription),
-            category: trimMultipleWhiteSpaces(req.body.productCategory),            
+            category: trimMultipleWhiteSpaces(req.body.productCategory),
             price: trimMultipleWhiteSpaces(req.body.productPrice),
             stock: trimMultipleWhiteSpaces(req.body.productStock),
-        };        
+        };
 
         const createdProduct = await Product.findByIdAndUpdate(
             req.params.id,
             updatedProductDetails,
         );
         res.redirect(`/allProducts/${req.params.id}`);
-        
     } catch (error) {
         console.error(error);
 
@@ -481,7 +479,7 @@ const postEditProduct =  async (req, res, next) => {
     }
 };
 
-const getDeleteProduct = async(req, res) => {
+const getDeleteProduct = async (req, res) => {
     try {
         // Check if there is an id in the request
         if (!req.params.id) {
@@ -489,7 +487,7 @@ const getDeleteProduct = async(req, res) => {
                 title: 'Error: Not Found!',
                 username: res.locals.user,
                 error: 'No product provided or invalid product!',
-            });            
+            });
         }
 
         const product = await Product.findById(req.params.id)
@@ -541,7 +539,6 @@ const postDeleteProduct = async (req, res) => {
         }
         const result = await Product.findByIdAndRemove(req.body.productId);
         res.redirect('/allProducts');
-        
     } catch (error) {
         console.error(error);
         res.render('productDelete', {
@@ -553,8 +550,7 @@ const postDeleteProduct = async (req, res) => {
     }
 };
 
-const getEditProductImage = async (req,res) => {
-    
+const getEditProductImage = async (req, res) => {
     try {
         // Check if there is an id for a product in the request
         if (!req.params.id || !validateIsMongoObjectId(req.params.id)) {
@@ -585,7 +581,6 @@ const getEditProductImage = async (req,res) => {
                 });
             }
         }
-        
     } catch (error) {
         res.render('404', {
             title: 'Product Image Edit',
@@ -593,12 +588,10 @@ const getEditProductImage = async (req,res) => {
             error: error,
         });
     }
-}
+};
 
-const postEditProductImage = async (req,res) => {
-
+const postEditProductImage = async (req, res) => {
     try {
-        
         // Check if there is an id for a product in the request
         if (!req.params.id || !validateIsMongoObjectId(req.params.id)) {
             res.render('productImageEdit', {
@@ -622,9 +615,8 @@ const postEditProductImage = async (req,res) => {
                 productUrl: req.body.productUrl,
             });
         } else {
-            
             let uploadedFile;
-            
+
             // Upload and replace the old file
             try {
                 uploadedFile = req.files.productImage;
@@ -635,12 +627,12 @@ const postEditProductImage = async (req,res) => {
 
                 const newUploadFileName = replaceFileNameSpacesWithHyphen(
                     uploadedFile.name,
-                    productNameInDatabase
+                    productNameInDatabase,
                 );
-                
+
                 const uploadPath =
                     staticsPath + '/images/products/' + newUploadFileName;
-                
+
                 // Upload the file on the server
                 uploadedFile.mv(uploadPath, async function (error) {
                     if (error) {
@@ -654,11 +646,11 @@ const postEditProductImage = async (req,res) => {
                             productUrl: req.body.productUrl,
                         });
                     } else {
-
                         // Upload filename in the database
                         const newProductDetails = {
-                            imageFilename: trimMultipleWhiteSpaces(newUploadFileName),
-                        }
+                            imageFilename:
+                                trimMultipleWhiteSpaces(newUploadFileName),
+                        };
 
                         const updatedProductDetails =
                             await Product.findByIdAndUpdate(
@@ -690,16 +682,14 @@ const postEditProductImage = async (req,res) => {
                 });
             }
         }
-
     } catch (error) {
         res.render('productImageEdit', {
             title: 'Product Image Edit',
             username: res.locals.user,
-            error: error,            
+            error: error,
         });
     }
-
-}
+};
 
 export {
     getAllProducts,

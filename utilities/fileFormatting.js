@@ -5,7 +5,7 @@ const replaceFileNameSpacesWithHyphen = (uploadedFileName, newFileName) => {
     const newUploadFileName =
         newFileName.toLowerCase().trim().replace(/\s+/g, '-') +
         uploadedFileExtension;
-    
+
     return newUploadFileName;
 };
 

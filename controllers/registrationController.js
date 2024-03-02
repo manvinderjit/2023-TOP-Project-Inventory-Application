@@ -12,16 +12,13 @@ const registerEmployee = async (req, res, next) => {
                 email: email,
                 error: 'Error: Please provide all fields.',
             });
-
         } else if (password !== confirmPassword) {
             res.render('register', {
                 title: 'Registration Page',
                 email: email,
                 error: 'Error: Password and confirm password must match!',
             });
-
         } else {
-
             // Validate email and password
             if (
                 validateEmail(email) &&

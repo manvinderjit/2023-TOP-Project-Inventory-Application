@@ -7,27 +7,26 @@ const getUploadGuideImage = (req, res) => {
     try {
         res.render('uploadImage', {
             title: 'Upload Images for the Guide',
-            username: res.locals.user,            
+            username: res.locals.user,
         });
     } catch (error) {
         res.render('404', {
             title: 'Error: Upload Guide Image Error!',
             username: res.locals.user,
             error: error,
-        })
+        });
     }
-}
+};
 
 const postUploadGuideImage = (req, res) => {
     try {
         // Check if a file was uploaded
-        if (!req.files || Object.keys(req.files).length === 0) {            
-            
+        if (!req.files || Object.keys(req.files).length === 0) {
             res.render('uploadImage', {
                 title: 'Upload Images for the Guide',
                 username: res.locals.user,
-                error: 'No image uploaded!'
-            }); 
+                error: 'No image uploaded!',
+            });
         } else {
             let uploadedFile;
             try {
@@ -43,13 +42,13 @@ const postUploadGuideImage = (req, res) => {
                             title: 'Upload Images for the Guide',
                             username: res.locals.user,
                             error: error,
-                        }); 
+                        });
                     } else {
                         res.render('uploadImage', {
                             title: 'Upload Images for the Guide',
                             username: res.locals.user,
                             success: 'File uploaded!',
-                        }); 
+                        });
                     }
                 });
             } catch (error) {
@@ -58,7 +57,7 @@ const postUploadGuideImage = (req, res) => {
                     title: 'Upload Images for the Guide',
                     username: res.locals.user,
                     error: error,
-                }); 
+                });
             }
         }
     } catch (error) {
@@ -66,7 +65,7 @@ const postUploadGuideImage = (req, res) => {
             title: 'Upload Images for the Guide',
             username: res.locals.user,
             error: error,
-        }); 
+        });
     }
 };
 

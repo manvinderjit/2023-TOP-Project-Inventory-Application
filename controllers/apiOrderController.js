@@ -15,7 +15,10 @@ const apiGetAllOrdersForAUser = async (req, res, next) => {
             const { id } = jwtDecode(token);
             // Get all orders for a user
             const allOrders = await Order.find({ customerId: id })
-                .populate({ path: 'items.itemDetails', select: 'name description' })
+                .populate({
+                    path: 'items.itemDetails',
+                    select: 'name description',
+                })
                 .sort({ name: 1 })
                 .exec();
 
@@ -28,11 +31,9 @@ const apiGetAllOrdersForAUser = async (req, res, next) => {
                     ordersList: allOrders,
                 });
             }
-        } else {            
-            res.status(403).send({error : 'Login expired!'});
+        } else {
+            res.status(403).send({ error: 'Login expired!' });
         }
-
-        
     } catch (error) {
         console.error(error);
         res.status(400).send({
@@ -43,10 +44,7 @@ const apiGetAllOrdersForAUser = async (req, res, next) => {
 
 const apiGetOrderById = async (req, res, next) => {
     try {
-        
-    } catch (error) {
-        
-    }
+    } catch (error) {}
 };
 
 const apiCreateOrder = async (req, res, next) => {
@@ -60,12 +58,12 @@ const apiCreateOrder = async (req, res, next) => {
 
             const order = new Order({
                 customerId: id,
-                items: req.body.items.map(item => {
+                items: req.body.items.map((item) => {
                     return {
                         ...item,
                         itemId: item._id,
                         itemPrice: item.price,
-                    }
+                    };
                 }),
                 totalAmount: req.body.totalAmount,
             });
@@ -74,29 +72,26 @@ const apiCreateOrder = async (req, res, next) => {
 
             // TODO: Check if items are in stock
 
-
             // Create Order
             const createdOrder = await order.save();
 
             // TODO: Update available item stock in database
 
-            if(createdOrder){
+            if (createdOrder) {
                 res.status(200).send({
                     message: 'Order create successfully!',
                     orderDetails: createdOrder,
                 });
-            }            
+            }
         } else {
             res.sendStatus(403);
         }
-        
     } catch (error) {
         console.error(error);
         res.status(400).send({
             error: `Something went wrong!`,
         });
     }
-
 };
 
 const apiPostCancelOrder = async (req, res, next) => {
@@ -110,11 +105,14 @@ const apiPostCancelOrder = async (req, res, next) => {
             const { orderId } = req.body;
 
             // Validate orderId
-            if (!orderId || orderId === null || !validateIsMongoObjectId(orderId)){
+            if (
+                !orderId ||
+                orderId === null ||
+                !validateIsMongoObjectId(orderId)
+            ) {
                 res.status(400).send({
                     error: 'Invalid orderId!',
                 });
-
             } else {
                 const updatedOrder = { status: 'Cancelled' };
 
@@ -125,7 +123,7 @@ const apiPostCancelOrder = async (req, res, next) => {
                 );
 
                 // TODO: Update available item stock in database
-                
+
                 if (cancelledOrder) {
                     res.status(200).send({
                         message: 'Order cancelled successfully!',
@@ -133,7 +131,6 @@ const apiPostCancelOrder = async (req, res, next) => {
                     });
                 }
             }
-            
         } else {
             res.sendStatus(403);
         }

@@ -1,5 +1,5 @@
-import Product from "../models/productModel.js";
-import Promo from "../models/promoModel.js";
+import Product from '../models/productModel.js';
+import Promo from '../models/promoModel.js';
 
 const fetchProductNameById = async (productId) => {
     const productDetails = await Product.findById(productId)

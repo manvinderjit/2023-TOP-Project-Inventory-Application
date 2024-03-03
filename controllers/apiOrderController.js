@@ -15,7 +15,7 @@ const apiGetAllOrdersForAUser = async (req, res, next) => {
             const { id } = jwtDecode(token);
             // Get all orders for a user
             const allOrders = await Order.find({ customerId: id })
-                .populate({ path: 'items.itemDetails', select: 'name description' })
+                .populate({ path: 'items.itemDetails', select: 'name description imageFilename' })
                 .sort({ name: 1 })
                 .exec();
 

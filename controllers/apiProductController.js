@@ -1,7 +1,8 @@
 import Product from '../models/productModel.js';
 import Category from '../models/categoryModel.js';
+import paginatedResults from '../middleware/paginationMw.js';
 
-const apiGetAllProducts = async (req, res, next) => {
+const apiGetAllProducts = async (req, res) => {
     try {
         // Get all categories for select list
         const categories = await Category.find().sort({ name: 1 }).exec();

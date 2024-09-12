@@ -2,15 +2,46 @@ import express, { Express, Request, Response } from 'express';
 import 'dotenv/config';
 import { Server } from 'http';
 import { fileURLToPath } from 'url';
+import path from 'path';
+import connectDB from './config/mongodb.js';
 
-const port: string | 5000 = process.env.PORT || 5000;
+const port: string | 5000 = process.env['PORT'] || 5000;
 export const app: Express = express();
 
-const viewsPath = fileURLToPath(new URL('views', import.meta.url));
-const staticsPath = fileURLToPath(new URL('.', import.meta.url));
+const viewsPath: string = fileURLToPath(new URL('views', import.meta.url));
+const staticsPath: string = fileURLToPath(new URL('.', import.meta.url));
 
 app.set('views', viewsPath);
 app.set('view engine', 'ejs');
+
+connectDB().catch((err) => console.log(err));
+
+// app.use(
+//     session({
+//         secret: process.env.ACCESS_TOKEN_SECRET,
+//         resave: false,
+//         saveUninitialized: false,
+//         name: process.env.SID,
+//         store: MongoStore.create({
+//             client: mongoose.connection.getClient(),
+//             autoRemove: 'native',
+//             ttl: process.env.SESSION_TTL, // 60 minutes
+//         }),
+//     }),
+// );
+
+app.use(express.json());
+app.use(express.static(path.join(staticsPath, './public')));
+app.use(express.urlencoded({ extended: true }));
+
+// Makes userId available for all routes
+// app.use((req, res, next) => {
+//     const { userId, authorized } = req.session;
+//     if (userId && authorized) {
+//         res.locals.user = userId;
+//     }
+//     next();
+// });
 
 app.get('/', (req: Request, res: Response) => {
     res.send('Hello Hi!');

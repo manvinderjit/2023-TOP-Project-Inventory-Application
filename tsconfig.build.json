@@ -1,8 +1,4 @@
 {
-  "extends": "./tsconfig.json",
-  "compilerOptions": {
-      "allowImportingTsExtensions": false,
-      "noEmit": false
-  },
-  "exclude": ["src/**/*types*", "__tests__"]
+    "extends": "./tsconfig.json",
+    "exclude": ["__tests__", "src/**/*types*"]
 }

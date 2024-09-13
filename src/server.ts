@@ -7,17 +7,20 @@ import connectDB from './config/mongodb.js';
 import session from 'express-session';
 import MongoStore from 'connect-mongo';
 import mongoose from 'mongoose';
+import cors from 'cors';
 
-const port: string | 5000 = process.env['PORT'] || 5000;
+import appRouter from './app/routers/appRouter.js';
+
+const port: string | number = process.env['PORT'] || 5000;
 export const app: Express = express();
 
-const viewsPath: string = fileURLToPath(new URL('views', import.meta.url));
+const viewsPath: string = fileURLToPath(new URL('app/views', import.meta.url));
 const staticsPath: string = fileURLToPath(new URL('.', import.meta.url));
 
 app.set('views', viewsPath);
 app.set('view engine', 'ejs');
 
-const conn = await connectDB().catch((err) => console.log(err));
+connectDB().catch((err) => console.log(err));
 
 app.use(
     session({
@@ -31,6 +34,7 @@ app.use(
             ttl: Number(process.env.SESSION_TTL), // 60 minutes
         }),
     }),
+    
 );
 
 app.use(express.json());
@@ -49,6 +53,10 @@ app.use(express.urlencoded({ extended: true }));
 app.get('/', (req: Request, res: Response) => {
     res.send('Hello Hi!');
 });
+
+app.use('/', appRouter);
+
+app.use(cors());
 
 const server: Server = app.listen(port, () => {
     console.log(`App server listening on port ${port}`);

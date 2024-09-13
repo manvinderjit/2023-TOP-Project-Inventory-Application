@@ -10,8 +10,10 @@
         "types": ["jest"],
         "moduleResolution": "Bundler",
         "module": "ESNext",
-        "allowJs": true,        
+        "allowJs": true,
+        "typeRoots": ["./src/types", "./node_modules/@types"]
     },
     "exclude": ["node_modules/", "src/**/*types*"],
-    "include": ["src/**/*.ts", "__test__/**/*.ts"]
+    "include": ["src/**/*.ts", "__test__/**/*.ts"],
+    "files": ["src/types/app.types.ts"]
 }

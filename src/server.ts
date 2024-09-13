@@ -11,6 +11,7 @@ import cors from 'cors';
 
 import appRouter from './app/routers/appRouter.js';
 
+
 const port: string | number = process.env['PORT'] || 5000;
 export const app: Express = express();
 

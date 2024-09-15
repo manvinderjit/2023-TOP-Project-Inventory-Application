@@ -10,7 +10,7 @@ import mongoose from 'mongoose';
 import cors from 'cors';
 
 import appRouter from './app/routers/appRouter.js';
-
+import apiRouter from './api/routers/apiRouter.js';
 
 const port: string | number = process.env['PORT'] || 5000;
 export const app: Express = express();
@@ -28,7 +28,7 @@ app.use(
         secret: process.env.ACCESS_TOKEN_SECRET as string | string[],
         resave: false,
         saveUninitialized: false,
-        name: process.env.SID,
+        name: 'inventory-app',
         store: MongoStore.create({
             client: mongoose.connection.getClient(),
             autoRemove: 'native',
@@ -51,13 +51,15 @@ app.use(express.urlencoded({ extended: true }));
 //     next();
 // });
 
-app.get('/', (req: Request, res: Response) => {
-    res.send('Hello Hi!');
-});
+// app.get('/', (req: Request, res: Response) => {
+//     res.send('Hello Hi!');
+// });
 
 app.use('/', appRouter);
 
 app.use(cors());
+
+app.use('/api', apiRouter);
 
 const server: Server = app.listen(port, () => {
     console.log(`App server listening on port ${port}`);

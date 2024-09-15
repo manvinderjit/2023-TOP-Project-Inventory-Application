@@ -1,5 +1,5 @@
 import express, { NextFunction, Request, Response } from 'express';
-import { loginEmployee } from '../services/auth.services.js';
+import { loginEmployee, logoutEmployee } from '../services/auth.services.js';
 
 const loginView = (req: Request, res: Response) => {
     res.render('login', {
@@ -9,9 +9,19 @@ const loginView = (req: Request, res: Response) => {
     });
 };
 
-const loginUser = async(req: Request, res: Response, next: NextFunction) => {
-    const loginResult = await loginEmployee(req, res);
-    if(loginResult?.error) {
+const loginUser = async(req: Request, res: Response, next: NextFunction) => {    
+    const { email, password } = req.body;
+    // Login Employee
+    const loginResult = await loginEmployee(email, password);
+    // If Login Success
+    if(loginResult.authenticated === true && loginResult.error === null) {
+        req.session.userId = email;
+        req.session.authorized = true;
+        // Redirect to Dashboard
+        res.redirect('/');
+    }
+    // If Login Error
+    else if(loginResult?.error) {
         res.render('login', {
             title: <string>'Login',
             email: <string>`${loginResult.email}`,
@@ -28,4 +38,4 @@ const registerView = (req: Request, res: Response) => {
     });
 };
 
-export { loginView, loginUser, registerView }
+export { loginView, loginUser, registerView };

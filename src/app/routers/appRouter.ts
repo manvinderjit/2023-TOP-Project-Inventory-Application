@@ -1,11 +1,19 @@
 import express, { Router } from 'express';
-const appRouter: Router = express.Router();
 import * as authControllers from '../controllers/auth.controllers.js';
+import * as indexControllers from '../controllers/index.controllers.js';
+import { redirectToLogin, redirectToDashboard } from '../middleware/auth.mw.js';
+import { logoutEmployee } from '../services/auth.services.js';
 
-appRouter.get('/login', authControllers.loginView);
+const appRouter: Router = express.Router();
+
+appRouter.get('/', redirectToLogin, indexControllers.dashboardView);
+
+appRouter.get('/login', redirectToDashboard, authControllers.loginView);
 
 appRouter.post('/login', authControllers.loginUser);
 
-appRouter.get('/register', authControllers.registerView);
+appRouter.post('/logout', logoutEmployee, redirectToLogin);
+
+appRouter.get('/register', redirectToDashboard, authControllers.registerView);
 
 export default appRouter;

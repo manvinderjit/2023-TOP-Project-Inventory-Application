@@ -1,8 +1,8 @@
 import express, { Router } from 'express';
-import * as apiProductsControllers from '../controllers/products.controllers.js';
+import apiProductsRouter from './apiProductsRouter.js';
 
 const apiRouter: Router = express.Router();
 
-apiRouter.get('/products/:page?', apiProductsControllers.getProducts);
+apiRouter.use('/products', apiProductsRouter);
 
 export default apiRouter;

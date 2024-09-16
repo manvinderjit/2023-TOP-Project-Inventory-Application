@@ -10,7 +10,7 @@ import mongoose from 'mongoose';
 import cors from 'cors';
 
 import appRouter from './app/routers/appRouter.js';
-import apiRouter from './api/routers/apiRouter.js';
+import apiRouter from './api/routers/index.api.router.js';
 
 const port: string | number = process.env['PORT'] || 5000;
 export const app: Express = express();

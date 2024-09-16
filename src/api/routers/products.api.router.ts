@@ -9,4 +9,3 @@ apiProductsRouter.get('/:page?', apiProductsControllers.getProducts);
 apiProductsRouter.get('/image/:name', apiGetProductImage);
 
 export default apiProductsRouter;
-

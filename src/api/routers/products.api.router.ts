@@ -4,7 +4,7 @@ import { apiGetProductImage } from '../controllers/image.api.controllers.js';
 
 const apiProductsRouter: Router = express.Router();
 
-apiProductsRouter.get('/:page?', apiProductsControllers.getProducts);
+apiProductsRouter.get('/', apiProductsControllers.getProducts);
 
 apiProductsRouter.get('/image/:name', apiGetProductImage);
 

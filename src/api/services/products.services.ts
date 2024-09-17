@@ -7,6 +7,9 @@ const fetchProducts = async(page:number | null = 0, perPageLimit:number = 6) => 
     let hasNextPage = false; 
 
     try {
+        const totalProductCount = await Product.countDocuments();
+        let totalPagesBasedOnLimit = Math.ceil(totalProductCount / perPageLimit);
+        
         const allProducts = await Product.find()
             .select({
                 name: 1,
@@ -43,6 +46,7 @@ const fetchProducts = async(page:number | null = 0, perPageLimit:number = 6) => 
                 error: null,
                 productList: allProducts,
                 hasNextPage,
+                totalPagesBasedOnLimit,
             };
         }
     } catch (error) { // if Error

@@ -2,6 +2,15 @@ import mongoose from 'mongoose';
 
 const Schema = mongoose.Schema;
 
+enum PromoStatus {
+    Active = 'Active', Expired = 'Expired'
+};
+
+enum PromoCategory {
+    Carousel = 'Carousel',
+    Others = 'Others',
+}
+
 const promoSchema = new mongoose.Schema(
     {
         name: {
@@ -29,11 +38,9 @@ const promoSchema = new mongoose.Schema(
         },
         category: {
             type: String,
-            enum: {
-                values: ['Carousel', 'Others'],
-                required: true,
-            },
+            enum: PromoCategory,
             trim: true,
+            required: true,
         },
         imageUrl: {
             type: String,
@@ -45,16 +52,15 @@ const promoSchema = new mongoose.Schema(
         },
         status: {
             type: String,
-            enum: {
-                values: ['Active', 'Expired'],
-                required: true,
-            },
+            enum: PromoStatus,
+            required: true,
             trim: true,
         },
         startsOn: {
             type: Date,
             required: true,
-            get: (date) => date.toLocaleDateString(),
+            get: (date: { toLocaleDateString: () => any }) =>
+                date.toLocaleDateString(),
             // TODO: Add validation
             // min: new Date(),
             // validate: {
@@ -71,7 +77,8 @@ const promoSchema = new mongoose.Schema(
         endsOn: {
             type: Date,
             required: true,
-            get: (date) => date.toLocaleDateString(),
+            get: (date: { toLocaleDateString: () => any }) =>
+                date.toLocaleDateString(),
             // TODO: Add validation
             // min: new Date(),
             // validate: {

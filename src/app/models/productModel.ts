@@ -54,6 +54,8 @@ const productSchema = new mongoose.Schema(
     },
 );
 
+productSchema.index({ name: 'text', description: 'text' });
+
 // Virtual for product's URL
 const productURL = productSchema.virtual('url');
 productURL.get(function () {

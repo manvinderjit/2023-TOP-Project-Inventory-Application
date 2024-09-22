@@ -248,6 +248,4 @@ describe("Redirect To Login", () => {
         expect(res.redirect).not.toHaveBeenCalled();
         expect(next).toHaveBeenCalled();
     });
-
-
 });

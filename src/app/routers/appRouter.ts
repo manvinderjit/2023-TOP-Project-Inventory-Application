@@ -10,7 +10,7 @@ appRouter.get('/', redirectToLogin, indexControllers.dashboardView);
 
 appRouter.get('/login', redirectToDashboard, authControllers.loginView);
 
-appRouter.post('/login', authControllers.loginUser);
+appRouter.post('/login', authControllers.loginEmployeeController);
 
 appRouter.post('/logout', logoutEmployee, redirectToLogin);
 

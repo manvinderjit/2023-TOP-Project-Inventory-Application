@@ -4,6 +4,7 @@ import { app, Shutdown } from '../../../src/server';
 import connectDB from '../../../src/config/mongodb';
 import httpMocks from 'node-mocks-http';
 import { loginEmployee, logoutEmployee } from '../../../src/app/services/auth.services';
+import { loginEmployeeController } from '../../../src/app/controllers/auth.controllers';
 
 describe('Login View', function () {
 
@@ -98,6 +99,65 @@ describe('Login View', function () {
         expect(response.authenticated).toEqual(false);
         expect(response.email).toEqual(email);
         expect(response.error).toEqual('Error: Invalid email and/or password');
+    });
+
+});
+
+describe('Login Employee', () => {
+
+    it('should login employee and redirect to dashboard if credentials are valid', async() => {
+        const validEmail = 'e@abc.com';
+        const validPassword = 'Admin1';
+        
+        let req: any = {
+            body: { email: validEmail, password: validPassword },
+            session:{
+                userId: '',
+                authorized: false,
+            }
+        }
+
+        const res: any = {
+            redirect: jest.fn(),
+            render: jest.fn(),
+        };
+
+        const next: any = jest.fn();
+
+        await loginEmployeeController(req, res, next);
+        expect(req.session.userId).toEqual(validEmail);
+        expect(req.session.authorized).toEqual(true);
+        expect(res.redirect).toHaveBeenCalledWith('/');
+        expect(next).not.toHaveBeenCalled();
+    });
+
+    it('should not log in employee and render login with error', async () => {
+        const invalidEmail = 'invalid@abc.com';
+        const invalidPassword = 'wrongPass';
+
+        let req: any = {
+            body: { email: invalidEmail, password: invalidPassword },
+            session: {
+                userId: '',
+                authorized: false,
+            },
+        };
+
+        const res: any = {
+            redirect: jest.fn(),
+            render: jest.fn(),
+        };
+
+        const next: any = jest.fn();
+
+        await loginEmployeeController(req, res, next);
+        
+        expect(res.render).toHaveBeenCalledWith('login', {
+            email: 'invalid@abc.com',
+            error: 'Error: Check email and/or password',
+            title: 'Login',
+        });
+        expect(next).not.toHaveBeenCalled();
     });
 
 });

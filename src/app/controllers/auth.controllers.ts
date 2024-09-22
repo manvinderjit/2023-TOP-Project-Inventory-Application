@@ -9,7 +9,7 @@ const loginView = (req: Request, res: Response) => {
     });
 };
 
-const loginUser = async(req: Request, res: Response, next: NextFunction) => {    
+const loginEmployeeController = async(req: Request, res: Response, next: NextFunction) => {    
     const { email, password } = req.body;
     // Login Employee
     const loginResult = await loginEmployee(email, password);
@@ -38,4 +38,4 @@ const registerView = (req: Request, res: Response) => {
     });
 };
 
-export { loginView, loginUser, registerView };
+export { loginView, loginEmployeeController, registerView };

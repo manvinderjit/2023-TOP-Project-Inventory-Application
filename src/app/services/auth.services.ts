@@ -32,7 +32,7 @@ export const loginEmployee = async (email: string, password: string) => {
             };
         }
     } catch (error) {
-        // console.error(error);
+        console.error(error);
         return {
             email,
             authenticated: false,

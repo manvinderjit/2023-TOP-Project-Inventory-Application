@@ -1,6 +1,8 @@
 import request from 'supertest';
+import { jest } from "@jest/globals";
 import { app, Shutdown } from '../../../src/server';
 import connectDB from '../../../src/config/mongodb';
+import httpMocks from 'node-mocks-http';
 import { loginEmployee, logoutEmployee } from '../../../src/app/services/auth.services';
 
 describe('Login View', function () {
@@ -97,5 +99,5 @@ describe('Login View', function () {
         expect(response.email).toEqual(email);
         expect(response.error).toEqual('Error: Invalid email and/or password');
     });
-    
+
 });

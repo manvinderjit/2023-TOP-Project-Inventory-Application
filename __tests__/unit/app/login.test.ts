@@ -101,3 +101,55 @@ describe('Login View', function () {
     });
 
 });
+
+describe("should Logout User", () => {
+    it('should logout user, destroy session, and redirect to login', async () => {
+        const req = httpMocks.createRequest({
+            session: {
+                destroy: jest.fn((cb:any) => cb(null)),
+            },
+        });
+        
+        let res: any = {
+            redirect: jest.fn(),
+            session: {
+                destroy: jest.fn(),
+            },
+            clearCookie: jest.fn(),
+            render: jest.fn(),
+        };
+
+        const next = jest.fn();
+        await logoutEmployee(req, res, next);
+        expect(req.session.destroy).toHaveBeenCalled();
+        expect(res.clearCookie).toHaveBeenCalledWith('inventory-app');        
+        expect(res.redirect).toHaveBeenCalledWith('/login');
+    });
+
+     it('should render dashboard with an error message when session destruction fails', async () => {
+        const req = httpMocks.createRequest({
+            session: {
+                destroy: jest.fn((cb: any) => cb(new Error('Server error'))),
+            },
+        });
+
+        let res: any = {            
+            session: {
+                destroy: jest.fn(),
+            },
+            render: jest.fn(),
+            locals: {
+                user: 'Dummy user',
+            },
+        };
+
+        const next = jest.fn();
+        await logoutEmployee(req, res, next);
+        expect(res.render).toHaveBeenCalledWith('dashboard', {
+            error: 'Error: Server error',
+            title: 'Dashboard',
+            username: 'Dummy user',
+        });
+     });
+
+});

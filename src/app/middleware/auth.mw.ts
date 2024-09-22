@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 const redirectToLogin = (req: Request, res: Response, next: NextFunction): void => {
-    if (!req.session?.userId || req.session.authorized === false) {
+    if (!req.session?.userId || req.session.authorized !== true) {
         res.redirect('/login');
     } else {
         next();

@@ -42,7 +42,6 @@ export const loginEmployee = async (email: string, password: string) => {
 };
 
 export const logoutEmployee = async (req:Request, res:Response, next: NextFunction) => {    
-    console.log(res);
     req.session.destroy((error) => {
         if (error) {
             res.render('dashboard', {
@@ -51,7 +50,9 @@ export const logoutEmployee = async (req:Request, res:Response, next: NextFuncti
                 error: <string>`${error}`,
             });
         }
-        res.clearCookie('inventory-app');
-        res.redirect('/login');
+        else {
+            res.clearCookie('inventory-app');
+            res.redirect('/login');
+        }
     });
 };

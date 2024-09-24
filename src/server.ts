@@ -1,4 +1,4 @@
-import express, { Express, Request, Response } from 'express';
+import express, { Express } from 'express';
 import 'dotenv/config';
 import { Server } from 'http';
 import { fileURLToPath } from 'url';
@@ -11,6 +11,7 @@ import cors from 'cors';
 
 import appRouter from './app/routers/appRouter.js';
 import apiRouter from './api/routers/index.api.router.js';
+import errorHandler from './global.middleware/errorHandler.mw.js';
 
 const port: string | number = process.env['PORT'] || 5000;
 export const app: Express = express();
@@ -60,6 +61,8 @@ app.use('/', appRouter);
 app.use(cors());
 
 app.use('/api', apiRouter);
+
+app.use(errorHandler);
 
 const server: Server = app.listen(port, () => {
     console.log(`App server listening on port ${port}`);

@@ -1,15 +1,15 @@
 import Promo from '../../app/models/promoModel.js';
 import { Request, Response, NextFunction } from 'express';
 
-const apiGetCarouselPromos = async (req: Request, res: Response, next: NextFunction) => {
+const fetchCarouselPromos = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const carouselPromos = await Promo.find({
             category: 'Carousel',
             status: 'Active',
         })
-            .sort({ name: 1 })
-            .select({ _id: 0, name: 1, caption: 1, category: 1, imageUrl: 1 })
-            .exec();
+        .sort({ name: 1 })
+        .select({ _id: 0, name: 1, caption: 1, category: 1, imageUrl: 1 })
+        .exec();
 
         if (!carouselPromos || carouselPromos.length === 0) {
             res.status(400).send({
@@ -28,4 +28,4 @@ const apiGetCarouselPromos = async (req: Request, res: Response, next: NextFunct
     }
 };
 
-export { apiGetCarouselPromos };
+export { fetchCarouselPromos };

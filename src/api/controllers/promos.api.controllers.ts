@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from 'express';
-import { apiGetCarouselPromos } from '../services/promos.services.js';
+import { fetchCarouselPromos } from '../services/promos.services.js';
 
-const getCarouselPromos = async(req: Request, res: Response, next: NextFunction) => apiGetCarouselPromos(req, res, next);
+const getCarouselPromos = async(req: Request, res: Response, next: NextFunction) => fetchCarouselPromos(req, res, next);
 
 export { getCarouselPromos };

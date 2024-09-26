@@ -1,5 +1,5 @@
 import { jest } from "@jest/globals";
-import Product from '../../../src/app/models/productModel';
+import Product from '../../../src/models/productModel';
 import { fetchProducts } from "../../../src/api/services/products.services";
 
 const mockProducts = [
@@ -177,7 +177,7 @@ describe("Api Products", () => {
         expect(result.totalPagesBasedOnLimit).toBe(2);
     });
 
-    it('should fetch products and return hasNextPage as true when per page limit is less than total pages', async () => {
+    it('should fetch products and return totalPages when totalPages are more than 1', async () => {
         let perPageLimit = 6;
         const returnedProducts = mockProducts.slice(0, perPageLimit);
 
@@ -247,7 +247,6 @@ describe("Api Products", () => {
         expect(result.totalPagesBasedOnLimit).toBe(1);
     });
 
-    // Handle no products found scenario gracefully
     it('should return error message when no products are found', async () => {
         (Product.countDocuments as jest.Mock) = jest.fn().mockReturnValue(0);
 
@@ -266,7 +265,6 @@ describe("Api Products", () => {
         expect(result.productList).toBeNull();
     });
 
-    // Handle database query errors
     it('should handle database query errors', async () => {
         const mockError = new Error('Database error');
         

@@ -1,7 +1,7 @@
 import bcrypt from 'bcrypt';
 import { validateEmail, validatePassword } from '../../utilities/validation.js';
 import { Request, Response, NextFunction } from 'express';
-import Employee from '../models/employees.js';
+import Employee from '../../models/employees.js';
 
 export const loginEmployee = async (email: string, password: string) => {
     try {

@@ -1,4 +1,4 @@
-import Promo from '../../app/models/promoModel.js';
+import Promo from '../../models/promoModel.js';
 import { Request, Response, NextFunction } from 'express';
 
 const fetchCarouselPromos = async (req: Request, res: Response, next: NextFunction) => {

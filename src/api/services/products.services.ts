@@ -1,5 +1,5 @@
-import Product from "../../app/models/productModel.js";
-import Category from "../../app/models/categoryModel.js";
+import Product from "../../models/productModel.js";
+import Category from "../../models/categoryModel.js";
 
 
 const isQueryValid = (query: string | null | undefined) => {

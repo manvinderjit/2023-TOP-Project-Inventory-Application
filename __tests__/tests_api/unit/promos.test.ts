@@ -1,6 +1,6 @@
 import { jest } from '@jest/globals';
 import Promo from '../../../src/models/promoModel';
-import { fetchCarouselPromos } from '../../../src/api/services/promos.services';
+import { getCarouselPromos } from '../../../src/api/controllers/promos.api.controllers';
 import { app, Shutdown } from '../../../src/server';
 import connectDB from '../../../src/config/mongodb';
 
@@ -91,7 +91,7 @@ describe("Promos", () =>{
             exec: jest.fn().mockReturnValueOnce(mockPromos),
         });
 
-        await fetchCarouselPromos(req, res, next);
+        await getCarouselPromos(req, res, next);
 
         expect(res.status).toHaveBeenCalledWith(200);
         expect(res.send).toHaveBeenCalledWith({ carouselPromos: mockPromos });
@@ -111,7 +111,7 @@ describe("Promos", () =>{
             exec: jest.fn().mockReturnValueOnce([]),
         });
 
-        await fetchCarouselPromos(req, res, next);
+        await getCarouselPromos(req, res, next);
 
         expect(res.status).toHaveBeenCalledWith(400);
         expect(res.send).toHaveBeenCalledWith({
@@ -132,7 +132,7 @@ describe("Promos", () =>{
             throw new Error('Database connection failure');
         });
 
-        await fetchCarouselPromos(req, res, next);
+        await getCarouselPromos(req, res, next);
 
         expect(res.status).toHaveBeenCalledWith(400);
         expect(res.send).toHaveBeenCalledWith({

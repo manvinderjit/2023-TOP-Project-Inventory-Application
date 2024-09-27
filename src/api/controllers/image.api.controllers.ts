@@ -15,21 +15,21 @@ const apiGetImage = async (
             !allowedImageDirectories.includes(req.baseUrl.split('/api/')[1]) // Check if the directory path is valid
         ) {
             res.sendStatus(404);
+        } else {
+            const options = {
+                root: staticsPath,
+            };
+
+            const imgFileName = `/images/${req.baseUrl.split('/api/')[1]}/${req.params.name}`;
+
+            res.sendFile(imgFileName, options, function (err) {
+                if (err) {
+                    next(err);
+                } else {
+                    console.log('Sent:', imgFileName);
+                }
+            });
         }
-
-        const options = {
-            root: staticsPath,
-        };
-
-        const imgFileName = `/images/${req.baseUrl.split('/api/')[1]}/${req.params.name}`;
-
-        res.sendFile(imgFileName, options, function (err) {
-            if (err) {
-                next(err);
-            } else {
-                console.log('Sent:', imgFileName);
-            }
-        });
     } catch (error) {
         console.error(error);
         res.status(400).send({

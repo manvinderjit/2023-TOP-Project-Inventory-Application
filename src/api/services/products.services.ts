@@ -1,16 +1,7 @@
 import Product from "../../models/productModel.js";
 import Category from "../../models/categoryModel.js";
+import { validateQuery } from "../../utilities/validation.js";
 
-
-const isQueryValid = (query: string | null | undefined) => {
-    if (
-        query &&
-        query !== null &&
-        query !== undefined &&
-        query.trim() !== ''
-    ) return true;
-    else return false;
-}
 const fetchProducts = async (
     page: number | null = 0,
     perPageLimit: number = 6,
@@ -20,11 +11,11 @@ const fetchProducts = async (
     
     let query = {};
 
-    if (isQueryValid(categoryQuery) && !isQueryValid(textQuery)) {
+    if (validateQuery(categoryQuery) && !validateQuery(textQuery)) {
         query = { category: { _id: categoryQuery } };
-    } else if (!isQueryValid(categoryQuery) && isQueryValid(textQuery)) {
+    } else if (!validateQuery(categoryQuery) && validateQuery(textQuery)) {
         query = { $text: { $search: textQuery } };
-    } else if (isQueryValid(categoryQuery) && isQueryValid(textQuery)) {
+    } else if (validateQuery(categoryQuery) && validateQuery(textQuery)) {
         query = {
             category: { _id: categoryQuery },
             $text: { $search: textQuery },

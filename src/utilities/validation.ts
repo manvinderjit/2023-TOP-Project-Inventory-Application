@@ -40,6 +40,12 @@ const validateIsNumber = (value:string) => {
     return !isNaN(Number(value.trim())) && typeof Number(value.trim()) === 'number';
 };
 
+const validateQuery = (query: string | null | undefined) => {
+    if (query && query !== null && query !== undefined && query.trim() !== '')
+        return true;
+    else return false;
+};
+
 export {
     validateEmail,
     validatePassword,
@@ -47,4 +53,5 @@ export {
     validateDescription,
     validateIsMongoObjectId,
     validateIsNumber,
+    validateQuery,
 };

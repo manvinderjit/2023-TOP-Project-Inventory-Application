@@ -1,5 +1,5 @@
 import { jest } from '@jest/globals';
-import Promo from '../../../src/app/models/promoModel';
+import Promo from '../../../src/models/promoModel';
 import { fetchCarouselPromos } from '../../../src/api/services/promos.services';
 import { app, Shutdown } from '../../../src/server';
 import connectDB from '../../../src/config/mongodb';

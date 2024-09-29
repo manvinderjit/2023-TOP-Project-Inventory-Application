@@ -1,6 +1,7 @@
-import { jest } from "@jest/globals";
+import { jest } from '@jest/globals';
 import Product from '../../../src/models/productModel';
-import { fetchProducts } from "../../../src/api/services/products.services";
+import { getProducts } from '../../../src/api/controllers/products.api.controllers';
+import createHttpError from 'http-errors';
 
 const mockProducts = [
     {
@@ -155,8 +156,18 @@ const mockProducts = [
     },
 ];
 
-describe("Api Products", () => {
-    it('should fetch products when default values for query params are used', async () => {
+describe("Get Products", () => {
+    // Return result with default values when no query search parameters are provided
+    it('should return products and total pages when no query parameters are provided', async () => {
+        const req: any = {
+            query: {},
+        };
+        const res: any = {
+            json: jest.fn(),
+            status: jest.fn().mockReturnThis(),
+        };
+        const next: any = jest.fn();
+
         (Product.find as jest.Mock) = jest.fn().mockReturnValueOnce({
             select: jest.fn().mockReturnThis(),
             sort: jest.fn().mockReturnThis(),
@@ -170,16 +181,103 @@ describe("Api Products", () => {
             .fn()
             .mockReturnValue(mockProducts.length);
 
-        const result = await fetchProducts(null, undefined, null, null);
+        await getProducts(req, res, next);
 
-        expect(result.error).toBeNull();
-        expect(result.productList).toEqual(mockProducts);
-        expect(result.totalPagesBasedOnLimit).toBe(2);
+        expect(res.json).toHaveBeenCalledWith({
+            productList: mockProducts,
+            totalPages: 2,
+        });
     });
 
-    it('should fetch products and return totalPages when totalPages are more than 1', async () => {
-        let perPageLimit = 6;
-        const returnedProducts = mockProducts.slice(0, perPageLimit);
+    // Handle valid category parameter
+    it('should return result from the provided category only when category param is provided', async () => {
+        const req: any = {
+            query: {
+                category: '652624671853eb7ecdacd6b8',
+            },
+        };
+        const res: any = {
+            json: jest.fn(),
+            status: jest.fn().mockReturnThis(),
+        };
+        const next: any = jest.fn();
+
+        const returnedProducts = mockProducts.filter((product) => {
+            return product.category.id === req.query.category;
+        });
+
+        (Product.countDocuments as jest.Mock) = jest
+            .fn()
+            .mockReturnValue(returnedProducts.length);
+
+        (Product.find as jest.Mock) = jest.fn().mockReturnValueOnce({
+            select: jest.fn().mockReturnThis(),
+            sort: jest.fn().mockReturnThis(),
+            limit: jest.fn().mockReturnThis(),
+            skip: jest.fn().mockReturnThis(),
+            populate: jest.fn().mockReturnThis(),
+            exec: jest.fn().mockReturnValueOnce(returnedProducts),
+        });
+
+        await getProducts(req, res, next);
+        expect(res.json).toHaveBeenCalledWith({
+            productList: returnedProducts,
+            totalPages: 1,
+        });
+    });
+
+    // Handle valid search parameter
+    it('should return result from the provided search only when search param is provided', async () => {
+        const req: any = {
+            query: {
+                search: 'keyboard',
+            },
+        };
+        const res: any = {
+            json: jest.fn(),
+            status: jest.fn().mockReturnThis(),
+        };
+        const next: any = jest.fn();
+
+        const returnedProducts = mockProducts.filter((product) => {
+            return product.description.includes(req.query.search);
+        });
+
+        (Product.countDocuments as jest.Mock) = jest
+            .fn()
+            .mockReturnValue(returnedProducts.length);
+
+        (Product.find as jest.Mock) = jest.fn().mockReturnValueOnce({
+            select: jest.fn().mockReturnThis(),
+            sort: jest.fn().mockReturnThis(),
+            limit: jest.fn().mockReturnThis(),
+            skip: jest.fn().mockReturnThis(),
+            populate: jest.fn().mockReturnThis(),
+            exec: jest.fn().mockReturnValueOnce(returnedProducts),
+        });
+
+        await getProducts(req, res, next);
+        expect(res.json).toHaveBeenCalledWith({
+            productList: returnedProducts,
+            totalPages: 1,
+        });
+    });
+
+    // Handle valid page and limit parameters
+    it('should return result from the provided page only when page and limit params are provided', async () => {
+        const req: any = {
+            query: {
+                page: 2,
+                limit: 6,
+            },
+        };
+        const res: any = {
+            json: jest.fn(),
+            status: jest.fn().mockReturnThis(),
+        };
+        const next: any = jest.fn();
+
+        const returnedProducts = mockProducts.slice(req.query.limit - mockProducts.length);
 
         (Product.countDocuments as jest.Mock) = jest
             .fn()
@@ -194,61 +292,23 @@ describe("Api Products", () => {
             exec: jest.fn().mockReturnValueOnce(returnedProducts),
         });
 
-        const result = await fetchProducts(null, perPageLimit, null, null);
-
-        expect(result.error).toBeNull();
-        expect(result.productList).toEqual(returnedProducts);
-        expect(result.totalPagesBasedOnLimit).toBe(2);
-    });
-
-    it('should fetch products with pagination when a per page limit is specified', async () => {
-        let perPageLimit = 9;
-        (Product.find as jest.Mock) = jest.fn().mockReturnValueOnce({
-            select: jest.fn().mockReturnThis(),
-            sort: jest.fn().mockReturnThis(),
-            limit: jest.fn().mockReturnThis(),
-            skip: jest.fn().mockReturnThis(),
-            populate: jest.fn().mockReturnThis(),
-            exec: jest.fn().mockReturnValueOnce(mockProducts.slice(0, perPageLimit)),
+        await getProducts(req, res, next);
+        expect(res.json).toHaveBeenCalledWith({
+            productList: returnedProducts,
+            totalPages: 2,
         });
-
-        (Product.countDocuments as jest.Mock) = jest
-            .fn()
-            .mockReturnValue(mockProducts.length);
-
-        const result = await fetchProducts(null, perPageLimit, null, null);
-
-        expect(result.error).toBeNull();
-        expect(result.productList).toEqual(mockProducts.slice(0, perPageLimit));
-        expect(result.totalPagesBasedOnLimit).toBe(2);
     });
 
-    it('should set totalPageCount to 1 when all products are fetched with pagination when a per page limit is specified', async () => {
-        let perPageLimit = 12;
-        (Product.find as jest.Mock) = jest.fn().mockReturnValueOnce({
-            select: jest.fn().mockReturnThis(),
-            sort: jest.fn().mockReturnThis(),
-            limit: jest.fn().mockReturnThis(),
-            skip: jest.fn().mockReturnThis(),
-            populate: jest.fn().mockReturnThis(),
-            exec: jest
-                .fn()
-                .mockReturnValueOnce(mockProducts.slice(0, perPageLimit)),
-        });
-
-        (Product.countDocuments as jest.Mock) = jest
-            .fn()
-            .mockReturnValue(mockProducts.length);
-
-        const result = await fetchProducts(null, perPageLimit, null, null);
-
-        expect(result.error).toBeNull();
-        expect(result.productList).toEqual(mockProducts.slice(0, perPageLimit));
-        expect(result.totalPagesBasedOnLimit).toBe(1);
-    });
-
-    it('should return error message when no products are found', async () => {
-        (Product.countDocuments as jest.Mock) = jest.fn().mockReturnValue(0);
+    // Handle empty database result
+    it('should return appropriate response if no products are found', async () => {
+        const req: any = {
+            query: {},
+        };
+        const res: any = {
+            json: jest.fn(),
+            status: jest.fn().mockReturnThis(),
+        };
+        const next: any = jest.fn();
 
         (Product.find as jest.Mock) = jest.fn().mockReturnValueOnce({
             select: jest.fn().mockReturnThis(),
@@ -259,30 +319,31 @@ describe("Api Products", () => {
             exec: jest.fn().mockReturnValueOnce([]),
         });
 
-        const result = await fetchProducts(null, undefined, null, null);
-
-        expect(result.error).toBe('No Products to Show!');
-        expect(result.productList).toBeNull();
+        await getProducts(req, res, next);
+        expect(res.status).toHaveBeenCalledWith(400);
+        expect(res.json).toHaveBeenCalledWith({
+            error: 'No Products to Show!',
+            productList: null,
+        });
     });
 
-    it('should handle database query errors', async () => {
-        const mockError = new Error('Database error');
-        
-        (console.error as jest.Mock) = jest.fn();
-        (Product.countDocuments as jest.Mock) = jest.fn().mockReturnValue(0);
+    // Return error if url query params are provided as array
+    it('should return invalid request error if url params contain array', async () => {
+        const req: any = {
+            query: {
+                category: ['validCategoryId', 'anotherValidCategoryId'],
+            },
+        };
+        const res: any = {
+            json: jest.fn(),
+            status: jest.fn().mockReturnThis(),
+        };
+        const next: any = jest.fn();
 
-        (Product.find as jest.Mock) = jest.fn().mockImplementationOnce(() => {
-            throw new Error('Database error');
-        });
+        await getProducts(req, res, next);
 
-        const result = await fetchProducts(
-            0,
-            6,
-            null,
-            null,
+        expect(next).toHaveBeenCalledWith(
+            createHttpError(400, 'Invalid request!'),
         );
-
-        expect(result.error).toEqual(mockError);
-        expect(result.productList).toBeNull();
     });
 });

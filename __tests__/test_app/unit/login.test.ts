@@ -3,8 +3,8 @@ import { jest } from "@jest/globals";
 import { app, Shutdown } from '../../../src/server';
 import connectDB from '../../../src/config/mongodb';
 import httpMocks from 'node-mocks-http';
-import { loginEmployee, logoutEmployee } from '../../../src/app/services/auth.services';
-import { loginEmployeeController } from '../../../src/app/controllers/auth.controllers';
+import { loginEmployee, logoutEmployee } from '../../../src/app/services/auth.app.services';
+import { loginEmployeeController } from '../../../src/app/controllers/auth.app.controllers';
 
 describe('Login View', function () {
 

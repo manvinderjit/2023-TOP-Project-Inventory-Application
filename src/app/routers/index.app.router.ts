@@ -1,8 +1,8 @@
 import express, { Router } from 'express';
-import * as authControllers from '../controllers/auth.controllers.js';
-import * as indexControllers from '../controllers/index.controllers.js';
+import * as authControllers from '../controllers/auth.app.controllers.js';
+import * as indexControllers from '../controllers/index.app.controllers.js';
 import { redirectToLogin, redirectToDashboard } from '../middleware/auth.mw.js';
-import { logoutEmployee } from '../services/auth.services.js';
+import { logoutEmployee } from '../services/auth.app.services.js';
 import registerAppRouter from './register.app.router.js';
 
 const appRouter: Router = express.Router();

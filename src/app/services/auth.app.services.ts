@@ -2,6 +2,7 @@ import bcrypt from 'bcrypt';
 import { validateEmail, validatePassword } from '../../utilities/validation.js';
 import { Request, Response, NextFunction } from 'express';
 import Employee from '../../models/employees.js';
+import type { CreateEmployeeAccount } from './auth.app.services.types.js';
 
 export const loginEmployee = async (email: string, password: string) => {
     try {
@@ -55,4 +56,34 @@ export const logoutEmployee = async (req:Request, res:Response, next: NextFuncti
             res.redirect('/login');
         }
     });
+};
+
+export const createEmployeeAccount = async (email: string, password:string): Promise<CreateEmployeeAccount> => {
+    let success = false;
+    let error = null;
+    
+    // Check if user exists
+    const employeeExists = await Employee.findOne({ email }).exec();
+    if(employeeExists) { success = false; error = 'Error: An account with the email already exists.'; } // Return error if employee exists
+    
+    else {
+        try {
+            // Hash password
+            const hashedPassword = await bcrypt.hashSync(password, 10);
+
+            // Create employee
+            const employee = await Employee.create({
+                email,
+                password: hashedPassword,
+            });
+            
+            if(employee && employee.email === email) { success = true; }
+            else { success = false; error = 'User creation failed'; }
+
+        } catch (err: any) {            
+            success = false;            
+            error = err;
+        }
+    }
+    return { success, error };
 };

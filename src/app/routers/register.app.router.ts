@@ -1,5 +1,5 @@
 import express, { Router } from 'express';
-import * as authControllers from '../controllers/auth.controllers.js';
+import * as authControllers from '../controllers/auth.app.controllers.js';
 import { redirectToDashboard } from '../middleware/auth.mw.js';
 
 const registerAppRouter: Router = express.Router();
@@ -8,6 +8,6 @@ const registerAppRouter: Router = express.Router();
 registerAppRouter.get('/', redirectToDashboard, authControllers.registerView);
 
 // POST request to register an employee account
-// registerAppRouter.post('/', );
+registerAppRouter.post('/', authControllers.registerEmployee);
 
 export default registerAppRouter;

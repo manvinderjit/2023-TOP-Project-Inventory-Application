@@ -1,5 +1,5 @@
 import { jest } from '@jest/globals';
-import { dashboardView } from '../../../src/app/controllers/index.controllers';
+import { dashboardView } from '../../../src/app/controllers/index.app.controllers';
 
 describe('Dashboard View', () => {
     it("should render Dashboard View", () => {

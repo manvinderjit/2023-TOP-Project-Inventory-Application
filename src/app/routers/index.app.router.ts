@@ -3,6 +3,7 @@ import * as authControllers from '../controllers/auth.controllers.js';
 import * as indexControllers from '../controllers/index.controllers.js';
 import { redirectToLogin, redirectToDashboard } from '../middleware/auth.mw.js';
 import { logoutEmployee } from '../services/auth.services.js';
+import registerAppRouter from './register.app.router.js';
 
 const appRouter: Router = express.Router();
 
@@ -14,6 +15,6 @@ appRouter.post('/login', authControllers.loginEmployeeController);
 
 appRouter.post('/logout', logoutEmployee, redirectToLogin);
 
-appRouter.get('/register', redirectToDashboard, authControllers.registerView);
+appRouter.use('/register', registerAppRouter);
 
 export default appRouter;

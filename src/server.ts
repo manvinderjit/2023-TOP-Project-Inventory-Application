@@ -9,7 +9,7 @@ import MongoStore from 'connect-mongo';
 import mongoose from 'mongoose';
 import cors from 'cors';
 
-import appRouter from './app/routers/appRouter.js';
+import appRouter from './app/routers/index.app.router.js';
 import apiRouter from './api/routers/index.api.router.js';
 import errorHandler from './global.middleware/errorHandler.mw.js';
 

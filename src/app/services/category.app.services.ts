@@ -8,8 +8,8 @@ interface CategoryDetails extends Document {
 }
 
 const fetchCategories = async (): Promise<CategoryDetails[]> => {
-    const fetchedCategories = await Category.find().sort({ name: 1 }).exec();    
-    return fetchedCategories;
+    const dataCategories = await Category.find().select('-__v').sort({ name: 1 }).exec();
+    return dataCategories;
 };
 
 export { fetchCategories };

@@ -5,6 +5,6 @@ import { redirectToLogin } from '../middleware/auth.mw.js';
 const categoryAppRouter: Router = express.Router();
 
 // GET request to render Manage Categories view
-categoryAppRouter.get('/', redirectToLogin, categoryControllers.categoryView);
+categoryAppRouter.get('/', redirectToLogin, categoryControllers.manageCategoriesView);
 
 export default categoryAppRouter;

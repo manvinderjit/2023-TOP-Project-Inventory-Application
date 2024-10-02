@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import { fetchCategories } from "../services/category.app.services.js";
 
-const categoryView = async (req: Request, res: Response): Promise<void> => {
+const manageCategoriesView = async (req: Request, res: Response): Promise<void> => {
     try {
         const categories = await fetchCategories();
         res.render('categories', {
@@ -11,11 +11,11 @@ const categoryView = async (req: Request, res: Response): Promise<void> => {
         });
     } catch (error) {
         res.render('categories', {
-            title: 'All Categories',
+            title: 'Manage Categories',
             username: res.locals.user,
             error: 'Something went wrong!',
         });
     };
 };
 
-export { categoryView };
+export { manageCategoriesView };

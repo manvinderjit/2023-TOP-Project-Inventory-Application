@@ -44,17 +44,13 @@ app.use(express.static(path.join(staticsPath, './public')));
 app.use(express.urlencoded({ extended: true }));
 
 // Makes userId available for all routes
-// app.use((req, res, next) => {
-//     const { userId, authorized } = req.session;
-//     if (userId && authorized) {
-//         res.locals.user = userId;
-//     }
-//     next();
-// });
-
-// app.get('/', (req: Request, res: Response) => {
-//     res.send('Hello Hi!');
-// });
+app.use((req, res, next) => {
+    const { userId, authorized } = req.session;
+    if (userId && authorized) {
+        res.locals.user = userId;
+    }
+    next();
+});
 
 app.use('/', appRouter);
 

@@ -3,7 +3,7 @@ import { jest } from '@jest/globals';
 import { app, Shutdown } from '../../../src/server';
 import connectDB from '../../../src/config/mongodb';
 import Category from '../../../src/models/categoryModel';
-import { categoryDetailsView, manageCategoriesView } from '../../../src/app/controllers/category.app.controllers';
+import { getCategoryDetailsView, getManageCategoriesView, getCreateCategoryView } from '../../../src/app/controllers/category.app.controllers';
 
 const dataMockCategories = [
   {
@@ -49,7 +49,7 @@ describe('Manage Categories View', () => {
                 exec: jest.fn().mockReturnValueOnce(dataMockCategories),
             });
         
-        await manageCategoriesView(req, res);
+        await getManageCategoriesView(req, res);
 
         expect(res.render).toHaveBeenCalledWith('categories', {
             title: 'Manage Categories',
@@ -71,7 +71,7 @@ describe('Manage Categories View', () => {
             throw new Error();
         });
 
-        await manageCategoriesView(req, res);
+        await getManageCategoriesView(req, res);
 
         expect(res.render).toHaveBeenCalledWith('categories', {
             title: 'Manage Categories',
@@ -174,7 +174,7 @@ describe("Category Details View", () => {
             exec: jest.fn().mockReturnValueOnce(mockCategoryDetails),
         });
         
-        await categoryDetailsView(req, res, next);
+        await getCategoryDetailsView(req, res, next);
 
         expect(res.render).toHaveBeenCalledWith('categoryView', {
             username: 'testUser',
@@ -197,7 +197,7 @@ describe("Category Details View", () => {
         };
         const next = jest.fn();
 
-        await categoryDetailsView(req, res, next);
+        await getCategoryDetailsView(req, res, next);
 
         expect(res.render).toHaveBeenCalledWith('categoryView', {
             username: 'testUser',
@@ -217,7 +217,7 @@ describe("Category Details View", () => {
         };
         const next = jest.fn();
 
-        await categoryDetailsView(req, res, next);
+        await getCategoryDetailsView(req, res, next);
 
         expect(res.render).toHaveBeenCalledWith('categoryView', {
             username: 'testUser',
@@ -242,7 +242,7 @@ describe("Category Details View", () => {
             exec: jest.fn().mockReturnValueOnce(null),
         });
 
-        await categoryDetailsView(req, res, next);
+        await getCategoryDetailsView(req, res, next);
 
         expect(res.render).toHaveBeenCalledWith('categoryView', {
             username: 'testUser',
@@ -265,7 +265,7 @@ describe("Category Details View", () => {
             throw new Error();
         });
         
-        await categoryDetailsView(req, res, next);
+        await getCategoryDetailsView(req, res, next);
 
         expect(res.render).toHaveBeenCalledWith('categoryView', {
             username: 'testUser',
@@ -274,3 +274,51 @@ describe("Category Details View", () => {
         });
     });
 });
+
+
+describe("Create Category", () => {
+
+    it("should render Create Category view", async() => {
+        const req: any = {};
+        const res: any = {
+            render: jest.fn(),
+            locals: { user: 'testUser' },
+        };
+        const next: any = jest.fn();
+
+        await getCreateCategoryView(req, res, next);
+
+        expect(res.render).toHaveBeenCalledWith('categoryCreate', {
+            username: res.locals.user,
+            title: 'Create Category',
+            categoryName: '',
+            categoryDescription: '',
+        });
+    });
+
+
+    it('should handle errors gracefull and render error message for Create Category view', async () => {
+        const req: any = {};
+        const res: any = {
+            render: jest.fn(),
+            locals: { user: 'testUser' },
+        };
+        const next: any = jest.fn();
+
+        jest.spyOn(res, 'render').mockImplementationOnce(() => {
+            throw new Error('Test Error');
+        });
+
+        await getCreateCategoryView(req, res, next);
+
+        expect(res.render).toHaveBeenCalledWith('categoryCreate', {
+            username: res.locals.user,
+            title: 'Create Category',
+            error: res.locals.error,
+            categoryName: '',
+            categoryDescription: '',
+        });
+    });
+
+});
+

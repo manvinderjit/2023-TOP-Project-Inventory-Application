@@ -4,7 +4,7 @@ import { Types } from "mongoose";
 import { validateIsMongoObjectId } from "../../utilities/validation.js";
 import { CategoryDetailsDocument } from "../../types/types.js";
 
-const manageCategoriesView = async (req: Request, res: Response): Promise<void> => {
+const getManageCategoriesView = async (req: Request, res: Response): Promise<void> => {
     try {
         const categories = await fetchCategories();
         res.render('categories', {
@@ -21,7 +21,7 @@ const manageCategoriesView = async (req: Request, res: Response): Promise<void> 
     };
 };
 
-const categoryDetailsView = async (req: Request, res: Response, next:NextFunction): Promise<void> => {
+const getCategoryDetailsView = async (req: Request, res: Response, next:NextFunction): Promise<void> => {
     try {
         let error: string | null = null;
 
@@ -66,4 +66,24 @@ const categoryDetailsView = async (req: Request, res: Response, next:NextFunctio
     };
 };
 
-export { manageCategoriesView, categoryDetailsView };
+const getCreateCategoryView = async (req: Request, res: Response, next:NextFunction): Promise<void> => {
+    try {
+        res.render('categoryCreate', {
+            username: res.locals.user,
+            title: 'Create Category',
+            categoryName: '',
+            categoryDescription: '',
+        });
+    } catch (error) {
+        console.error(error);
+        res.render('categoryCreate', {
+            username: res.locals.user,
+            title: 'Create Category',
+            error: error,
+            categoryName: '',
+            categoryDescription: '',
+        });
+    };
+};
+
+export { getManageCategoriesView, getCategoryDetailsView, getCreateCategoryView };

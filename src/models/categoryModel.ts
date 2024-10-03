@@ -1,4 +1,5 @@
 import mongoose from 'mongoose';
+import { CategoryDetailsDocument } from '../types/types';
 
 const categorySchema = new mongoose.Schema({
     name: {
@@ -23,6 +24,6 @@ categoryURL.get(function () {
     return `/categories/${this._id}`;
 });
 
-const Category = mongoose.model('Category', categorySchema);
+const Category = mongoose.model<CategoryDetailsDocument>('Category', categorySchema);
 
 export default Category;

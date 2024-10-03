@@ -7,4 +7,6 @@ const categoryAppRouter: Router = express.Router();
 // GET request to render Manage Categories view
 categoryAppRouter.get('/', redirectToLogin, categoryControllers.manageCategoriesView);
 
+categoryAppRouter.get('/:id', redirectToLogin, categoryControllers.categoryDetailsView);
+
 export default categoryAppRouter;

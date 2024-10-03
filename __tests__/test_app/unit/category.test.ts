@@ -3,7 +3,7 @@ import { jest } from '@jest/globals';
 import { app, Shutdown } from '../../../src/server';
 import connectDB from '../../../src/config/mongodb';
 import Category from '../../../src/models/categoryModel';
-import { manageCategoriesView } from '../../../src/app/controllers/category.app.controllers';
+import { categoryDetailsView, manageCategoriesView } from '../../../src/app/controllers/category.app.controllers';
 
 const dataMockCategories = [
   {
@@ -22,6 +22,13 @@ const dataMockCategories = [
     description: 'Different types of computer mice.'
   },
 ];
+
+const mockCategoryDetails = {
+    _id: '652624671853eb7ecdacd6b8',
+    name: 'Monitors',
+    description: 'Different types of monitors.',
+    url: 'categories/652624671853eb7ecdacd6b8',
+};
 
 describe('Manage Categories View', () => {
 
@@ -146,5 +153,124 @@ describe("Manage Categories Page", () => {
             `<button class=\"btn btn-outline-primary me-2\">Logout</button>`,
         );
         
+    });
+});
+
+describe("Category Details View", () => {
+    
+    it("should render category details for a valid category Id", async () => {
+        const req: any = {
+            params: { id: mockCategoryDetails._id },
+        };
+        const res: any = {
+            render: jest.fn(),
+            locals: { user: 'testUser' },
+        };
+        const next = jest.fn();
+
+        (Category.findById as jest.Mock) = jest.fn().mockReturnValueOnce({
+            select: jest.fn().mockReturnThis(),
+            sort: jest.fn().mockReturnThis(),
+            exec: jest.fn().mockReturnValueOnce(mockCategoryDetails),
+        });
+        
+        await categoryDetailsView(req, res, next);
+
+        expect(res.render).toHaveBeenCalledWith('categoryView', {
+            username: 'testUser',
+            _id: mockCategoryDetails._id,
+            title: mockCategoryDetails.name,
+            name: mockCategoryDetails.name,
+            description: mockCategoryDetails.description,
+            url: mockCategoryDetails.url,
+        });
+
+    });
+
+    it('should render error message when an invalid category ID is provided', async () => {
+        const req: any = {
+            params: { id: 'invalidId' },
+        };
+        const res: any = {
+            render: jest.fn(),
+            locals: { user: 'testUser' },
+        };
+        const next = jest.fn();
+
+        await categoryDetailsView(req, res, next);
+
+        expect(res.render).toHaveBeenCalledWith('categoryView', {
+            username: 'testUser',
+            error: "Category not provided or invalid!",
+            title: "Error! Not found.",
+        });
+
+    });
+
+    it('should render error message when a category Id is not provided', async () => {
+        const req: any = {
+            params: {  },
+        };
+        const res: any = {
+            render: jest.fn(),
+            locals: { user: 'testUser' },
+        };
+        const next = jest.fn();
+
+        await categoryDetailsView(req, res, next);
+
+        expect(res.render).toHaveBeenCalledWith('categoryView', {
+            username: 'testUser',
+            error: 'Category not provided or invalid!',
+            title: 'Error! Not found.',
+        });
+    });
+
+    it('should render error message when category details are not found', async () => {
+        const req: any = {
+            params: { id: '652624671853eb7ecdacd6b0' },
+        };
+        const res: any = {
+            render: jest.fn(),
+            locals: { user: 'testUser' },
+        };
+        const next = jest.fn();
+
+        (Category.findById as jest.Mock) = jest.fn().mockReturnValueOnce({
+            select: jest.fn().mockReturnThis(),
+            sort: jest.fn().mockReturnThis(),
+            exec: jest.fn().mockReturnValueOnce(null),
+        });
+
+        await categoryDetailsView(req, res, next);
+
+        expect(res.render).toHaveBeenCalledWith('categoryView', {
+            username: 'testUser',
+            error: 'Category details not found!',
+            title: 'Error! Not found.',
+        });
+    });
+
+    it('should handle unknown errors gracefully and render error message', async () => {
+        const req: any = {
+            params: { id: '652624671853eb7ecdacd6b0' },
+        };
+        const res: any = {
+            render: jest.fn(),
+            locals: { user: 'testUser' },
+        };
+        const next = jest.fn();
+
+        (Category.findById as jest.Mock) = jest.fn().mockReturnValueOnce(() => {
+            throw new Error();
+        });
+        
+        await categoryDetailsView(req, res, next);
+
+        expect(res.render).toHaveBeenCalledWith('categoryView', {
+            username: 'testUser',
+            title: 'Error! Something went wrong!',
+            error: 'Something went wrong!',
+        });
     });
 });

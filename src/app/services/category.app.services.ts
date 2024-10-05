@@ -19,12 +19,16 @@ const fetchCategoryDetails = async (
     return dataCategoryDetails;
 };
 
-const saveCategoryDetails = async (categoryName: string, categoryDescription: string) => {
-    const createdCategory = await Category.create({
-        name: categoryName,
-        description: categoryDescription,
-    });
+const createCategory = async (
+    categoryName: string,
+    categoryDescription: string,
+): Promise<CategoryDetailsDocument | null> => {
+    const createdCategory: CategoryDetailsDocument | null =
+        await Category.create({
+            name: categoryName,
+            description: categoryDescription,
+        });
     return createdCategory;
 };
 
-export { fetchCategories, fetchCategoryDetails, saveCategoryDetails };
+export { fetchCategories, fetchCategoryDetails, createCategory };

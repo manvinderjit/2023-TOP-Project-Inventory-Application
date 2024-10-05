@@ -13,6 +13,6 @@ categoryAppRouter.post('/create', redirectToLogin, categoryControllers.postCreat
 
 categoryAppRouter.get('/:id', redirectToLogin, categoryControllers.getCategoryDetailsView);
 
-categoryAppRouter.get('/:id', redirectToLogin, categoryControllers.getCategoryDetailsView);
+categoryAppRouter.get('/:id/edit', redirectToLogin, categoryControllers.getEditCategory);
 
 export default categoryAppRouter;

@@ -8,8 +8,8 @@ import {
     getManageCategoriesView,
     getCreateCategoryView,
     postCreateCategory,
+    getEditCategory,
 } from '../../../src/app/controllers/category.app.controllers';
-import { saveCategoryDetails } from '../../../src/app/services/category.app.services';
 
 const dataMockCategories = [
   {
@@ -484,4 +484,139 @@ describe('POST Create Category', () => {
             categoryDescription: req.body.categoryDescription,
         });
     });
+});
+
+describe('GET Edit Category', () => {
+    it('should render Edit Category view when a valid category id is provided', async () => {
+        const req: any = {
+            params: {
+                id: mockCategoryDetails._id,
+            }
+        };
+        const res: any = {
+            render: jest.fn(),
+            locals: { user: 'testUser' },
+        };
+        const next: any = jest.fn();
+
+
+        (Category.findById as jest.Mock) = jest.fn().mockReturnValueOnce({
+            select: jest.fn().mockReturnThis(),
+            sort: jest.fn().mockReturnThis(),
+            exec: jest.fn().mockReturnValueOnce(mockCategoryDetails),
+        });
+
+        await getEditCategory(req, res, next);
+
+        expect(res.render).toHaveBeenCalledWith('categoryEdit', {
+            username: res.locals.user,
+            title: 'Edit Category',
+            error: null,
+            id: req.params.id,
+            categoryName: mockCategoryDetails.name,
+            categoryDescription: mockCategoryDetails.description,
+        });
+    });
+
+    it('should handle error gracefully and render error messages when no category id is provided', async () => {
+        const req: any = {
+            params: {},
+        };
+        const res: any = {
+            render: jest.fn(),
+            locals: { user: 'testUser' },
+        };
+        const next: any = jest.fn();
+
+        await getEditCategory(req, res, next);
+
+        expect(res.render).toHaveBeenCalledWith('categoryEdit', {
+            username: res.locals.user,
+            title: 'Edit Category',
+            error: new Error('Please provide a valid category!'),
+            id: '',
+            categoryName: '',
+            categoryDescription: '',
+        });
+    });
+
+    it('should handle error gracefully and render error messages when an invalid category id is provided', async () => {
+        const req: any = {
+            params: {
+                id: 'invalid Id',
+            },
+        };
+        const res: any = {
+            render: jest.fn(),
+            locals: { user: 'testUser' },
+        };
+        const next: any = jest.fn();
+
+        await getEditCategory(req, res, next);
+
+        expect(res.render).toHaveBeenCalledWith('categoryEdit', {
+            username: res.locals.user,
+            title: 'Edit Category',
+            error: new Error('Please provide a valid category!'),
+            id: req.params.id,
+            categoryName: '',
+            categoryDescription: '',
+        });
+    });
+
+    it('should handle error gracefully and render error messages when an empty category id is provided', async () => {
+        const req: any = {
+            params: {
+                id: '   ',
+            },
+        };
+        const res: any = {
+            render: jest.fn(),
+            locals: { user: 'testUser' },
+        };
+        const next: any = jest.fn();
+
+        await getEditCategory(req, res, next);
+
+        expect(res.render).toHaveBeenCalledWith('categoryEdit', {
+            username: res.locals.user,
+            title: 'Edit Category',
+            error: new Error('Please provide a valid category!'),
+            id: req.params.id,
+            categoryName: '',
+            categoryDescription: '',
+        });
+    });
+
+
+    it('should handle error gracefully and render error messages when details for a category is not found', async () => {
+        const req: any = {
+            params: {
+                id: mockCategoryDetails._id,
+            },
+        };
+        const res: any = {
+            render: jest.fn(),
+            locals: { user: 'testUser' },
+        };
+        const next: any = jest.fn();
+
+        (Category.findById as jest.Mock) = jest.fn().mockReturnValueOnce({
+            select: jest.fn().mockReturnThis(),
+            sort: jest.fn().mockReturnThis(),
+            exec: jest.fn().mockReturnValueOnce(null),
+        });
+
+        await getEditCategory(req, res, next);
+
+        expect(res.render).toHaveBeenCalledWith('categoryEdit', {
+            username: res.locals.user,
+            title: 'Edit Category',
+            error: new Error('Category not found!'),
+            id: req.params.id,
+            categoryName: '',
+            categoryDescription: '',
+        });
+    });
+    
 });

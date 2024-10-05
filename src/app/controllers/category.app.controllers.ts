@@ -1,8 +1,13 @@
 import { NextFunction, Request, Response } from "express";
-import { fetchCategories, fetchCategoryDetails, saveCategoryDetails } from "../services/category.app.services.js";
+import {
+    fetchCategories,
+    fetchCategoryDetails,
+    createCategory,
+} from '../services/category.app.services.js';
 import { validateDescription, validateIsMongoObjectId, validateName } from "../../utilities/validation.js";
 import { CategoryDetailsDocument } from "../../types/types.js";
 import { trimMultipleWhiteSpaces } from "../../utilities/stringFormatting.js";
+import { Types } from 'mongoose';
 
 const getManageCategoriesView = async (req: Request, res: Response): Promise<void> => {
     try {
@@ -106,8 +111,8 @@ const postCreateCategory = async (req: Request, res: Response, next:NextFunction
         } 
         
         if(error === null && validateName(categoryName) && validateDescription(categoryDescription)) { // If Valid
-            const createdCategory = await saveCategoryDetails(categoryName, categoryDescription);
-            if(createdCategory.name === categoryName) {
+            const createdCategory = await createCategory(categoryName, categoryDescription);
+            if(createdCategory?.name === categoryName) {
                 res.render('categoryCreate', {
                     username: res.locals.user,
                     title: 'Create Category',
@@ -135,4 +140,39 @@ const postCreateCategory = async (req: Request, res: Response, next:NextFunction
 
 };
 
-export { getManageCategoriesView, getCategoryDetailsView, getCreateCategoryView, postCreateCategory };
+const getEditCategory = async (req: Request, res: Response, next:NextFunction): Promise<void> => {
+    try {
+        if(!req.params.id || req.params.id === undefined || req.params.id === null || !validateIsMongoObjectId(req.params.id)){
+            throw new Error('Please provide a valid category!');
+        } else {
+            const categoryDetails = await (fetchCategoryDetails(req.params.id));
+            if (
+                categoryDetails &&
+                categoryDetails !== null &&
+                categoryDetails?._id?.toString() === req.params.id
+            ) {
+                res.render('categoryEdit', {
+                    username: res.locals.user,
+                    title: 'Edit Category',
+                    error: null,
+                    id: req.params.id,
+                    categoryName: categoryDetails.name,
+                    categoryDescription: categoryDetails.description,
+                });
+            } else throw new Error('Category not found!');
+        }
+
+    } catch (err) {
+        console.error(err);
+        res.render('categoryEdit', {
+            username: res.locals.user,
+            title: 'Edit Category',
+            error: err,
+            id: req.params.id ? req.params.id : '',
+            categoryName: '',
+            categoryDescription: '',
+        });
+    }
+};
+
+export { getManageCategoriesView, getCategoryDetailsView, getCreateCategoryView, postCreateCategory, getEditCategory };

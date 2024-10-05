@@ -3,7 +3,13 @@ import { jest } from '@jest/globals';
 import { app, Shutdown } from '../../../src/server';
 import connectDB from '../../../src/config/mongodb';
 import Category from '../../../src/models/categoryModel';
-import { getCategoryDetailsView, getManageCategoriesView, getCreateCategoryView } from '../../../src/app/controllers/category.app.controllers';
+import {
+    getCategoryDetailsView,
+    getManageCategoriesView,
+    getCreateCategoryView,
+    postCreateCategory,
+} from '../../../src/app/controllers/category.app.controllers';
+import { saveCategoryDetails } from '../../../src/app/services/category.app.services';
 
 const dataMockCategories = [
   {
@@ -276,7 +282,7 @@ describe("Category Details View", () => {
 });
 
 
-describe("Create Category", () => {
+describe("GET Create Category", () => {
 
     it("should render Create Category view", async() => {
         const req: any = {};
@@ -297,7 +303,7 @@ describe("Create Category", () => {
     });
 
 
-    it('should handle errors gracefull and render error message for Create Category view', async () => {
+    it('should handle errors gracefully and render error message for Create Category view', async () => {
         const req: any = {};
         const res: any = {
             render: jest.fn(),
@@ -322,3 +328,160 @@ describe("Create Category", () => {
 
 });
 
+describe('POST Create Category', () => {
+    it('should successfully create a category when valid data is provided', async () => {
+        const req: any = {
+            body: {
+                categoryName: 'Valid Category',
+                categoryDescription: 'Valid description for a dummy category',
+            },
+        };
+        const res: any = {
+            render: jest.fn(),
+            locals: { user: 'testUser' },
+        };
+        const next: any = jest.fn();
+
+        const mockedCategoryValue = {
+            name: req.body.categoryName,
+            description: req.body.categoryDescription,
+            _id: '67004786a187d56061d095a7',
+        };
+
+        (Category.create as jest.Mock) = jest.fn().mockReturnValue(mockedCategoryValue);
+
+        await postCreateCategory(req, res, next);
+
+        expect(res.render).toHaveBeenCalledWith('categoryCreate', {
+            username: res.locals.user,
+            title: 'Create Category',
+            success: `Category ${req.body.categoryName} created successfully`,
+            categoryName: '',
+            categoryDescription: '',
+        });
+    });
+
+    it('should handle errors gracefully and render error message when the categoryName is not provided', async () => {
+        const req: any = {
+            body: {
+                categoryDescription: 'Valid description for a dummy category',
+            },
+        };
+        const res: any = {
+            render: jest.fn(),
+            locals: { user: 'testUser' },
+        };
+        const next: any = jest.fn();
+
+        await postCreateCategory(req, res, next);
+
+        expect(res.render).toHaveBeenCalledWith('categoryCreate', {
+            username: res.locals.user,
+            title: 'Create Category',
+            error: new Error('Please provide all fields!'),
+            categoryName: req.body.categoryName,
+            categoryDescription: req.body.categoryDescription,
+        });
+    });
+
+    it('should handle errors gracefully and render error message when the categoryName is invalid', async () => {
+        const req: any = {
+            body: {
+                categoryName: '   ',
+                categoryDescription: 'Valid description for a dummy category',
+            },
+        };
+        const res: any = {
+            render: jest.fn(),
+            locals: { user: 'testUser' },
+        };
+        const next: any = jest.fn();
+
+        await postCreateCategory(req, res, next);
+
+        expect(res.render).toHaveBeenCalledWith('categoryCreate', {
+            username: res.locals.user,
+            title: 'Create Category',
+            error: new Error('Please ensure all fields are valid!'),
+            categoryName: req.body.categoryName,
+            categoryDescription: req.body.categoryDescription,
+        });
+    });
+
+    it('should handle errors gracefully and render error message when the categoryDescription is not provided', async () => {
+        const req: any = {
+            body: {
+                categoryName: 'Valid Category',
+            },
+        };
+        const res: any = {
+            render: jest.fn(),
+            locals: { user: 'testUser' },
+        };
+        const next: any = jest.fn();
+
+        await postCreateCategory(req, res, next);
+
+        expect(res.render).toHaveBeenCalledWith('categoryCreate', {
+            username: res.locals.user,
+            title: 'Create Category',
+            error: new Error('Please provide all fields!'),
+            categoryName: req.body.categoryName,
+            categoryDescription: req.body.categoryDescription,
+        });
+    });
+
+    it('should handle errors gracefully and render error message when the categoryDescription is invalid', async () => {
+        const req: any = {
+            body: {
+                categoryName: 'Valid Category',
+                categoryDescription: '   ',
+            },
+        };
+        const res: any = {
+            render: jest.fn(),
+            locals: { user: 'testUser' },
+        };
+        const next: any = jest.fn();
+
+        await postCreateCategory(req, res, next);
+
+        expect(res.render).toHaveBeenCalledWith('categoryCreate', {
+            username: res.locals.user,
+            title: 'Create Category',
+            error: new Error('Please ensure all fields are valid!'),
+            categoryName: req.body.categoryName,
+            categoryDescription: req.body.categoryDescription,
+        });
+    });
+
+    it('should handle errors gracefully and render error message when category creation throws error', async () => {
+        const req: any = {
+            body: {
+                categoryName: 'Valid Category',
+                categoryDescription: 'Valid description for a dummy category',
+            },
+        };
+        const res: any = {
+            render: jest.fn(),
+            locals: { user: 'testUser' },
+        };
+        const next: any = jest.fn();
+
+        const mockError = new Error('Validation failed');
+
+        (Category.create as jest.Mock) = jest
+            .fn()
+            .mockReturnValue(() => { throw new Error('');});
+
+        await postCreateCategory(req, res, next);
+
+        expect(res.render).toHaveBeenCalledWith('categoryCreate', {
+            username: res.locals.user,
+            title: 'Create Category',
+            error: new Error('Category creation failed!'),
+            categoryName: req.body.categoryName,
+            categoryDescription: req.body.categoryDescription,
+        });
+    });
+});

@@ -1,14 +1,14 @@
-const productName = document.getElementById('productName');
-const productDescription = document.getElementById('productDescription');
-const productCategory = document.getElementById('productCategory');
-const productPrice = document.getElementById('productPrice');
-const productStock = document.getElementById('productStock');
+const productName = document.getElementById('productName') as HTMLInputElement;
+const productDescription = document.getElementById('productDescription')as HTMLInputElement;
+const productCategory = document.getElementById('productCategory')as HTMLInputElement;
+const productPrice = document.getElementById('productPrice')as HTMLInputElement;
+const productStock = document.getElementById('productStock')as HTMLInputElement;
 
-const productNameError = document.getElementById('productNameError');
-const productDescriptionError = document.getElementById('productDescriptionError');
-const productCategoryError = document.getElementById('productCategoryError');
-const productPriceError = document.getElementById('productPriceError');
-const productStockError = document.getElementById('productStockError');
+const productNameError = document.getElementById('productNameError') as HTMLDivElement;
+const productDescriptionError = document.getElementById('productDescriptionError') as HTMLDivElement;
+const productCategoryError = document.getElementById('productCategoryError') as HTMLDivElement;
+const productPriceError = document.getElementById('productPriceError') as HTMLDivElement;
+const productStockError = document.getElementById('productStockError') as HTMLDivElement;
 
 const form = document.querySelector('form');
 

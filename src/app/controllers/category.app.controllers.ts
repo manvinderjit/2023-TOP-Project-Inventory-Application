@@ -1,8 +1,8 @@
 import { NextFunction, Request, Response } from "express";
-import { fetchCategories, fetchCategoryDetails } from "../services/category.app.services.js";
-import { Types } from "mongoose";
-import { validateIsMongoObjectId } from "../../utilities/validation.js";
+import { fetchCategories, fetchCategoryDetails, saveCategoryDetails } from "../services/category.app.services.js";
+import { validateDescription, validateIsMongoObjectId, validateName } from "../../utilities/validation.js";
 import { CategoryDetailsDocument } from "../../types/types.js";
+import { trimMultipleWhiteSpaces } from "../../utilities/stringFormatting.js";
 
 const getManageCategoriesView = async (req: Request, res: Response): Promise<void> => {
     try {
@@ -86,4 +86,53 @@ const getCreateCategoryView = async (req: Request, res: Response, next:NextFunct
     };
 };
 
-export { getManageCategoriesView, getCategoryDetailsView, getCreateCategoryView };
+const postCreateCategory = async (req: Request, res: Response, next:NextFunction): Promise<void> => {
+    try {
+        let error = null;
+        // Check if the required fields are provided in the body
+        if (!req.body.categoryName || !req.body.categoryDescription) {
+            // error = 'Please provide all fields!';
+            throw new Error ('Please provide all fields!');
+        }
+        
+        const categoryName = trimMultipleWhiteSpaces(req.body.categoryName);
+        const categoryDescription = trimMultipleWhiteSpaces(
+            req.body.categoryDescription,
+        );
+        // Validate Category Name and Category Description fields
+        if (!validateName(categoryName) || !validateDescription(categoryDescription)) { // If Invalid
+            // error = 'Please ensure all fields are valid!';            
+            throw new Error('Please ensure all fields are valid!');
+        } 
+        
+        if(error === null && validateName(categoryName) && validateDescription(categoryDescription)) { // If Valid
+            const createdCategory = await saveCategoryDetails(categoryName, categoryDescription);
+            if(createdCategory.name === categoryName) {
+                res.render('categoryCreate', {
+                    username: res.locals.user,
+                    title: 'Create Category',
+                    success: `Category ${createdCategory.name} created successfully`,
+                    categoryName: '',
+                    categoryDescription: '',
+                });
+            } else {
+                throw new Error('Category creation failed!');
+            }
+        } else { // Otherwise return a default error
+            throw new Error('Category Creation: An unkown error occured');
+        }
+
+    } catch (err) {
+        console.error(err);
+        res.render('categoryCreate', {
+            username: res.locals.user,
+            title: 'Create Category',
+            error: err ? err : `Category creation failed! Something went wrong.`,
+            categoryName: req.body.categoryName,
+            categoryDescription: req.body.categoryDescription,
+        });
+    };
+
+};
+
+export { getManageCategoriesView, getCategoryDetailsView, getCreateCategoryView, postCreateCategory };

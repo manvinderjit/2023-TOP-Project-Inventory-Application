@@ -9,6 +9,8 @@ categoryAppRouter.get('/', redirectToLogin, categoryControllers.getManageCategor
 
 categoryAppRouter.get('/create', redirectToLogin, categoryControllers.getCreateCategoryView);
 
+categoryAppRouter.post('/create', redirectToLogin, categoryControllers.postCreateCategory);
+
 categoryAppRouter.get('/:id', redirectToLogin, categoryControllers.getCategoryDetailsView);
 
 categoryAppRouter.get('/:id', redirectToLogin, categoryControllers.getCategoryDetailsView);

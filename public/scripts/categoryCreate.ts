@@ -1,10 +1,10 @@
-const categoryName = document.getElementById('categoryName');
-const categoryNameError = document.getElementById('categoryNameError');
+const categoryName = document.getElementById('categoryName') as HTMLInputElement;
+const categoryNameError = document.getElementById('categoryNameError') as HTMLDivElement;
 
-const categoryDescription = document.getElementById('categoryDescription');
-const categoryDescriptionError = document.getElementById('categoryDescriptionError');
+const categoryDescription = document.getElementById('categoryDescription') as HTMLInputElement;
+const categoryDescriptionError = document.getElementById('categoryDescriptionError') as HTMLDivElement;
 
-const form = document.querySelector('form');
+const categoryForm = document.querySelector('form[id="form-create-category"]') as HTMLFormElement;
 
 categoryName.addEventListener('input', (event) => {
     if (categoryName.validity.valid) {
@@ -65,12 +65,12 @@ function showcategoryDescriptionError() {
     categoryDescriptionError.className = 'invalid-feedback';
 };
 
-form.addEventListener('submit', (event) => {
+categoryForm.addEventListener('submit', (event) => {
     if (!categoryName.validity.valid) {
         showcategoryNameError();
         event.preventDefault();
     }
-    if(!categoryDescription.validity.valid){
+    if (!categoryDescription.validity.valid) {
         showcategoryDescriptionError();
         event.preventDefault();
     }

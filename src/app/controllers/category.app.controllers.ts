@@ -4,6 +4,7 @@ import {
     fetchCategoryDetails,
     createCategory,
     updateCategoryDetails,
+    deleteCategory,
 } from '../services/category.app.services.js';
 import { validateDescription, validateIsMongoObjectId, validateName } from "../../utilities/validation.js";
 import { CategoryDetailsDocument } from "../../types/types.js";
@@ -267,7 +268,39 @@ const getDeleteCategory = async (req: Request, res: Response, next:NextFunction)
 };
 
 const postDeleteCategory = async (req: Request, res: Response, next:NextFunction): Promise<void> => {
-
+    try {
+        // Validate category id
+        if(!req.body.categoryId || req.body.categoryId === undefined || req.body.categoryId === null || !validateIsMongoObjectId(req.body.categoryId)){
+            throw new Error('Please provide a valid category!');
+        } else {
+            // Try deleting the category
+            const { error, success } = await deleteCategory(req.body.categoryId);
+            // If no error, Redirect to the Manage Categories View
+            if(error === null && success === true) res.redirect('/categories');
+            // If deletion fails, throw error
+            else if(error !== null || success !== true) throw new Error(error ? error : 'Deletion failed');
+        }
+    } catch (error) {
+        console.error(error);        
+        // Render error if error
+        res.render('categoryDelete', {
+            username: res.locals.user,
+            title: 'Delete Category',
+            error: error,
+            categoryId: (req.body.categoryId !== undefined ? req.body.categoryId : ''),
+            name: '',
+            description: '',
+        });
+    }
 };
 
-export { getManageCategoriesView, getCategoryDetailsView, getCreateCategoryView, postCreateCategory, getEditCategory, postEditCategory, getDeleteCategory, postDeleteCategory };
+export {
+    getManageCategoriesView,
+    getCategoryDetailsView,
+    getCreateCategoryView,
+    postCreateCategory,
+    getEditCategory,
+    postEditCategory,
+    getDeleteCategory,
+    postDeleteCategory,
+};

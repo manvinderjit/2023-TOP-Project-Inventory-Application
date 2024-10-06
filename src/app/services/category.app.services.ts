@@ -1,6 +1,7 @@
 import { ObjectId } from "mongoose";
 import Category from "../../models/categoryModel.js";
 import { CategoryDetailsDocument } from "../../types/types.js";
+import Product from "../../models/productModel.js";
 
 const fetchCategories = async (): Promise<CategoryDetailsDocument[]> => {
     const dataCategories = await Category.find()
@@ -41,4 +42,40 @@ const updateCategoryDetails = async (
     return dataUpdateCategory;
 };
 
-export { fetchCategories, fetchCategoryDetails, createCategory, updateCategoryDetails };
+const deleteCategory = async (
+    categoryId: string,
+): Promise<{
+    error: string | null;
+    success: boolean;
+}> => {
+    let error = null;
+    let success = false;
+    // Check if the Category has any products listed under it, can't delete a category that still has products under it
+    const getAllProductsInCategory = await Product.find(
+        {
+            category: categoryId,
+        },
+        'name, description',
+    ).exec();
+    // If no products under the category, delete it
+    if (getAllProductsInCategory && getAllProductsInCategory.length === 0) {
+        const deletedResult = await Category.findByIdAndDelete(categoryId);
+        // If deletion succeeds
+        if (deletedResult && deletedResult._id && deletedResult._id.toString() === categoryId)
+            success = true;
+        // If deletion fails, set error
+        else error = 'Deletion failed!';
+    } else {
+        // If category has products under it, set error
+        error = `Category has ${getAllProductsInCategory.length} products under it. Please delete them before deleting the category!`;
+    }
+    return { error, success };
+};
+
+export {
+    fetchCategories,
+    fetchCategoryDetails,
+    createCategory,
+    updateCategoryDetails,
+    deleteCategory,
+};

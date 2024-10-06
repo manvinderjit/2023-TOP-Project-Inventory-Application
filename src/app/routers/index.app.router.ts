@@ -5,6 +5,7 @@ import { redirectToLogin, redirectToDashboard } from '../middleware/auth.mw.js';
 import { logoutEmployee } from '../services/auth.app.services.js';
 import registerAppRouter from './register.app.router.js';
 import categoryAppRouter from './category.app.router.js';
+import promosAppRouter from './promos.app.router.js';
 
 const appRouter: Router = express.Router();
 
@@ -19,5 +20,7 @@ appRouter.post('/logout', logoutEmployee, redirectToLogin);
 appRouter.use('/register', registerAppRouter);
 
 appRouter.use('/categories', redirectToLogin, categoryAppRouter);
+
+appRouter.use('/promos', redirectToLogin, promosAppRouter);
 
 export default appRouter;

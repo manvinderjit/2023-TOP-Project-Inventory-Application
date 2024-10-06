@@ -9,6 +9,7 @@ import {
     getCreateCategoryView,
     postCreateCategory,
     getEditCategory,
+    postEditCategory,
 } from '../../../src/app/controllers/category.app.controllers';
 
 const dataMockCategories = [
@@ -588,7 +589,6 @@ describe('GET Edit Category', () => {
         });
     });
 
-
     it('should handle error gracefully and render error messages when details for a category is not found', async () => {
         const req: any = {
             params: {
@@ -618,5 +618,329 @@ describe('GET Edit Category', () => {
             categoryDescription: '',
         });
     });
-    
+});
+
+describe('POST Edit Category', () => {
+    it('should update category when valid category details are provided', async () => {
+        const req: any = {
+            params: {
+                id: mockCategoryDetails._id,
+            },
+            body: {
+                categoryName: 'Dummy Category',
+                categoryDescription: 'A dummy category description',
+            }
+        };
+        const res: any = {
+            render: jest.fn(),
+            locals: { user: 'testUser' },
+            redirect: jest.fn(),
+        };
+        const next: any = jest.fn();
+
+        (Category.findByIdAndUpdate as jest.Mock) = jest.fn().mockReturnValue(mockCategoryDetails);
+
+        await postEditCategory(req, res, next);
+        expect(Category.findByIdAndUpdate).toHaveBeenCalledWith(req.params.id, { name:req.body.categoryName, description: req.body.categoryDescription });
+        expect(res.redirect).toHaveBeenCalledWith(mockCategoryDetails.url);
+    });
+
+    it('should handle error gracefully and render error messages when an invalid category id is provided', async () => {
+        const req: any = {
+            params: {
+                id: 'invalid Id',
+            },
+            body: {
+                categoryName: 'Dummy Category',
+                categoryDescription: 'A dummy category description',
+            },
+        };
+        const res: any = {
+            render: jest.fn(),
+            locals: { user: 'testUser' },
+            redirect: jest.fn(),
+        };
+        const next: any = jest.fn();
+
+        (Category.findByIdAndUpdate as jest.Mock) = jest.fn().mockReturnValue(mockCategoryDetails);
+
+        await postEditCategory(req, res, next);
+
+        expect(Category.findByIdAndUpdate).not.toHaveBeenCalled();
+
+        expect(res.render).toHaveBeenCalledWith('categoryEdit', {
+            username: res.locals.user,
+            title: 'Edit Category',
+            error: new Error('Please provide a valid category!'),
+            id: req.params.id,
+            categoryName: req.body.categoryName,
+            categoryDescription: req.body.categoryDescription,
+        });
+    });
+
+    it('should handle error gracefully and render error messages when category id is not provided', async () => {
+        const req: any = {
+            params: {
+            },
+            body: {
+                categoryName: 'Dummy Category',
+                categoryDescription: 'A dummy category description',
+            },
+        };
+        const res: any = {
+            render: jest.fn(),
+            locals: { user: 'testUser' },
+            redirect: jest.fn(),
+        };
+        const next: any = jest.fn();
+
+        (Category.findByIdAndUpdate as jest.Mock) = jest.fn().mockReturnValue(mockCategoryDetails);
+
+        await postEditCategory(req, res, next);
+
+        expect(Category.findByIdAndUpdate).not.toHaveBeenCalled();
+
+        expect(res.render).toHaveBeenCalledWith('categoryEdit', {
+            username: res.locals.user,
+            title: 'Edit Category',
+            error: new Error('Please provide a valid category!'),
+            id: req.params.id,
+            categoryName: req.body.categoryName,
+            categoryDescription: req.body.categoryDescription,
+        });
+    });
+
+    it('should handle error gracefully and render error messages the category name field is missing', async () => {
+        const req: any = {
+            params: {
+                id: mockCategoryDetails._id,
+            },
+            body: {
+                categoryDescription: 'A dummy category description',
+            },
+        };
+        const res: any = {
+            render: jest.fn(),
+            locals: { user: 'testUser' },
+            redirect: jest.fn(),
+        };
+        const next: any = jest.fn();
+
+        (Category.findByIdAndUpdate as jest.Mock) = jest.fn().mockReturnValue(mockCategoryDetails);
+
+        await postEditCategory(req, res, next);
+
+        expect(Category.findByIdAndUpdate).not.toHaveBeenCalled();
+
+        expect(res.render).toHaveBeenCalledWith('categoryEdit', {
+            username: res.locals.user,
+            title: 'Edit Category',
+            error: new Error('Please provide all fields!'),
+            id: req.params.id,
+            categoryName: req.body.categoryName,
+            categoryDescription: req.body.categoryDescription,
+        });
+    });
+
+    it('should handle error gracefully and render error messages the category description field is missing', async () => {
+        const req: any = {
+            params: {
+                id: mockCategoryDetails._id,
+            },
+            body: {
+                categoryName: 'A dummy category name',
+            },
+        };
+        const res: any = {
+            render: jest.fn(),
+            locals: { user: 'testUser' },
+            redirect: jest.fn(),
+        };
+        const next: any = jest.fn();
+
+        (Category.findByIdAndUpdate as jest.Mock) = jest.fn().mockReturnValue(mockCategoryDetails);
+
+        await postEditCategory(req, res, next);
+
+        expect(Category.findByIdAndUpdate).not.toHaveBeenCalled();
+
+        expect(res.render).toHaveBeenCalledWith('categoryEdit', {
+            username: res.locals.user,
+            title: 'Edit Category',
+            error: new Error('Please provide all fields!'),
+            id: req.params.id,
+            categoryName: req.body.categoryName,
+            categoryDescription: req.body.categoryDescription,
+        });
+    });
+
+    it('should handle error gracefully and render error messages the category name field is too short', async () => {
+        const req: any = {
+            params: {
+                id: mockCategoryDetails._id,
+            },
+            body: {
+                categoryName: 'as',
+                categoryDescription: 'A dummy category description',
+            },
+        };
+        const res: any = {
+            render: jest.fn(),
+            locals: { user: 'testUser' },
+            redirect: jest.fn(),
+        };
+        const next: any = jest.fn();
+
+        (Category.findByIdAndUpdate as jest.Mock) = jest.fn().mockReturnValue(mockCategoryDetails);
+
+        await postEditCategory(req, res, next);
+
+        expect(Category.findByIdAndUpdate).not.toHaveBeenCalled();
+
+        expect(res.render).toHaveBeenCalledWith('categoryEdit', {
+            username: res.locals.user,
+            title: 'Edit Category',
+            error: new Error('Please check provided fields!'),
+            id: req.params.id,
+            categoryName: req.body.categoryName,
+            categoryDescription: req.body.categoryDescription,
+        });
+    });
+
+    it('should handle error gracefully and render error messages the category name field is too long', async () => {
+        const req: any = {
+            params: {
+                id: mockCategoryDetails._id,
+            },
+            body: {
+                categoryName: 'This is a dummy category name that is too long and should return an error',
+                categoryDescription: 'A dummy category description',
+            },
+        };
+        const res: any = {
+            render: jest.fn(),
+            locals: { user: 'testUser' },
+            redirect: jest.fn(),
+        };
+        const next: any = jest.fn();
+
+        (Category.findByIdAndUpdate as jest.Mock) = jest.fn().mockReturnValue(mockCategoryDetails);
+
+        await postEditCategory(req, res, next);
+
+        expect(Category.findByIdAndUpdate).not.toHaveBeenCalled();
+
+        expect(res.render).toHaveBeenCalledWith('categoryEdit', {
+            username: res.locals.user,
+            title: 'Edit Category',
+            error: new Error('Please check provided fields!'),
+            id: req.params.id,
+            categoryName: req.body.categoryName,
+            categoryDescription: req.body.categoryDescription,
+        });
+    });
+
+    it('should handle error gracefully and render error messages the category description field is too short', async () => {
+        const req: any = {
+            params: {
+                id: mockCategoryDetails._id,
+            },
+            body: {
+                categoryName: 'A dummy category name',
+                categoryDescription: 'name',
+            },
+        };
+        const res: any = {
+            render: jest.fn(),
+            locals: { user: 'testUser' },
+            redirect: jest.fn(),
+        };
+        const next: any = jest.fn();
+
+        (Category.findByIdAndUpdate as jest.Mock) = jest
+            .fn()
+            .mockReturnValue(mockCategoryDetails);
+
+        await postEditCategory(req, res, next);
+
+        expect(Category.findByIdAndUpdate).not.toHaveBeenCalled();
+
+        expect(res.render).toHaveBeenCalledWith('categoryEdit', {
+            username: res.locals.user,
+            title: 'Edit Category',
+            error: new Error('Please check provided fields!'),
+            id: req.params.id,
+            categoryName: req.body.categoryName,
+            categoryDescription: req.body.categoryDescription,
+        });
+    });
+
+    it('should handle error gracefully and render error messages the category name field is too long', async () => {
+        const req: any = {
+            params: {
+                id: mockCategoryDetails._id,
+            },
+            body: {
+                categoryName: 'Dummy Category',
+                categoryDescription:
+                    'A dummy category description that is too long and should return an error and not execute the update method. A dummy category description that is too long and should return an error and not execute the update method',
+            },
+        };
+        const res: any = {
+            render: jest.fn(),
+            locals: { user: 'testUser' },
+            redirect: jest.fn(),
+        };
+        const next: any = jest.fn();
+
+        (Category.findByIdAndUpdate as jest.Mock) = jest
+            .fn()
+            .mockReturnValue(mockCategoryDetails);
+
+        await postEditCategory(req, res, next);
+
+        expect(Category.findByIdAndUpdate).not.toHaveBeenCalled();
+
+        expect(res.render).toHaveBeenCalledWith('categoryEdit', {
+            username: res.locals.user,
+            title: 'Edit Category',
+            error: new Error('Please check provided fields!'),
+            id: req.params.id,
+            categoryName: req.body.categoryName,
+            categoryDescription: req.body.categoryDescription,
+        });
+    });
+
+    it('should handle error gracefully and render error messages if the update fails', async () => {
+        const req: any = {
+            params: {
+                id: mockCategoryDetails._id,
+            },
+            body: {
+                categoryName: 'A Dummy Category name',
+                categoryDescription: 'A dummy category description',
+            },
+        };
+        const res: any = {
+            render: jest.fn(),
+            locals: { user: 'testUser' },
+            redirect: jest.fn(),
+        };
+        const next: any = jest.fn();
+
+        (Category.findByIdAndUpdate as jest.Mock) = jest
+            .fn()
+            .mockReturnValue(() => {throw new Error()});
+
+        await postEditCategory(req, res, next);
+
+        expect(res.render).toHaveBeenCalledWith('categoryEdit', {
+            username: res.locals.user,
+            title: 'Edit Category',
+            error: new Error('Category Update Failed!'),
+            id: req.params.id,
+            categoryName: req.body.categoryName,
+            categoryDescription: req.body.categoryDescription,
+        });
+    });
 });

@@ -3,6 +3,7 @@ import {
     fetchCategories,
     fetchCategoryDetails,
     createCategory,
+    updateCategoryDetails,
 } from '../services/category.app.services.js';
 import { validateDescription, validateIsMongoObjectId, validateName } from "../../utilities/validation.js";
 import { CategoryDetailsDocument } from "../../types/types.js";
@@ -142,6 +143,7 @@ const postCreateCategory = async (req: Request, res: Response, next:NextFunction
 
 const getEditCategory = async (req: Request, res: Response, next:NextFunction): Promise<void> => {
     try {
+        // Validate category id
         if(!req.params.id || req.params.id === undefined || req.params.id === null || !validateIsMongoObjectId(req.params.id)){
             throw new Error('Please provide a valid category!');
         } else {
@@ -175,4 +177,50 @@ const getEditCategory = async (req: Request, res: Response, next:NextFunction): 
     }
 };
 
-export { getManageCategoriesView, getCategoryDetailsView, getCreateCategoryView, postCreateCategory, getEditCategory };
+const postEditCategory = async (req: Request, res: Response, next:NextFunction): Promise<void> => {
+    try {     
+        // Validate category id
+        if(!req.params.id || req.params.id === undefined || req.params.id === null || !validateIsMongoObjectId(req.params.id)){
+            throw new Error('Please provide a valid category!');
+        } 
+        // Check if category name and category description fields are provided
+        else if(!req.body.categoryName || !req.body.categoryDescription) {
+            throw new Error('Please provide all fields!');
+        }         
+        else {
+            // Trim multiple white spaces
+            const categoryName = trimMultipleWhiteSpaces(req.body.categoryName);
+            const categoryDescription = trimMultipleWhiteSpaces(
+                req.body.categoryDescription,
+            );
+            // Validate category name and category description provided
+            if (validateName(categoryName) && validateDescription(categoryDescription)) {
+                const dataCategoryDetails = {
+                    name: categoryName,
+                    description: categoryDescription,
+                }
+                // Update category details
+                const dataUpdatedCategoryDetails = await updateCategoryDetails(req.params.id, dataCategoryDetails);
+                if(dataUpdatedCategoryDetails && dataUpdatedCategoryDetails?._id?.toString() === req.params.id) {
+                    res.redirect(dataUpdatedCategoryDetails.url);
+                } else { // Throw error if update fails
+                    throw new Error('Category Update Failed!');    
+                }
+            } else { // Error if category name and category description are invalid
+                throw new Error('Please check provided fields!');
+            }
+        }
+    } catch (error) {
+        console.error(error);
+        res.render('categoryEdit', {
+            username: res.locals.user,
+            title: 'Edit Category',
+            error: error,
+            id: req.params.id,
+            categoryName: req.body.categoryName,
+            categoryDescription: req.body.categoryDescription,
+        });
+    };
+};
+
+export { getManageCategoriesView, getCategoryDetailsView, getCreateCategoryView, postCreateCategory, getEditCategory, postEditCategory };

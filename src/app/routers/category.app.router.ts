@@ -15,4 +15,6 @@ categoryAppRouter.get('/:id', redirectToLogin, categoryControllers.getCategoryDe
 
 categoryAppRouter.get('/:id/edit', redirectToLogin, categoryControllers.getEditCategory);
 
+categoryAppRouter.post('/:id/edit', redirectToLogin, categoryControllers.postEditCategory);
+
 export default categoryAppRouter;

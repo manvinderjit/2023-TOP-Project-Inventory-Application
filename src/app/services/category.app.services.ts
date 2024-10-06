@@ -1,3 +1,4 @@
+import { ObjectId } from "mongoose";
 import Category from "../../models/categoryModel.js";
 import { CategoryDetailsDocument } from "../../types/types.js";
 
@@ -31,4 +32,13 @@ const createCategory = async (
     return createdCategory;
 };
 
-export { fetchCategories, fetchCategoryDetails, createCategory };
+const updateCategoryDetails = async (
+    categoryId: string,
+    categoryDetails: { name: string, description: string },
+): Promise<CategoryDetailsDocument | null> => {
+    const dataUpdateCategory: CategoryDetailsDocument | null =
+        await Category.findByIdAndUpdate(categoryId, categoryDetails);
+    return dataUpdateCategory;
+};
+
+export { fetchCategories, fetchCategoryDetails, createCategory, updateCategoryDetails };

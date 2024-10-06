@@ -223,4 +223,51 @@ const postEditCategory = async (req: Request, res: Response, next:NextFunction):
     };
 };
 
-export { getManageCategoriesView, getCategoryDetailsView, getCreateCategoryView, postCreateCategory, getEditCategory, postEditCategory };
+const getDeleteCategory = async (req: Request, res: Response, next:NextFunction): Promise<void> => {
+    try {
+        // Validate category id
+        if(!req.params.id || req.params.id === undefined || req.params.id === null || !validateIsMongoObjectId(req.params.id)){
+            throw new Error('Please provide a valid category!');
+        } else {
+            // Fetch category details from database
+            const categoryDetails = await (fetchCategoryDetails(req.params.id));
+            // If category exists
+            if (
+                categoryDetails &&
+                categoryDetails !== null &&
+                categoryDetails?._id?.toString() === req.params.id
+            ) { // Render GET delete category view
+                res.render('categoryDelete', {
+                    username: res.locals.user,
+                    categoryId: categoryDetails._id,
+                    title: 'Delete Category',
+                    name: categoryDetails.name,
+                    description: categoryDetails.description,
+                    url: categoryDetails.url,
+                });
+            } 
+            // Otherwise throw error
+            else { 
+                throw new Error('Category not found!');
+            };
+        }
+    } catch (err) {
+        console.error(err);
+        // Render error
+        res.render('categoryDelete', {
+            username: res.locals.user,
+            categoryId: req.params.id,
+            title: 'Delete Category',
+            error: err,
+            name: '',
+            description: '',
+            url: '',
+        });
+    }
+};
+
+const postDeleteCategory = async (req: Request, res: Response, next:NextFunction): Promise<void> => {
+
+};
+
+export { getManageCategoriesView, getCategoryDetailsView, getCreateCategoryView, postCreateCategory, getEditCategory, postEditCategory, getDeleteCategory, postDeleteCategory };

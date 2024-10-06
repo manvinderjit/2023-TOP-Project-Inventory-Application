@@ -10,6 +10,7 @@ import {
     postCreateCategory,
     getEditCategory,
     postEditCategory,
+    getDeleteCategory,
 } from '../../../src/app/controllers/category.app.controllers';
 
 const dataMockCategories = [
@@ -941,6 +942,127 @@ describe('POST Edit Category', () => {
             id: req.params.id,
             categoryName: req.body.categoryName,
             categoryDescription: req.body.categoryDescription,
+        });
+    });
+});
+
+describe('GET Delete Category', () => {
+    it('should render Delete Category view when a valid category id is provided', async () => {
+        const req: any = {
+            params: {
+                id: mockCategoryDetails._id,
+            }
+        };
+        const res: any = {
+            render: jest.fn(),
+            locals: { user: 'testUser' },
+        };
+        const next: any = jest.fn();
+
+        (Category.findById as jest.Mock) = jest.fn().mockReturnValueOnce({
+            select: jest.fn().mockReturnThis(),
+            exec: jest.fn().mockReturnValueOnce(mockCategoryDetails),
+        });
+
+        await getDeleteCategory(req, res, next);
+
+        expect(res.render).toHaveBeenCalledWith('categoryDelete', {
+            username: res.locals.user,
+            categoryId: mockCategoryDetails._id,
+            title: 'Delete Category',
+            name: mockCategoryDetails.name,
+            description: mockCategoryDetails.description,
+            url: mockCategoryDetails.url,
+        });
+    });
+
+    it('should handle error gracefully and render error messages when no category id is provided', async () => {
+        const req: any = {
+            params: {},
+        };
+        const res: any = {
+            render: jest.fn(),
+            locals: { user: 'testUser' },
+        };
+        const next: any = jest.fn();
+        
+        (Category.findById as jest.Mock) = jest.fn().mockReturnValueOnce({
+            select: jest.fn().mockReturnThis(),
+            exec: jest.fn().mockReturnValueOnce(mockCategoryDetails),
+        });        
+
+        await getDeleteCategory(req, res, next);
+
+        expect(res.render).toHaveBeenCalledWith('categoryDelete', {
+            username: res.locals.user,
+            title: 'Delete Category',
+            categoryId: req.params.id,
+            error: new Error('Please provide a valid category!'),            
+            name: '',
+            description: '',
+            url: '',
+        });
+    });
+
+    it('should handle error gracefully and render error messages when an invalid category id is provided', async () => {
+        const req: any = {
+            params: {
+                id: 'Invalid Id'
+            },
+        };
+        const res: any = {
+            render: jest.fn(),
+            locals: { user: 'testUser' },
+        };
+        const next: any = jest.fn();
+
+        await getDeleteCategory(req, res, next);
+
+        (Category.findById as jest.Mock) = jest.fn().mockReturnValueOnce({
+            select: jest.fn().mockReturnThis(),
+            exec: jest.fn().mockReturnValueOnce(mockCategoryDetails),            
+        });
+
+        expect(Category.findById).not.toHaveBeenCalled();
+
+        expect(res.render).toHaveBeenCalledWith('categoryDelete', {
+            username: res.locals.user,
+            title: 'Delete Category',
+            categoryId: req.params.id,
+            error: new Error('Please provide a valid category!'),
+            name: '',
+            description: '',
+            url: '',
+        });
+    });
+
+    it('should handle error gracefully and render error messages when a category is not found in database', async () => {
+        const req: any = {
+            params: {
+                id: mockCategoryDetails._id,
+            },
+        };
+        const res: any = {
+            render: jest.fn(),
+            locals: { user: 'testUser' },
+        };
+        const next: any = jest.fn();
+
+        (Category.findById as jest.Mock) = jest.fn().mockReturnValueOnce({
+            select: jest.fn().mockReturnThis(),            
+            exec: jest.fn().mockReturnValueOnce(null),
+        });
+
+        await getDeleteCategory(req, res, next);
+
+        expect(res.render).toHaveBeenCalledWith('categoryDelete', {
+            username: res.locals.user,
+            title: 'Delete Category',
+            categoryId: req.params.id,
+            error: new Error('Category not found!'),
+            name: '',
+            description: '',
+            url: '',
         });
     });
 });

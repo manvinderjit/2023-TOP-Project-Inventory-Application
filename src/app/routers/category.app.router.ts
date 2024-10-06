@@ -13,6 +13,10 @@ categoryAppRouter.post('/create', redirectToLogin, categoryControllers.postCreat
 
 categoryAppRouter.get('/:id', redirectToLogin, categoryControllers.getCategoryDetailsView);
 
+categoryAppRouter.get('/:id/delete', redirectToLogin, categoryControllers.getDeleteCategory);
+
+categoryAppRouter.post('/:id/delete', redirectToLogin, categoryControllers.postDeleteCategory);
+
 categoryAppRouter.get('/:id/edit', redirectToLogin, categoryControllers.getEditCategory);
 
 categoryAppRouter.post('/:id/edit', redirectToLogin, categoryControllers.postEditCategory);

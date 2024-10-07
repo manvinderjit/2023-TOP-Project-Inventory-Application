@@ -61,8 +61,25 @@ export const getPromoDetails = async (req: Request, res: Response): Promise<void
 
 export const getCreatePromo = async (req: Request, res: Response): Promise<void> => {
     try {
-        res.send('Not Implemented Yet!');
-    } catch (error) {}
+        res.render('promoCreate', {
+            title: 'Create Promo',
+            username: res.locals.user,
+            promoName: '',
+            promoCaption: '',
+            promoDescription: '',
+            promoCategoryList: promoCategories,
+            selectedPromoCategory: null,
+        });
+    } catch (err) {
+        console.error(err);
+        res.render('promoCreate', {
+            title: 'Create Promo',
+            username: res.locals.user,
+            error: err,
+            selectedPromoCategory: null,
+            promoCategoryList: promoCategories,
+        });
+    }
 };
 
 export const postCreatePromo = async (req: Request, res: Response): Promise<void> => {

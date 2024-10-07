@@ -340,3 +340,53 @@ describe('GET Promo View', () => {
         });
     });
 });
+
+
+describe('GET Create Promo View', () => {
+    it("should render the Create Promo View", async() => {
+        const req: any = {};
+
+        const res: any = {
+            locals: {
+                username: 'user@abc.com',
+            },
+            render: jest.fn(),
+        };
+
+        await getCreatePromo(req, res);
+
+        expect(res.render).toHaveBeenCalledWith('promoCreate', {
+            title: 'Create Promo',
+            username: res.locals.user,
+            promoName: '',
+            promoCaption: '',
+            promoDescription: '',
+            promoCategoryList: promoCategories,
+            selectedPromoCategory: null,
+        });
+    });
+    it('should hander error gracefully in a Create Promo View', async () => {
+        const req: any = {};
+
+        const res: any = {
+            locals: {
+                username: 'user@abc.com',
+            },
+            render: jest.fn(),
+        };
+
+        jest.spyOn(res, 'render').mockImplementationOnce(() => {
+            throw new Error('Test Error');
+        });
+
+        await getCreatePromo(req, res);
+
+        expect(res.render).toHaveBeenCalledWith('promoCreate', {
+            title: 'Create Promo',
+            username: res.locals.user,
+            error: new Error('Test Error'),
+            selectedPromoCategory: null,
+            promoCategoryList: promoCategories,
+        });
+    });
+});

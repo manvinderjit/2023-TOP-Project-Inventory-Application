@@ -1,3 +1,4 @@
+import { Types } from "mongoose";
 import Promo from "../../models/promoModel.js";
 import { validateIsNumber } from "../../utilities/validation.js";
 
@@ -25,6 +26,22 @@ export const fetchPromos = async(promoCategory: string | null | undefined) => {
 export const fetchPromoDetails = async (promoId: string) => {
     const dataPromoDetails = await Promo.findById(promoId)
         .sort({ name: 1 })
-        .exec();
+        .exec();        
     return dataPromoDetails;
 };
+
+interface PromoDetailable extends Document { 
+    createdAt: NativeDate;
+    updatedAt: NativeDate;
+    category: string,
+    name: string;
+    status: string;
+    startsOn: Date;
+    endsOn: Date;
+    caption?: {
+        heading: string;
+        description: string;
+    } | null | undefined;
+    imageUrl?: string | null | undefined;
+    imageFilename?: string | null | undefined;
+}

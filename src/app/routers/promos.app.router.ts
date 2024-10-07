@@ -7,6 +7,9 @@ const promosAppRouter: Router = express.Router();
 // GET request to render Manage Promos view
 promosAppRouter.get('/', redirectToLogin, promosControllers.getManagePromos);
 
+// GET request to fetch promos by category
+promosAppRouter.post('/', redirectToLogin, promosControllers.getManagePromos);
+
 // GET request to render Create Promo view
 promosAppRouter.get('/create', redirectToLogin, promosControllers.getCreatePromo);
 

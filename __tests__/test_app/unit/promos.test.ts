@@ -12,7 +12,7 @@ import {
 } from '../../../src/app/controllers/promos.app.controllers';
 import { promoCategories } from '../../../src/app/services/promos.app.services';
 
-const dataMockPromos = [
+const mockPromos = [
     {
         caption: {
             heading: 'Accessories and Peripherals',
@@ -102,7 +102,7 @@ const dataMockPromos = [
 ];
 
 describe('Manage Promos View', () => {
-    it('should render Manage Promos view when promos are found', async () => {
+    it('should render Manage Promos view when promos exist and no category is provided', async () => {
         const req: any = {
             body:{
 
@@ -118,7 +118,7 @@ describe('Manage Promos View', () => {
 
         (Promo.find as jest.Mock) = jest.fn().mockReturnValueOnce({
             sort: jest.fn().mockReturnThis(),
-            exec: jest.fn().mockReturnValueOnce(dataMockPromos),
+            exec: jest.fn().mockReturnValueOnce(mockPromos),
         });
 
         await getManagePromos(req, res);
@@ -126,7 +126,41 @@ describe('Manage Promos View', () => {
         expect(res.render).toHaveBeenCalledWith('promos', {
             title: 'Manage Promos',
             username: res.locals.user,
-            promosList: dataMockPromos,
+            promosList: mockPromos,
+            promoCategoryList: promoCategories,
+            selectedPromoCategory: req.body.promoCategory,
+        });
+    });
+
+    it('should render Manage Promos view with promos from a category when a categoryId is provided', async () => {
+        const req: any = {
+            body: {
+                promoCategory: '1',
+            },
+        };
+
+        const res: any = {
+            locals: {
+                username: 'user@abc.com',
+            },
+            render: jest.fn(),
+        };
+
+        const returnedProducts = mockPromos.filter((promo) => {
+            return promo.category === promoCategories[req.body.promoCategory - 1].name;
+        });
+
+        (Promo.find as jest.Mock) = jest.fn().mockReturnValueOnce({
+            sort: jest.fn().mockReturnThis(),
+            exec: jest.fn().mockReturnValueOnce(returnedProducts),
+        });
+
+        await getManagePromos(req, res);
+
+        expect(res.render).toHaveBeenCalledWith('promos', {
+            title: 'Manage Promos',
+            username: res.locals.user,
+            promosList: returnedProducts,
             promoCategoryList: promoCategories,
             selectedPromoCategory: req.body.promoCategory,
         });

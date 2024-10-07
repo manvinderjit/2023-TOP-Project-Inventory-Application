@@ -4,7 +4,7 @@ import { fetchPromos, promoCategories } from '../services/promos.app.services.js
 export const getManagePromos = async (req: Request, res: Response): Promise<void> => {
     try {
         // Fetch Promos Data
-        const dataPromos = await fetchPromos(null);
+        const dataPromos = await fetchPromos(req.body?.promoCategory);
         // Check if data returned
         if(dataPromos && dataPromos.length > 0){
             // Render the Manage Promos View

@@ -1,5 +1,6 @@
 import { NextFunction, Request, Response } from 'express';
-import { fetchPromos, promoCategories } from '../services/promos.app.services.js';
+import { fetchPromoDetails, fetchPromos, promoCategories } from '../services/promos.app.services.js';
+import { validateIsMongoObjectId } from '../../utilities/validation.js';
 
 export const getManagePromos = async (req: Request, res: Response): Promise<void> => {
     try {
@@ -31,8 +32,31 @@ export const getManagePromos = async (req: Request, res: Response): Promise<void
 
 export const getPromoDetails = async (req: Request, res: Response): Promise<void> => {
     try {
-        res.send('Not Implemented Yet!');
-    } catch (error) {}
+        // Check if there is a vaild promo id in the request
+        if (!req.params.id || !validateIsMongoObjectId(req.params.id)) {
+            // If no or invalid promo id, throw error
+            throw new Error('Invalid promo ID provided');
+        } else {
+            // Fetch promo details
+            const promoDetails = await fetchPromoDetails(req.params.id);
+            // If promo details found
+            if(promoDetails && promoDetails !== null && promoDetails._id.toString() === req.params.id) {
+                res.render('promoView', {
+                    title: 'Promo Details',
+                    username: res.locals.user,
+                    promoDetails: promoDetails,
+                });
+            }
+            else throw new Error('Promo not found!');
+        }
+    } catch (err) {
+        console.error(err);
+        res.render('promoView', {
+            title: 'Promo Details: Error',
+            username: res.locals.user,
+            error: err,
+        });
+    }
 };
 
 export const getCreatePromo = async (req: Request, res: Response): Promise<void> => {

@@ -21,3 +21,10 @@ export const fetchPromos = async(promoCategory: string | null | undefined) => {
     const allPromos = await Promo.find(query).sort({ name: 1 }).exec();
     return allPromos;
 };
+
+export const fetchPromoDetails = async (promoId: string) => {
+    const dataPromoDetails = await Promo.findById(promoId)
+        .sort({ name: 1 })
+        .exec();
+    return dataPromoDetails;
+};

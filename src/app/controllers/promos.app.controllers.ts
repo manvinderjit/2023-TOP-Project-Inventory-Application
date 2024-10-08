@@ -240,8 +240,32 @@ export const postEditPromo = async (req: Request, res: Response): Promise<void> 
 
 export const getDeletePromo = async (req: Request, res: Response): Promise<void> => {
     try {
-        res.send('Not Implemented Yet!');
-    } catch (error) {}
+        // Check if there is a vaild promo id in the request
+        if (!req.params.id || !validateIsMongoObjectId(req.params.id)) {
+            // If no or invalid promo id, throw error
+            throw new Error('Invalid promo ID provided!');
+        } else {
+            // Fetch promo details
+            const promoDetails = await fetchPromoDetails(req.params.id);
+            // If promo details
+            if(promoDetails && promoDetails !== null && promoDetails._id.toString() === req.params.id) {
+                res.render('promoDelete', {
+                    title: 'Promo Delete',
+                    username: res.locals.user,
+                    promoDetails: promoDetails,
+                });
+            } 
+            else throw new Error('Promo not found!'); // Otherwise throw error
+        };
+    } catch (error) {
+        console.error(error);
+        // Render error on the page
+        res.render('promoDelete', {
+            title: 'Promo Delete',
+            username: res.locals.user,
+            error: error,            
+        });
+    }
 };
 
 export const postDeletePromo = async (req: Request, res: Response): Promise<void> => {

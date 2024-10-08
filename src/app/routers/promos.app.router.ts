@@ -1,6 +1,7 @@
 import express, { Router } from 'express';
 import * as promosControllers from '../controllers/promos.app.controllers.js';
 import { redirectToLogin } from '../middleware/auth.mw.js';
+import fileUpload from 'express-fileupload';
 
 const promosAppRouter: Router = express.Router();
 
@@ -14,7 +15,7 @@ promosAppRouter.post('/', redirectToLogin, promosControllers.getManagePromos);
 promosAppRouter.get('/create', redirectToLogin, promosControllers.getCreatePromo);
 
 // POST request to Create Promo
-promosAppRouter.post('/create', redirectToLogin, promosControllers.postCreatePromo);
+promosAppRouter.post('/create', redirectToLogin, fileUpload(), promosControllers.postCreatePromo);
 
 // GET request to render Promo Details view
 promosAppRouter.get('/:id', redirectToLogin, promosControllers.getPromoDetails);

@@ -11,6 +11,7 @@ import {
     postDeletePromo,
 } from '../../../src/app/controllers/promos.app.controllers';
 import { promoCategories } from '../../../src/app/services/promos.app.services';
+import fs, { unlink } from 'node:fs';
 
 const mockPromos = [
     {
@@ -101,17 +102,37 @@ const mockPromos = [
     },
 ];
 
+const mockCreatePromo = {
+    promoName: 'Dummy Promo',
+    promoCaption: 'Dummy Promo Caption',
+    promoDescription: 'Dummy Promo Description',
+    promoCategory: '1',
+    promoStatus: 'Active',
+    promoStartDate: '2024-10-15',
+    promoEndDate: '2024-10-31',
+};
+
+// const mockPromoImage: {
+//     name: 'red-podium-with-gift-shopping-bag-gold-coin-chinese-new-year-sale-banner-3d-background.jpg',
+//     data: `<Buffer ff d8 ff e1 10 84 45 78 69 66 00 00 4d 4d 00 2a 00 00 00 08 00 09 01 0e 00 02 00 00 00 5b 00 00 00 7a 01 12 00 03 00 00 00 01 00 01 00 00 01 1a 00 05 ... 3883249 more bytes>`,
+//     size: 3883299,
+//     encoding: '7bit',
+//     tempFilePath: '',
+//     truncated: false,
+//     mimetype: 'image/jpeg',
+//     md5: 'd4d1e2d843497b07cf37752f4cd5554e',
+//     mv: jest.fn(),
+// };
+
 describe('Manage Promos View', () => {
     it('should render Manage Promos view when promos exist and no category is provided', async () => {
         const req: any = {
-            body:{
-
-            }
+            body:{}
         };
 
         const res: any = {
             locals: {
-                username: 'user@abc.com',
+                user: 'user@abc.com',
             },
             render: jest.fn(),
         };
@@ -141,7 +162,7 @@ describe('Manage Promos View', () => {
 
         const res: any = {
             locals: {
-                username: 'user@abc.com',
+                user: 'user@abc.com',
             },
             render: jest.fn(),
         };
@@ -173,7 +194,7 @@ describe('Manage Promos View', () => {
 
         const res: any = {
             locals: {
-                username: 'user@abc.com',
+                user: 'user@abc.com',
             },
             render: jest.fn(),
         };
@@ -200,7 +221,7 @@ describe('Manage Promos View', () => {
 
         const res: any = {
             locals: {
-                username: 'user@abc.com',
+                user: 'user@abc.com',
             },
             render: jest.fn(),
         };
@@ -231,7 +252,7 @@ describe('GET Promo View', () => {
 
         const res: any = {
             locals: {
-                username: 'user@abc.com',
+                user: 'user@abc.com',
             },
             render: jest.fn(),
         };
@@ -261,7 +282,7 @@ describe('GET Promo View', () => {
 
         const res: any = {
             locals: {
-                username: 'user@abc.com',
+                user: 'user@abc.com',
             },
             render: jest.fn(),
         };
@@ -289,7 +310,7 @@ describe('GET Promo View', () => {
 
         const res: any = {
             locals: {
-                username: 'user@abc.com',
+                user: 'user@abc.com',
             },
             render: jest.fn(),
         };
@@ -319,7 +340,7 @@ describe('GET Promo View', () => {
 
         const res: any = {
             locals: {
-                username: 'user@abc.com',
+                user: 'user@abc.com',
             },
             render: jest.fn(),
         };
@@ -341,14 +362,13 @@ describe('GET Promo View', () => {
     });
 });
 
-
 describe('GET Create Promo View', () => {
     it("should render the Create Promo View", async() => {
         const req: any = {};
 
         const res: any = {
             locals: {
-                username: 'user@abc.com',
+                user: 'user@abc.com',
             },
             render: jest.fn(),
         };
@@ -370,7 +390,7 @@ describe('GET Create Promo View', () => {
 
         const res: any = {
             locals: {
-                username: 'user@abc.com',
+                user: 'user@abc.com',
             },
             render: jest.fn(),
         };
@@ -389,4 +409,316 @@ describe('GET Create Promo View', () => {
             promoCategoryList: promoCategories,
         });
     });
+});
+
+describe("POST Create Promo", () => {
+    it("should create a promo and render success message when all details are provided", async () => {
+        const req: any = {
+            body: mockCreatePromo,
+            files: {
+                promoImage: {
+                    name: 'image.png',
+                    mv: jest.fn((path, callback: any) => callback(null)),
+                },
+            },
+        };
+
+        const res: any = {
+            render: jest.fn(),
+            locals: {
+                user: 'user@abc.com',
+            },
+        };
+
+        (Promo.create as jest.Mock) = jest.fn().mockReturnValueOnce(mockCreatePromo);
+
+        await postCreatePromo(req, res);
+
+        expect(res.render).toHaveBeenCalled();
+        expect(req.files.promoImage.mv).toHaveBeenCalled();
+        expect(Promo.create).toHaveBeenCalled();
+        expect(res.render).toHaveBeenCalledWith('promoCreate', {
+            title: 'Create Promo',
+            username: res.locals.user,
+            success: 'Promo Created!',
+            promoName: '',
+            promoCaption: '',
+            promoDescription: '',
+            promoStatus: '',
+            promoStartDate: '',
+            promoEndDate: '',
+            selectedPromoCategory: null,
+            promoCategoryList: promoCategories,
+        });
+    });
+
+    it('should hander error gracefully and render error messages when a file is not uploaded', async () => {
+        const req: any = {
+            body: mockCreatePromo,
+        };
+
+        const res: any = {
+            render: jest.fn(),
+            locals: {
+                user: 'user@abc.com',
+            },
+        };
+
+        (Promo.create as jest.Mock) = jest
+            .fn()
+            .mockReturnValueOnce(mockCreatePromo);
+
+        await postCreatePromo(req, res);
+
+        expect(Promo.create).not.toHaveBeenCalled();
+        expect(res.render).toHaveBeenCalledWith('promoCreate', {
+            title: 'Create Promo',
+            username: res.locals.user,
+            error: new Error('No file was uploaded!'),
+            // TODO: Pass following field values
+            promoName: req.body.promoName,
+            promoCaption: req.body.promoCaption,
+            promoDescription: req.body.promoDescription,
+            promoStatus: req.body.promoStatus,
+            promoStartDate: req.body.promoStartDate,
+            promoEndDate: req.body.promoEndDate,
+            selectedPromoCategory: req.body.promoCategory,
+            promoCategoryList: promoCategories,
+        });
+    });
+
+    it('should hander error gracefully and render error messages when fields are missing', async () => {
+        const req: any = {
+            body: {},
+            files: {
+                promoImage: {
+                    name: 'image.png',
+                    mv: jest.fn((path, callback: any) => callback(null)),
+                },
+            },
+        };
+
+        const res: any = {
+            render: jest.fn(),
+            locals: {
+                user: 'user@abc.com',
+            },
+        };
+
+        (Promo.create as jest.Mock) = jest
+            .fn()
+            .mockReturnValueOnce(mockCreatePromo);
+
+        await postCreatePromo(req, res);
+
+        expect(Promo.create).not.toHaveBeenCalled();
+        expect(res.render).toHaveBeenCalledWith('promoCreate', {
+            title: 'Create Promo',
+            username: res.locals.user,
+            error: new Error(
+                'Please check  promoName, promoCaption, promoDescription, promoCategory, promoStatus, promoStartDate, promoEndDate',
+            ),
+            // TODO: Pass following field values
+            promoName: req.body.promoName,
+            promoCaption: req.body.promoCaption,
+            promoDescription: req.body.promoDescription,
+            promoStatus: req.body.promoStatus,
+            promoStartDate: req.body.promoStartDate,
+            promoEndDate: req.body.promoEndDate,
+            selectedPromoCategory: req.body.promoCategory,
+            promoCategoryList: promoCategories,
+        });
+    });
+
+    it('should hander error gracefully and render error messages when fields are invalid', async () => {
+        const req: any = {
+            body: {
+                promoName: 'Du',
+                promoCaption:
+                    'Dummy Promo Caption That is too long and will trigger an invalid field error',
+                promoDescription: 'A',
+                promoCategory: 'Invalid',
+                promoStatus: 'Invalid',
+                promoStartDate: 'Not A Date',
+                promoEndDate: '20241031',
+            },
+            files: {
+                promoImage: {
+                    name: 'image.png',
+                    mv: jest.fn((path, callback: any) => callback(null)),
+                },
+            },
+        };
+
+        const res: any = {
+            render: jest.fn(),
+            locals: {
+                user: 'user@abc.com',
+            },
+        };
+
+        (Promo.create as jest.Mock) = jest
+            .fn()
+            .mockReturnValueOnce(mockCreatePromo);
+
+        await postCreatePromo(req, res);
+
+        expect(Promo.create).not.toHaveBeenCalled();
+        expect(res.render).toHaveBeenCalledWith('promoCreate', {
+            title: 'Create Promo',
+            username: res.locals.user,
+            error: new Error(
+                'Please check  promoName, promoCaption, promoDescription, promoCategory, promoStatus, promoStartDate, promoEndDate',
+            ),
+            // TODO: Pass following field values
+            promoName: req.body.promoName,
+            promoCaption: req.body.promoCaption,
+            promoDescription: req.body.promoDescription,
+            promoStatus: req.body.promoStatus,
+            promoStartDate: req.body.promoStartDate,
+            promoEndDate: req.body.promoEndDate,
+            selectedPromoCategory: req.body.promoCategory,
+            promoCategoryList: promoCategories,
+        });
+    });
+
+    it("should handle errors gracefully and render error message when file upload fails", async () => {
+        const req: any = {
+            body: mockCreatePromo,
+            files: {
+                promoImage: {
+                    name: 'image.png',
+                    mv: jest.fn((path, callback: any) => callback(new Error('Upload failed'))),
+                },
+            },
+        };
+
+        const res: any = {
+            render: jest.fn(),
+            locals: {
+                user: 'user@abc.com',
+            },
+        };
+
+        (Promo.create as jest.Mock) = jest.fn().mockReturnValueOnce(mockCreatePromo);
+
+        await postCreatePromo(req, res);
+
+        expect(req.files.promoImage.mv).toHaveBeenCalled();
+        expect(Promo.create).not.toHaveBeenCalled();
+        expect(res.render).toHaveBeenCalledWith('promoCreate', {
+            title: 'Create Promo',
+            username: res.locals.user,
+            error: new Error('Upload failed'),
+            // TODO: Pass following field values
+            promoName: req.body.promoName,
+            promoCaption: req.body.promoCaption,
+            promoDescription: req.body.promoDescription,
+            promoStatus: req.body.promoStatus,
+            promoStartDate: req.body.promoStartDate,
+            promoEndDate: req.body.promoEndDate,
+            selectedPromoCategory: req.body.promoCategory,
+            promoCategoryList: promoCategories,
+        });
+    });
+
+    it("should handle errors gracefully and render error message when Promo Creation fails", async () => {
+        const req: any = {
+            body: mockCreatePromo,
+            files: {
+                promoImage: {
+                    name: 'image.png',
+                    mv: jest.fn((path, callback: any) => callback(null)),
+                },
+            },
+        };
+
+        const res: any = {
+            render: jest.fn(),
+            locals: {
+                user: 'user@abc.com',
+            },
+        };
+
+        (Promo.create as jest.Mock) = jest.fn().mockReturnValueOnce(null);
+
+        jest.spyOn({ unlink }, 'unlink').mockImplementationOnce(
+            (path, callback) => callback(null),
+        );
+
+        await postCreatePromo(req, res);
+
+        expect(req.files.promoImage.mv).toHaveBeenCalled();
+        expect(res.render).toHaveBeenCalledWith('promoCreate', {
+            title: 'Create Promo',
+            username: res.locals.user,
+            error: new Error('Promo creation failed!'),
+            promoName: req.body.promoName,
+            promoCaption: req.body.promoCaption,
+            promoDescription: req.body.promoDescription,
+            promoStatus: req.body.promoStatus,
+            promoStartDate: req.body.promoStartDate,
+            promoEndDate: req.body.promoEndDate,
+            selectedPromoCategory: req.body.promoCategory,
+            promoCategoryList: promoCategories,
+        });
+    });
+
+    // it("should handle errors gracefully and render error message when file deletion error occurs", async () => {
+    //     const req: any = {
+    //         body: mockCreatePromo,
+    //         files: {
+    //             promoImage: {
+    //                 name: 'image.png',
+    //                 mv: jest.fn((path, callback: any) => callback(null)),
+    //             },
+    //         },
+    //     };
+
+    //     const res: any = {
+    //         render: jest.fn(),
+    //         locals: {
+    //             user: 'user@abc.com',
+    //         },
+    //     };
+
+    //     (Promo.create as jest.Mock) = jest.fn().mockReturnValueOnce(null);
+
+    //     // jest.mock('fs');
+
+    //     // jest.mock('fs');
+    //     // fs.unlink.mockImplementation(
+    //     //     (path, callback) => callback(new Error('File deletion failed')),
+    //     // );
+    //     // jest.spyOn({ unlink }, 'unlink').mockImplementation(
+    //     //     (path, callback) => {
+    //     //         console.log('+++++++++++')
+    //     //         callback(new Error('File deletion failed'))},
+    //     // );
+    //     (unlink as unknown as jest.Mock) = jest.fn().mockImplementation((path, callback: any) => callback(new Error('File not found')));
+
+    //     // (unlink as jest.fn).mockRejectedValueOnce(new Error('File not found'));
+
+    //     // (unlink as unknown as jest.Mock) = jest.fn().mockImplementation((p, cb: any) => 
+    //     //     cb(new Error('File not found'))
+    //     // ); // Mocking an error
+    //     //  = jest.fn().mockImplementationOnce((path, cb: any) => cb(new Error('File not found'))); // Mocking an error
+
+    //     await postCreatePromo(req, res);
+
+    //     expect(req.files.promoImage.mv).toHaveBeenCalled();
+    //     expect(res.render).toHaveBeenCalledWith('promoCreate', {
+    //         title: 'Create Promo',
+    //         username: res.locals.user,
+    //         error: new Error('Promo creation failed!'),
+    //         promoName: req.body.promoName,
+    //         promoCaption: req.body.promoCaption,
+    //         promoDescription: req.body.promoDescription,
+    //         promoStatus: req.body.promoStatus,
+    //         promoStartDate: req.body.promoStartDate,
+    //         promoEndDate: req.body.promoEndDate,
+    //         selectedPromoCategory: req.body.promoCategory,
+    //         promoCategoryList: promoCategories,
+    //     });
+    // });
 });

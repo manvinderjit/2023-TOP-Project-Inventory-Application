@@ -1,6 +1,7 @@
 import { Types } from "mongoose";
 import Promo from "../../models/promoModel.js";
 import { validateIsNumber } from "../../utilities/validation.js";
+import { trimMultipleWhiteSpaces } from "../../utilities/stringFormatting.js";
 
 export const promoCategories = [
     {
@@ -45,3 +46,22 @@ interface PromoDetailable extends Document {
     imageUrl?: string | null | undefined;
     imageFilename?: string | null | undefined;
 }
+
+export const createPromo = async(promoDetails: { promoName: string; promoCaption: string; promoDescription: string; promoCategory: number; newUploadFileName: any; promoStatus: string; promoStartDate: string; promoEndDate: string; }) => {
+    const createdPromo = await Promo.create({
+        name: trimMultipleWhiteSpaces(promoDetails.promoName),
+        caption: {
+            heading: trimMultipleWhiteSpaces(promoDetails.promoCaption),
+            description: trimMultipleWhiteSpaces(promoDetails.promoDescription),
+        },
+        category: trimMultipleWhiteSpaces(
+            promoCategories[promoDetails.promoCategory - 1].name,
+        ),
+        imageUrl: `promos/carousel/${promoDetails.newUploadFileName}`,
+        imageFilename: promoDetails.newUploadFileName,
+        status: trimMultipleWhiteSpaces(promoDetails.promoStatus),
+        startsOn: trimMultipleWhiteSpaces(promoDetails.promoStartDate),
+        endsOn: trimMultipleWhiteSpaces(promoDetails.promoEndDate),
+    });
+    return createdPromo;
+};

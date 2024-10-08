@@ -46,6 +46,51 @@ const validateQuery = (query: string | null | undefined) => {
     else return false;
 };
 
+const validateDate = (dateValue: any): boolean => {
+    const date = new Date(dateValue);
+    // Check if the value is an instance of Date
+    if (!(date instanceof Date)) {
+        return false;
+    }
+    // Check if the date is valid
+    return !isNaN(date.getTime());
+};
+
+const validateFieldsMissingOrEmpty = (
+    fields: string[],
+    reqBody: { [x: string]: string },
+): string[] => {
+    const missingFields: string[] = [];
+    fields.forEach((field) => {
+        if (
+            !reqBody[field] ||
+            reqBody[field] === null ||
+            reqBody[field] === undefined ||
+            reqBody[field].trim() === ''
+        )
+            missingFields.push(' ' + field);
+    });
+    return missingFields;
+};
+
+const validateEnums = (enumArray: string[], value: string): boolean => enumArray.includes(value.toLowerCase());
+
+const validateFieldValues = (
+    fieldsAndValidators: {
+        field: string;
+        value: string;
+        validator: (name: string) => boolean;
+    }[],
+): string[] => {
+    const invalidFields: string[] = [];
+    fieldsAndValidators.forEach((fieldAndValidator) => {
+        if (!fieldAndValidator.validator(fieldAndValidator.value)) {
+            invalidFields.push(` ` + fieldAndValidator.field);
+        }
+    });
+    return invalidFields;
+};
+
 export {
     validateEmail,
     validatePassword,
@@ -54,4 +99,8 @@ export {
     validateIsMongoObjectId,
     validateIsNumber,
     validateQuery,
+    validateFieldsMissingOrEmpty,
+    validateEnums,
+    validateFieldValues,
+    validateDate,
 };

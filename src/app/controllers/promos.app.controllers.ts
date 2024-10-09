@@ -1,10 +1,11 @@
 import { NextFunction, Request, Response } from 'express';
-import { createPromo, fetchPromoDetails, fetchPromos, promoCategories } from '../services/promos.app.services.js';
+import { createPromo, deletePromo, fetchPromoDetails, fetchPromos, getPromoImageName, promoCategories } from '../services/promos.app.services.js';
 import { validateDate, validateDescription, validateEnums, validateFieldsMissingOrEmpty, validateFieldValues, validateIsMongoObjectId, validateName } from '../../utilities/validation.js';
 import { fileURLToPath } from 'url';
 import { replaceFileNameSpacesWithHyphen } from '../../utilities/fileFormatting.js';
 import { unlink } from 'node:fs';
 import { PathLike } from 'fs';
+import { checkImageExists, deleteAppImage } from '../services/image.app.services.js';
 
 interface ExpressFileUploadRequest extends Request {
     files: any;
@@ -270,6 +271,34 @@ export const getDeletePromo = async (req: Request, res: Response): Promise<void>
 
 export const postDeletePromo = async (req: Request, res: Response): Promise<void> => {
     try {
-        res.send('Not Implemented Yet!');
-    } catch (error) {}
+        // Check if there is a vaild promo id in the request
+        if (!req.params.id || !validateIsMongoObjectId(req.params.id)) {
+            // If no or invalid promo id, throw error
+            throw new Error('Invalid promo ID provided!');
+        } else {
+            // Get Promo Image Name for Deletion
+            const promoImageName = await getPromoImageName(req.params.id);
+            if (promoImageName) {
+                let imagePath =
+                    staticsPath + '/images/promos/' + promoImageName;
+                // Check Image Exists
+                const imageExistsFlag = await checkImageExists(imagePath);
+                // Delete Image
+                if (imageExistsFlag) await deleteAppImage(imagePath);
+            };
+            
+            // Delete Promo from db
+            const deleteStatus = await deletePromo(req.params.id);
+            if(deleteStatus && deleteStatus._id.toString() === req.params.id) res.redirect('/promos');
+            else throw new Error('Deletion Failed!');
+        }
+    } catch (error) {
+        console.error(error);
+        // Render error on the page
+        res.render('promoDelete', {
+            title: 'Promo Delete',
+            username: res.locals.user,
+            error: error,
+        });
+    }
 };

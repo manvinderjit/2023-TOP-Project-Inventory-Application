@@ -10,8 +10,39 @@ import {
     getDeletePromo,
     postDeletePromo,
 } from '../../../src/app/controllers/promos.app.controllers';
-import { promoCategories } from '../../../src/app/services/promos.app.services';
+import { deletePromo, getPromoImageName, promoCategories } from '../../../src/app/services/promos.app.services';
 import fs, { unlink } from 'node:fs';
+import { checkImageExists, deleteAppImage } from '../../../src/app/services/image.app.services';
+
+// jest.mock('../../../src/app/services/promos.app.services');
+
+// const getPromoImageNameMock: any = getPromoImageName as jest.Mock;
+
+// jest.mock('../../../src/app/services/promos.app.services', () => ({
+//     __esModule: true, // this property makes it work
+//     getPromoImageName: jest.fn().mockReturnValue(mockPromoDetails.imageFilename),
+// }));
+// jest.mock('../../../src/app/services/image.app.services', () => ({
+//         __esModule: true,
+//     checkImageExists: jest.fn().mockReturnValue(true),
+//     deleteAppImage: jest.fn().mockReturnValue(true),
+// }));
+// jest.unstable_mockModule(
+//     '../../../src/app/services/promos.app.services',
+//     () => ({
+//         checkImageExists: jest.fn().mockReturnValue(true),
+//         deleteAppImage: jest.fn().mockReturnValue(true),
+//         // etc.
+//     }),
+// );
+
+// const f1 = jest.spyOn({ getPromoImageName }, 'getPromoImageName').mockResolvedValue(mockPromoDetails.imageFilename);
+
+// const f2 = jest.spyOn({ checkImageExists }, 'checkImageExists').mockResolvedValue(true);
+
+// const f3 = jest.spyOn({ deleteAppImage }, 'deleteAppImage').mockResolvedValue(true);
+
+// const f4 = jest.spyOn({ deletePromo }, 'deletePromo').mockImplementation((id:any) => id);
 
 const mockPromos = [
     {
@@ -118,15 +149,15 @@ const mockPromoDetails = {
     description: 'Find accessories and peripherals for your computing requirements!'
   },
   _id: '657fc0d54055729bfa20fb1e',
-  name: 'All Accessories',
+  name: 'All dummy',
   category: 'Carousel',
-  imageUrl: 'promos/image/all-accessories.jpg',
+  imageUrl: 'promos/image/all-dummy.jpg',
   status: 'Active',
   startsOn: '2024-02-23T00:00:00.000Z',
   endsOn: '2024-02-28T00:00:00.000Z',
   createdAt:'2023-12-18T03:47:33.155Z',
   updatedAt:'2024-02-20T19:14:02.663Z',
-  imageFilename: 'all-accessories.jpg'
+  imageFilename: 'all-dummy.jpg'
 }
 // const mockPromoImage: {
 //     name: 'red-podium-with-gift-shopping-bag-gold-coin-chinese-new-year-sale-banner-3d-background.jpg',
@@ -846,6 +877,135 @@ describe('GET Delete Promo View', () => {
             title: 'Promo Delete',
             username: res.locals.user,
             error: new Error('Promo not found!')
+        });
+    });
+});
+
+describe('POST Delete Promo', () => {
+    it('should be able to Delete Promo and redirect to the Manage Promos page', async () => {
+        const req: any = {
+            params: {
+                id: mockPromoDetails._id,
+            },
+        };
+
+        const res: any = {
+            locals: {
+                user: 'user@abc.com',
+            },
+            render: jest.fn(),
+            redirect: jest.fn(),
+        };
+
+        (Promo.findById as jest.Mock) = jest.fn().mockReturnValueOnce({
+            select: jest.fn().mockReturnThis(),
+            exec: jest.fn().mockReturnValueOnce(mockPromoDetails),
+        });
+
+        // const f1 = jest.spyOn({ getPromoImageName }, 'getPromoImageName').mockResolvedValue(mockPromoDetails.imageFilename);
+
+        // const f2 = jest.spyOn({ checkImageExists }, 'checkImageExists').mockResolvedValue(true);
+
+        // const f3 = jest.spyOn({ deleteAppImage }, 'deleteAppImage').mockResolvedValue(true);
+
+        // const f4 = jest.spyOn({ deletePromo }, 'deletePromo').mockResolvedValue(req.params.id);
+        // (deleteAppImage as jest.Mock).mockReturnValue(true);
+
+        // type GetPromoImageName = () => Promise<string | null | undefined>;
+
+        // const mock = jest.spyOn(getPromoImageName, 'getPromoImageName');
+        // mock.mockImplementation(() => Promise.resolve({ data: {} }));
+
+        // getPromoImageNameMock.mockResolvedValue(mockPromoDetails.imageFilename);
+        //     // jest.fn() as jest.MockedFunction<GetPromoImageName>;
+
+        // // Now you can mock its resolved value
+        // // (getPromoImageName as jest.Mock).mockReturnValue('image.png');
+        // // (getPromoImageName as jest.Mock).mockResolvedValue(mockPromoDetails.imageFilename);
+        // jest.mock('../../../src/app/services/image.app.services', () => ({
+        //     checkImageExists: jest.fn().mockReturnValue(true),
+        //     deleteAppImage: jest.fn().mockReturnValue(true),
+        // }));
+
+        // const dbSpy = jest
+        //     .spyOn(
+        //         require('../../../src/app/services/image.app.services'),
+        //         'checkImageExists',
+        //     )
+        //     .mockImplementation(() => true);
+
+        (Promo.findByIdAndDelete as jest.Mock) = jest
+            .fn()
+            .mockReturnValueOnce(mockPromoDetails);
+
+        await postDeletePromo(req, res);
+        // expect(dbSpy).toHaveBeenCalledWith(mockPromoDetails.imageFilename);
+        // expect(f1).toHaveBeenCalledWith(mockPromoDetails.imageFilename);
+        // expect(f2).toHaveBeenCalledWith(mockPromoDetails.imageFilename);
+        expect(res.redirect).toHaveBeenCalledWith('/promos');
+    });
+
+    // Invalid promo ID results in an error
+    it('should render error messages when invalid promo ID is provided', async () => {
+        const req: any = {
+            params: { id: 'invalidMongoObjectId' },
+        };
+        const res: any = {
+            redirect: jest.fn(),
+            render: jest.fn(),
+            locals: { user: 'testUser' },
+        };
+
+        (Promo.findById as jest.Mock) = jest.fn().mockReturnValueOnce({
+            select: jest.fn().mockReturnThis(),
+            exec: jest.fn().mockReturnValueOnce(mockPromoDetails),
+        });
+
+        (Promo.findByIdAndDelete as jest.Mock) = jest
+            .fn()
+            .mockReturnValueOnce(mockPromoDetails);
+
+        await postDeletePromo(req, res);
+
+        expect(Promo.findById).not.toHaveBeenCalled();
+        expect(Promo.findByIdAndDelete).not.toHaveBeenCalled();
+
+        expect(res.render).toHaveBeenCalledWith('promoDelete', {
+            title: 'Promo Delete',
+            username: res.locals.user,
+            error: new Error('Invalid promo ID provided!'),
+        });
+    });
+
+    // Invalid promo ID results in an error
+    it('should render error messages when deletion fails', async () => {
+        const req: any = {
+            params: { id: mockPromoDetails._id },
+        };
+        const res: any = {
+            redirect: jest.fn(),
+            render: jest.fn(),
+            locals: { user: 'testUser' },
+        };
+
+        (Promo.findById as jest.Mock) = jest.fn().mockReturnValueOnce({
+            select: jest.fn().mockReturnThis(),
+            exec: jest.fn().mockReturnValueOnce(mockPromoDetails),
+        });
+
+        (Promo.findByIdAndDelete as jest.Mock) = jest
+            .fn()
+            .mockReturnValueOnce(null);
+
+        await postDeletePromo(req, res);
+
+        expect(Promo.findById).toHaveBeenCalledWith(req.params.id);
+        expect(Promo.findByIdAndDelete).toHaveBeenCalledWith(req.params.id);
+
+        expect(res.render).toHaveBeenCalledWith('promoDelete', {
+            title: 'Promo Delete',
+            username: res.locals.user,
+            error: new Error('Deletion Failed!'),
         });
     });
 });

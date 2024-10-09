@@ -6,6 +6,7 @@ import { replaceFileNameSpacesWithHyphen } from '../../utilities/fileFormatting.
 import { unlink } from 'node:fs';
 import { PathLike } from 'fs';
 import { checkImageExists, deleteAppImage } from '../services/image.app.services.js';
+import { Types } from 'mongoose';
 
 interface ExpressFileUploadRequest extends Request {
     files: any;
@@ -229,8 +230,36 @@ export const postCreatePromo = async (
 
 export const getEditPromo = async (req: Request, res: Response): Promise<void> => {
     try {
-        res.send('Not Implemented Yet!');
-    } catch (error) {}
+        // Check if there is a vaild promo id in the request
+        if (!req.params.id || !validateIsMongoObjectId(req.params.id)) {
+            // If no or invalid promo id, throw error
+            throw new Error('Invalid Promo ID provided!');
+        } else {
+            // Fetch Promo Details
+            const promoDetails = await fetchPromoDetails(req.params.id);
+            if (
+                promoDetails &&
+                promoDetails !== null &&
+                promoDetails._id.toString() === req.params.id
+            ) {                
+                res.render('promoEdit', {
+                    title: 'Promo Edit',
+                    username: res.locals.user,
+                    promoUrl: `/promos/${promoDetails._id}`,
+                    promoCategoryList: promoCategories,
+                    promoDetails,
+                });
+            } else throw new Error('Promo not found!'); // Otherwise throw error
+        };
+        
+    } catch (error) {
+        console.error(error);
+        res.render('promoEdit', {
+            title: 'Promo Edit',
+            username: res.locals.user,
+            error: error,            
+        });
+    }
 };
 
 export const postEditPromo = async (req: Request, res: Response): Promise<void> => {

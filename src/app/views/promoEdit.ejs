@@ -27,33 +27,32 @@
 
                 <% if(locals.error && error !=='' && error !== undefined) { %>
                     <div class="alert alert-warning w-50 m-auto" role="alert">
-                        Error: <%= error %>
+                        <%= error %>
                     </div>        
                 <% } else if (locals.success && success !=='' && success !== undefined) { %>
                     <div class="alert alert-success w-50 m-auto" role="alert">
                         Success: <%= success %>
                     </div>
                 <% } %>
-            </div>
-         
-            
+            </div>         
+            <% if(locals.promoDetails) { %> 
              <div class="container w-50 m-auto">
                 <form method='POST' action="" >
                     <fieldset>
                         <legend class="mb-4 ">Edit Promo Details</legend>
                         <div class="mb-3">
                             <label class="form-label" for="promoName">Promo Name: </label>
-                            <input class="form-control" type="text" id="promoName" name="promoName" required minlength="3" maxlength="30" required pattern="^[a-zA-Z0-9.\-_\(\) ]{3,30}$" value="<%= promoName %>">
+                            <input class="form-control" type="text" id="promoName" name="promoName" required minlength="3" maxlength="30" required pattern="^[a-zA-Z0-9.\-_\(\) ]{3,30}$" value="<%= promoDetails.name %>">
                             <div id="promoNameError" aria-live="polite"></div>
                         </div >
                         <div class="mb-3">
                             <label class="form-label" for="promoCaption">Promo Caption Heading: </label>
-                            <textarea class="form-control" type="text" id="promoCaption" name="promoCaption" minlength="5" maxlength="100" required><%= promoCaption %></textarea>
+                            <textarea class="form-control" type="text" id="promoCaption" name="promoCaption" minlength="5" maxlength="100" required><%= promoDetails.caption.heading %></textarea>
                             <div id="promoCaptionError" aria-live="polite"></div>
                         </div >
                         <div class="mb-3">
                             <label class="form-label" for="promoDescription">Promo Description: </label>
-                            <textarea class="form-control" type="text" id="promoDescription" name="promoDescription" minlength="5" maxlength="100" required><%= promoDescription %></textarea>
+                            <textarea class="form-control" type="text" id="promoDescription" name="promoDescription" minlength="5" maxlength="100" required><%= promoDetails.caption.description %></textarea>
                             <div id="promoDescriptionError" aria-live="polite"></div>
                         </div >
                         <div class="input-group mb-3">
@@ -62,7 +61,7 @@
                                 <option value='choose'>Choose Promo Category...</option>
                                 <% if(locals.promoCategoryList && promoCategoryList.length > 0) { %>
                                     <% promoCategoryList.forEach((category => { %>
-                                        <option value='<%= category.id %>' <% if(promoCategory && category.name == promoCategory) { %> selected <% } %> ><%= category.name %></option>
+                                        <option value='<%= category.id %>' <% if(promoDetails.category && category.name == promoDetails.category) { %> selected <% } %> ><%= category.name %></option>
                                     <% })) %>
                                 <% } %>
                             </select>
@@ -70,24 +69,24 @@
                         </div>
                         <div class="mb-3">
                             <div class="form-label" >Current Promo Image: </div>
-                            <img id="currentPromoImage" src="/images/promos/<%= promoImageName %>" class="img-fluid rounded">
+                            <img id="currentPromoImage" src="/images/promos/<%= promoDetails.imageFilename %>" class="img-fluid rounded">
                         </div>                         
                         <div class="input-group mb-3">
                             <label class="input-group-text" for="promoStatus">Promo Status</label>
                             <select class="form-select" id="promoStatus" name="promoStatus">
                                 <option value='choose'>Choose Promo Status...</option>                                
-                                <option value="Active" <% if(promoStatus && promoStatus == "Active") { %> selected <% } %> >Active</option>
-                                <option value="Expired" <% if(promoStatus && promoStatus == "Expired") { %> selected <% } %> >Expired</option>
+                                <option value="Active" <% if(promoDetails.status && promoDetails.status == "Active") { %> selected <% } %> >Active</option>
+                                <option value="Expired" <% if(promoDetails.status && promoDetails.status == "Expired") { %> selected <% } %> >Expired</option>
                             </select>
                             <div id="promoStatusError" aria-live="polite"></div>
                         </div>
                         <div class="input-group mb-3">
                             <label class="input-group-text" for="promoStartDate">Promo Start Date</label>
-                            <input class="form-control" type="date" id="promoStartDate" name="promoStartDate" value="<%= promoStartDate %>"/>
+                            <input class="form-control" type="date" id="promoStartDate" name="promoStartDate" value="<%= promoDetails.startsOn %>"/>
                         </div>                        
                         <div class="input-group mb-3">
                             <label class="input-group-text" for="promoEndDate">Promo End Date</label>
-                            <input class="form-control" type="date" id="promoEndDate" name="promoEndDate" value="<%= promoEndDate %>"/>
+                            <input class="form-control" type="date" id="promoEndDate" name="promoEndDate" value="<%= promoDetails.endsOn %>"/>
                         </div>
                     </fieldset>
                     <div class="mb-3 d-flex justify-content-center">
@@ -97,12 +96,13 @@
             </div>
              <hr>
             <div class="card-body text-center">
-                <a href="<%= `${promoUrl}/edit/image` %>" class="btn btn-primary ">Change Image: <%= promoName %></a>
+                <a href="<%= `${promoUrl}/edit/image` %>" class="btn btn-primary ">Change Image: <%= promoDetails.name %></a>
             </div>
             <div class="card-body text-center">
-                <a href=<%= `${promoUrl}` %> class="btn btn-primary ">View <%= promoName %></a>
-                <a href=<%= `${promoUrl}/delete` %> class="btn btn-primary ">Delete <%= promoName %></a>
+                <a href=<%= `${promoUrl}` %> class="btn btn-primary ">View <%= promoDetails.name %></a>
+                <a href=<%= `${promoUrl}/delete` %> class="btn btn-primary ">Delete <%= promoDetails.name %></a>
             </div>
+            <% } %> 
             <hr>
             <div class="card-body  text-center">
                 <a href="/promos" class="btn btn-primary ">Back To All Promo</a>

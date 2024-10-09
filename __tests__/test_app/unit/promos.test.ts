@@ -771,6 +771,118 @@ describe("POST Create Promo", () => {
     // });
 });
 
+describe('GET Edit Promo View', () => {
+    it('should render the Edit Promo View', async () => {
+        const req: any = {
+            params: {
+                id: mockPromoDetails._id,
+            }
+        };
+
+        const res: any = {
+            locals: {
+                user: 'user@abc.com',
+            },
+            render: jest.fn(),
+        };
+
+        (Promo.findById as jest.Mock) = jest.fn().mockReturnValueOnce({
+            sort: jest.fn().mockReturnThis(),
+            exec: jest.fn().mockReturnValueOnce(mockPromoDetails),
+        });
+
+        await getEditPromo(req, res);
+
+        expect(Promo.findById).toHaveBeenCalledWith(mockPromoDetails._id);
+        expect(res.render).toHaveBeenCalledWith('promoEdit', {
+            title: 'Promo Edit',
+            username: res.locals.user,
+            promoDetails: mockPromoDetails,            
+            promoUrl: `/promos/${mockPromoDetails._id}`,
+            promoCategoryList: promoCategories,
+        });
+    });
+
+    it('should hander error gracefully in the Edit Promo View when a promo Id is not provided', async () => {
+        const req: any = {
+            params: {},
+        };
+
+        const res: any = {
+            locals: {
+                user: 'user@abc.com',
+            },
+            render: jest.fn(),
+        };
+
+        (Promo.findById as jest.Mock) = jest
+            .fn()
+            .mockReturnValueOnce(mockPromoDetails);
+
+        await getEditPromo(req, res);
+
+        expect(Promo.findById).not.toHaveBeenCalled();
+        expect(res.render).toHaveBeenCalledWith('promoEdit', {
+            title: 'Promo Edit',
+            username: res.locals.user,
+            error: new Error('Invalid Promo ID provided!'),
+        });
+    });
+
+    it('should hander error gracefully in the Edit Promo View when an invalid promo Id is provided', async () => {
+        const req: any = {
+            params: { id: 'Invalid Id'},
+        };
+
+        const res: any = {
+            locals: {
+                user: 'user@abc.com',
+            },
+            render: jest.fn(),
+        };
+
+        (Promo.findById as jest.Mock) = jest
+            .fn()
+            .mockReturnValueOnce(mockPromoDetails);
+
+        await getEditPromo(req, res);
+
+        expect(Promo.findById).not.toHaveBeenCalled();
+        expect(res.render).toHaveBeenCalledWith('promoEdit', {
+            title: 'Promo Edit',
+            username: res.locals.user,
+            error: new Error('Invalid Promo ID provided!'),
+        });
+    });
+    
+    it('should hander error gracefully in the Edit Promo View when promo details are not found', async () => {
+        const req: any = {
+            params: { id: mockPromoDetails._id},
+        };
+
+        const res: any = {
+            locals: {
+                user: 'user@abc.com',
+            },
+            render: jest.fn(),
+        };
+
+        (Promo.findById as jest.Mock) = jest.fn().mockReturnValueOnce({
+            sort: jest.fn().mockReturnThis(),
+            exec: jest.fn().mockReturnValueOnce(null),
+        });
+
+        await getEditPromo(req, res);
+
+        expect(Promo.findById).toHaveBeenCalledWith(req.params.id);
+        expect(res.render).toHaveBeenCalledWith('promoEdit', {
+            title: 'Promo Edit',
+            username: res.locals.user,
+            error: new Error('Promo not found!'),
+        });
+    });
+});
+
 describe('GET Delete Promo View', () => {
     it('should render the Delete Promo View', async () => {
         const req: any = {

@@ -95,7 +95,8 @@ const promoSchema = new mongoose.Schema(
     },
     {
         timestamps: true,
-        toJSON: { getters: true },
+        toJSON: { getters: true, virtuals:true, },
+        toObject: { virtuals: true },
     },
 );
 

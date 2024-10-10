@@ -44,6 +44,7 @@
                             <label class="form-label" for="promoName">Promo Name: </label>
                             <input class="form-control" type="text" id="promoName" name="promoName" required minlength="3" maxlength="30" required pattern="^[a-zA-Z0-9.\-_\(\) ]{3,30}$" value="<%= promoDetails.name %>">
                             <div id="promoNameError" aria-live="polite"></div>
+                            <input class="form-control" type="hidden" id="promoId" name="promoId" value="<%= promoDetails.id %>" >
                         </div >
                         <div class="mb-3">
                             <label class="form-label" for="promoCaption">Promo Caption Heading: </label>
@@ -70,6 +71,7 @@
                         <div class="mb-3">
                             <div class="form-label" >Current Promo Image: </div>
                             <img id="currentPromoImage" src="/images/promos/<%= promoDetails.imageFilename %>" class="img-fluid rounded">
+                            <input class="form-control" type="hidden" id="promoImageName" name="promoImageName" value="<%= promoDetails.imageFilename %>" >
                         </div>                         
                         <div class="input-group mb-3">
                             <label class="input-group-text" for="promoStatus">Promo Status</label>

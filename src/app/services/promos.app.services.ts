@@ -78,6 +78,35 @@ export const createPromo = async (promoDetails: {
     return createdPromo;
 };
 
+export const updatePromo = async (promoId:string, promoDetails: {
+    promoName: string;
+    promoCaption: string;
+    promoDescription: string;
+    promoCategory: number;
+    newUploadFileName: any;
+    promoStatus: string;
+    promoStartDate: string;
+    promoEndDate: string;
+}) => {
+    const promoNewData = {
+        name: trimMultipleWhiteSpaces(promoDetails.promoName),
+        caption: {
+            heading: trimMultipleWhiteSpaces(promoDetails.promoCaption),
+            description: trimMultipleWhiteSpaces(promoDetails.promoDescription),
+        },
+        category: trimMultipleWhiteSpaces(
+            promoCategories[promoDetails.promoCategory - 1].name,
+        ),
+        // imageUrl: `promos/carousel/${promoDetails.newUploadFileName}`,
+        // imageFilename: promoDetails.newUploadFileName,
+        status: trimMultipleWhiteSpaces(promoDetails.promoStatus),
+        startsOn: trimMultipleWhiteSpaces(promoDetails.promoStartDate),
+        endsOn: trimMultipleWhiteSpaces(promoDetails.promoEndDate),
+    };
+    const updatedPromo = await Promo.findByIdAndUpdate(promoId, promoNewData);
+    return updatedPromo;
+};
+
 export const getPromoImageName = async (promoId:string) => {
     const result = await Promo.findById(promoId).select({ imageFilename: 1, _id: 0}).exec();
     return result?.imageFilename;

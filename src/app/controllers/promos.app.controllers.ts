@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from 'express';
-import { createPromo, deletePromo, fetchPromoDetails, fetchPromos, getPromoImageName, promoCategories } from '../services/promos.app.services.js';
+import { createPromo, deletePromo, fetchPromoDetails, fetchPromos, getPromoImageName, promoCategories, updatePromo } from '../services/promos.app.services.js';
 import { validateDate, validateDescription, validateEnums, validateFieldsMissingOrEmpty, validateFieldValues, validateIsMongoObjectId, validateName } from '../../utilities/validation.js';
 import { fileURLToPath } from 'url';
 import { replaceFileNameSpacesWithHyphen } from '../../utilities/fileFormatting.js';
@@ -19,6 +19,16 @@ const validatePromoCategory = (categoryValue: string) =>
 
 const validatePromoStatus = (statusValue: string) =>
     validateEnums(['active', 'expired'], statusValue);
+
+const requiredFields = [
+    'promoName',
+    'promoCaption',
+    'promoDescription',
+    'promoCategory',
+    'promoStatus',
+    'promoStartDate',
+    'promoEndDate',
+];
 
 export const getManagePromos = async (req: Request, res: Response): Promise<void> => {
     try {
@@ -108,16 +118,6 @@ export const postCreatePromo = async (
         let uploadedFile: { name: string; mv: (arg0: string, arg1: (error: any) => Promise<void>) => void; };
         let uploadPath: PathLike;
         let isError: Error | string | null = null;
-        
-        const requiredFields = [
-            'promoName',
-            'promoCaption' ,
-            'promoDescription' ,
-            'promoCategory' ,
-            'promoStatus' ,
-            'promoStartDate' ,
-            'promoEndDate'
-        ];
 
         const requiredFieldsAndValidators = [
            { field: 'promoName', validator: validateName, value: req.body.promoName, },
@@ -264,8 +264,82 @@ export const getEditPromo = async (req: Request, res: Response): Promise<void> =
 
 export const postEditPromo = async (req: Request, res: Response): Promise<void> => {
     try {
-        res.send('Not Implemented Yet!');
-    } catch (error) {}
+        // Required fields for Promo
+        const requiredFieldsAndValidators = [
+            { field: 'promoName', validator: validateName, value: req.body.promoName, },
+            { field: 'promoCaption' , validator: validateName, value: req.body.promoCaption, },
+            { field: 'promoDescription' , validator: validateDescription, value: req.body.promoDescription },
+            { field: 'promoCategory' , validator: validatePromoCategory, value: req.body.promoCategory, },
+            { field: 'promoStatus' , validator: validatePromoStatus, value: req.body.promoStatus },
+            { field: 'promoStartDate' , validator: validateDate, value: req.body.promoStartDate },
+            { field: 'promoEndDate', validator: validateDate, value: req.body.promoEndDate, },
+        ];
+
+        // Check if there is a vaild promo id in the request
+        if (!req.params.id || !req.body.promoId || req.params.id !== req.body.promoId || !validateIsMongoObjectId(req.body.promoId)) {
+            // If no or invalid promo id, throw error
+            throw new Error('Invalid Promo ID provided!');
+        } else {
+            // Check if all the fields are provided and non-empty
+            const missingFields: string[] = validateFieldsMissingOrEmpty(
+                requiredFields,
+                req.body,
+            );
+            // Throw error if fields are missing or empty
+            if(missingFields.length !== 0) throw new Error(`Please check ${missingFields}`);
+            
+            // Check if all the fields are valid
+            const invalidFields: string[] = validateFieldValues(requiredFieldsAndValidators);
+
+            // Throw error for invalid fields
+            if(invalidFields.length !==0 ) throw new Error(`Please check ${invalidFields}`);
+
+            // If all fields are provided and Valid
+            else if(missingFields.length === 0 && invalidFields.length === 0) {
+                try {
+                    const updatePromoStatus = await updatePromo(req.body.promoId, req.body);                    
+                    if(updatePromoStatus && updatePromoStatus._id.toString() === req.body.promoId) 
+                        res.redirect(`/promos/${updatePromoStatus._id}`);
+                    else throw new Error('Promo Update Failed!');
+                } catch (err) {
+                    throw err;
+                }
+            }
+        }
+    } catch (error) {
+        console.error(error);
+        if(req.params.id && validateIsMongoObjectId(req.params.id) && req.body.promoId && req.params.id === req.body.promoId ) {
+            // Get Promo Data from Request to send back with error
+            const promoDataFromRequest = {
+                id: req.body?.promoId,
+                name: req.body?.promoName,
+                caption: {
+                    heading: req.body?.promoCaption,
+                    description: req.body?.promoDescription,
+                },
+                status: req.body?.promoStatus,
+                startsOn: req.body?.promoStartDate,
+                endsOn: req.body?.promoEndDate,
+                category: promoCategories[req.body?.promoCategory - 1]?.name,
+                imageFilename: req.body?.promoImageName,
+            };
+
+            res.render('promoEdit', {
+                title: 'Promo Edit',
+                username: res.locals.user,
+                error: error,
+                promoDetails: promoDataFromRequest,
+                promoUrl: `/promos/${req.body.promoId}`,
+                promoCategoryList: promoCategories,
+            });
+        } else {
+            res.render('promoEdit', {
+                title: 'Promo Edit',
+                username: res.locals.user,
+                error: error,
+            });
+        }
+    }
 };
 
 export const getDeletePromo = async (req: Request, res: Response): Promise<void> => {

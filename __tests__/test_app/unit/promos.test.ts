@@ -146,7 +146,7 @@ const mockCreatePromo = {
 const mockPromoDetails = {
   caption: {
     heading: 'Accessories and Peripherals',
-    description: 'Find accessories and peripherals for your computing requirements!'
+    description: 'Find accessories and peripherals for your computing requirements'
   },
   _id: '657fc0d54055729bfa20fb1e',
   name: 'All dummy',
@@ -879,6 +879,247 @@ describe('GET Edit Promo View', () => {
             title: 'Promo Edit',
             username: res.locals.user,
             error: new Error('Promo not found!'),
+        });
+    });
+});
+
+describe('POST Edit Promo View', () => {
+    it('should update promo details and redirect to the Promo Page after successfully updating Promo data', async () => {
+        const req: any = {
+            params: { id: mockPromoDetails._id },
+            body: {
+                promoId: mockPromoDetails._id,
+                promoName: mockPromoDetails.name,
+                promoCaption: mockPromoDetails.caption.heading,
+                promoDescription: mockPromoDetails.caption.description,
+                promoStatus: mockPromoDetails.status,
+                promoStartDate: mockPromoDetails.startsOn,
+                promoEndDate: mockPromoDetails.endsOn,
+                promoCategory: '1',
+            },
+        };
+
+        const res: any = {
+            locals: {
+                user: 'user@abc.com',
+            },
+            render: jest.fn(),
+            redirect: jest.fn(),
+        };
+
+        (Promo.findByIdAndUpdate as jest.Mock) = jest
+            .fn()
+            .mockReturnValueOnce(mockPromoDetails);
+
+        await postEditPromo(req, res);
+
+        expect(res.render).not.toHaveBeenCalled();
+        expect(res.redirect).toHaveBeenCalledWith(`/promos/${mockPromoDetails._id}`);
+    });
+
+    it('should handle error gracefully and display error message when promo update fails due to db error', async () => {
+        const req: any = {
+            params: { id: mockPromoDetails._id },
+            body: {
+                promoId: mockPromoDetails._id,
+                promoName: mockPromoDetails.name,
+                promoCaption: mockPromoDetails.caption.heading,
+                promoDescription: mockPromoDetails.caption.description,
+                promoStatus: mockPromoDetails.status,
+                promoStartDate: mockPromoDetails.startsOn,
+                promoEndDate: mockPromoDetails.endsOn,
+                promoCategory: '1',
+                promoImageName: mockPromoDetails.imageFilename,
+            },
+        };
+
+        const res: any = {
+            locals: {
+                user: 'user@abc.com',
+            },
+            render: jest.fn(),
+            redirect: jest.fn(),
+        };
+
+        (Promo.findByIdAndUpdate as jest.Mock) = jest
+            .fn()
+            .mockReturnValueOnce(null);
+
+        await postEditPromo(req, res);
+
+        expect(res.render).toHaveBeenCalledWith('promoEdit', {
+            title: 'Promo Edit',
+            username: res.locals.user,
+            error: new Error ('Promo Update Failed!'),
+            promoDetails: {
+                caption: {
+                    description: req.body.promoDescription,
+                    heading: req.body.promoCaption,
+                },
+                category: mockPromoDetails.category,
+                endsOn: req.body.promoEndDate,
+                id: req.body.promoId,                
+                name: req.body.promoName,
+                startsOn: req.body.promoStartDate,
+                status: req.body.promoStatus,
+                imageFilename: req.body.promoImageName
+            },
+            promoUrl: `/promos/${req.body.promoId}`,
+            promoCategoryList: promoCategories,
+        });
+        expect(res.redirect).not.toHaveBeenCalled();
+    });
+
+    it('should hander error gracefully in the POST Edit Promo when a promo Id is not provided', async () => {
+        const req: any = {
+            params: {},
+            body: {},
+        };
+
+        const res: any = {
+            locals: {
+                user: 'user@abc.com',
+            },
+            render: jest.fn(),
+        };
+
+        (Promo.findByIdAndUpdate as jest.Mock) = jest
+            .fn()
+            .mockReturnValueOnce(mockPromoDetails);
+
+        await postEditPromo(req, res);
+
+        expect(Promo.findByIdAndUpdate).not.toHaveBeenCalled();
+        expect(res.render).toHaveBeenCalledWith('promoEdit', {
+            title: 'Promo Edit',
+            username: res.locals.user,
+            error: new Error('Invalid Promo ID provided!'),
+        });
+    });
+
+    it('should hander error gracefully in the POST Edit Promo when an invalid promo Id is provided', async () => {
+        const req: any = {
+            params: { id: 'Invalid Promo Id' },
+            body: { promoId: 'Invalid Promo Id' },
+        };
+
+        const res: any = {
+            locals: {
+                user: 'user@abc.com',
+            },
+            render: jest.fn(),
+        };
+
+        (Promo.findByIdAndUpdate as jest.Mock) = jest
+            .fn()
+            .mockReturnValueOnce(mockPromoDetails);
+
+        await postEditPromo(req, res);
+
+        expect(Promo.findByIdAndUpdate).not.toHaveBeenCalled();
+        expect(res.render).toHaveBeenCalledWith('promoEdit', {
+            title: 'Promo Edit',
+            username: res.locals.user,
+            error: new Error('Invalid Promo ID provided!'),
+        });
+    });
+
+    it('should hander error gracefully and render error messages in the POST Edit Promo when fields are missing', async () => {
+        const req: any = {
+            params: { id: mockPromoDetails._id },
+            body: { 
+                promoId: mockPromoDetails._id
+            },
+        };
+
+        const res: any = {
+            locals: {
+                user: 'user@abc.com',
+            },
+            render: jest.fn(),
+        };
+
+        (Promo.findByIdAndUpdate as jest.Mock) = jest
+            .fn()
+            .mockReturnValueOnce(mockPromoDetails);
+
+        await postEditPromo(req, res);
+
+        expect(Promo.findByIdAndUpdate).not.toHaveBeenCalled();
+        expect(res.render).toHaveBeenCalledWith('promoEdit', {
+            title: 'Promo Edit',
+            username: res.locals.user,
+            error: new Error(
+                'Please check  promoName, promoCaption, promoDescription, promoCategory, promoStatus, promoStartDate, promoEndDate',
+            ),
+            promoCategoryList: promoCategories,
+            promoDetails: {
+                id: req.body?.promoId,
+                name: req.body?.promoName,
+                caption: {
+                    heading: req.body?.promoCaption,
+                    description: req.body?.promoDescription,
+                },
+                status: req.body?.promoStatus,
+                startsOn: req.body?.promoStartDate,
+                endsOn: req.body?.promoEndDate,
+                category: promoCategories[req.body?.promoCategory - 1]?.name,
+                imageFilename: req.body?.promoImageName,
+            },
+            promoUrl: `/promos/${req.body.promoId}`,
+        });
+    });
+
+    it('should hander error gracefully and render error messages in the POST Edit Promo when fields are invalid', async () => {
+        const req: any = {
+            params: { id: mockPromoDetails._id },
+            body: {
+                promoId: mockPromoDetails._id,
+                promoName: 'a     ',
+                promoCaption: 'a      ',
+                promoDescription: 'a     ',
+                promoStatus: ' a    ',
+                promoStartDate: 'a     ',
+                promoEndDate: '  a   ',
+                promoCategory: 'a',
+            },
+        };
+
+        const res: any = {
+            locals: {
+                user: 'user@abc.com',
+            },
+            render: jest.fn(),
+        };
+
+        (Promo.findByIdAndUpdate as jest.Mock) = jest
+            .fn()
+            .mockReturnValueOnce(mockPromoDetails);
+
+        await postEditPromo(req, res);
+
+        expect(Promo.findByIdAndUpdate).not.toHaveBeenCalled();
+        expect(res.render).toHaveBeenCalledWith('promoEdit', {
+            title: 'Promo Edit',
+            username: res.locals.user,
+            error: new Error(
+                'Please check  promoName, promoCaption, promoDescription, promoCategory, promoStatus, promoStartDate, promoEndDate',
+            ),
+            promoCategoryList: promoCategories,
+            promoDetails: {
+                id: req.body?.promoId,
+                name: req.body?.promoName,
+                caption: {
+                    heading: req.body?.promoCaption,
+                    description: req.body?.promoDescription,
+                },
+                status: req.body?.promoStatus,
+                startsOn: req.body?.promoStartDate,
+                endsOn: req.body?.promoEndDate,
+                category: promoCategories[req.body?.promoCategory - 1]?.name,
+                imageFilename: req.body?.promoImageName,
+            },
+            promoUrl: `/promos/${req.body.promoId}`,
         });
     });
 });

@@ -37,22 +37,23 @@
                 <% } %>
             </div>
 
+            <% if(locals.promoData && promoData !=='' && promoData !== undefined) { %>
             <div class="container w-50 m-auto">
                 <form method='POST' action="" encType="multipart/form-data">
                     <fieldset>
                         <legend class="mb-4 ">Upload Promo Image</legend>
                         <div class="mb-3">
-                            <div class="form-label" ><strong> Promo Name:</strong> <%= promoName %></div>
+                            <div class="form-label" ><strong> Promo Name:</strong> <%= promoData.promoName %></div>
                         </div >
                         <div class="mb-3">
-                            <div class="form-label" ><strong> Promo Caption:</strong> <%= promoCaption %></div>
+                            <div class="form-label" ><strong> Promo Caption:</strong> <%= promoData.promoCaption %></div>
                         </div >
                         <div class="mb-3">
-                            <div class="form-label" ><strong> Promo Description:</strong> <%= promoDescription %></div>
+                            <div class="form-label" ><strong> Promo Description:</strong> <%= promoData.promoDescription %></div>
                         </div >
                         <div class="mb-3">
                             <div class="form-label" ><strong>Current Promo Image:</strong> </div>
-                            <img id="currentpromoImage" src="/images/promos/<%= promoImage %> " class="img-fluid rounded">                            
+                            <img id="currentpromoImage" src="/images/promos/<%= promoData.promoImage %> " class="img-fluid rounded">                            
                         </div>
                         <div class="mb-3">
                             <label class="form-label" for="promoImage"><strong>Upload New promo Image: </strong></label>
@@ -64,15 +65,17 @@
                         <button type="submit" class="btn btn-primary">Update Promo Image</button>
                     </div>
                 </form>
+                
             </div>
             <hr>
             <div class="card-body text-center">
-                <a href="<%= `${promoUrl}/edit` %>" class="btn btn-primary ">Edit <%= promoName %></a>
+                <a href="<%= `${promoData.promoUrl}/edit` %>" class="btn btn-primary ">Edit <%= promoData.promoName %></a>
             </div>
             <div class="card-body text-center">
-                <a href=<%= `${promoUrl}` %> class="btn btn-primary ">View <%= promoName %></a>
-                <a href=<%= `${promoUrl}/delete` %> class="btn btn-primary ">Delete <%= promoName %></a>
+                <a href=<%= `${promoData.promoUrl}` %> class="btn btn-primary ">View <%= promoData.promoName %></a>
+                <a href=<%= `${promoData.promoUrl}/delete` %> class="btn btn-primary ">Delete <%= promoData.promoName %></a>
             </div>
+            <% } %>
             <hr>
             <div class="card-body  text-center">
                 <a href="/promos" class="btn btn-primary ">Back To All Promos</a>

@@ -32,4 +32,8 @@ promosAppRouter.get('/:id/edit', redirectToLogin, promosControllers.getEditPromo
 // POST request to Edit Promo
 promosAppRouter.post('/:id/edit', redirectToLogin, promosControllers.postEditPromo);
 
+promosAppRouter.get('/:id/edit/image', redirectToLogin, promosControllers.getEditPromoImage);
+
+promosAppRouter.post('/:id/edit/image', redirectToLogin, promosControllers.postEditPromoImage);
+
 export default promosAppRouter;

@@ -405,3 +405,48 @@ export const postDeletePromo = async (req: Request, res: Response): Promise<void
         });
     }
 };
+
+export const getEditPromoImage = async (req: Request, res: Response): Promise<void> => {
+    try {
+        // Check if there is a vaild promo id in the request
+        if (!req.params.id || !validateIsMongoObjectId(req.params.id)) {
+            // If no or invalid promo id, throw error
+            throw new Error('Invalid promo ID provided!');
+        } else {
+            // Fetch promo details
+            const promoDetails = await fetchPromoDetails(req.params.id);
+            // If promo details
+            if (
+                promoDetails &&
+                promoDetails !== null &&
+                promoDetails._id.toString() === req.params.id
+            ) {
+                res.render('promoImageEdit', {
+                    title: 'Promo Edit Image',
+                    username: res.locals.user,
+                    promoData: { 
+                        promoName: promoDetails.name,
+                        promoImage: promoDetails.imageFilename,
+                        promoCaption: promoDetails.caption?.heading,
+                        promoDescription: promoDetails.caption?.description,
+                        promoUrl: `/promos/${promoDetails._id}`,
+                    }
+                });
+            } else throw new Error('Promo not found!'); // Otherwise throw error
+        }
+    } catch (error) {
+        res.render('promoImageEdit', {
+            title: 'Promo Edit Image',
+            username: res.locals.user,
+            error: error,            
+        });
+    }
+};
+
+export const postEditPromoImage = async (req: Request, res: Response): Promise<void> => {
+    try {
+        res.send('Not implemented yet!');
+    } catch (error) {
+        
+    }
+};

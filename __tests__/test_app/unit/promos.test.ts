@@ -9,6 +9,7 @@ import {
     postEditPromo,
     getDeletePromo,
     postDeletePromo,
+    getEditPromoImage,
 } from '../../../src/app/controllers/promos.app.controllers';
 import { deletePromo, getPromoImageName, promoCategories } from '../../../src/app/services/promos.app.services';
 import fs, { unlink } from 'node:fs';
@@ -1359,6 +1360,126 @@ describe('POST Delete Promo', () => {
             title: 'Promo Delete',
             username: res.locals.user,
             error: new Error('Deletion Failed!'),
+        });
+    });
+});
+
+describe('GET Edit Promo Image', () => {
+    it('should render the Edit Promo Image view when a valid id is provided', async () => {
+        const req: any = {
+            params: {
+                id: mockPromoDetails._id,
+            }
+        };
+
+        const res: any = {
+            locals: {
+                user: 'user@abc.com',
+            },
+            render: jest.fn(),
+        };
+
+        (Promo.findById as jest.Mock) = jest.fn().mockReturnValueOnce({
+            sort: jest.fn().mockReturnThis(),
+            exec: jest.fn().mockReturnValueOnce(mockPromoDetails),
+        });
+
+        await getEditPromoImage(req, res);
+
+        expect(res.render).toHaveBeenCalledWith('promoImageEdit', {
+            title: 'Promo Edit Image',
+            username: res.locals.user,
+            promoData: { 
+                promoName: mockPromoDetails.name,
+                promoImage: mockPromoDetails.imageFilename,
+                promoCaption: mockPromoDetails.caption?.heading,
+                promoDescription: mockPromoDetails.caption?.description,
+                promoUrl: `/promos/${mockPromoDetails._id}`,
+            }
+        });
+    });
+
+    it('should render the error messages on Edit Promo Image view when no promo id is provided', async () => {
+        const req: any = {
+            params: {},
+        };
+
+        const res: any = {
+            locals: {
+                user: 'user@abc.com',
+            },
+            render: jest.fn(),
+        };
+
+        (Promo.findById as jest.Mock) = jest.fn().mockReturnValueOnce({
+            sort: jest.fn().mockReturnThis(),
+            exec: jest.fn().mockReturnValueOnce(mockPromoDetails),
+        });
+
+        await getEditPromoImage(req, res);
+
+        expect(Promo.findById).not.toHaveBeenCalled();
+        expect(res.render).toHaveBeenCalledWith('promoImageEdit', {
+            title: 'Promo Edit Image',
+            username: res.locals.user,
+            error: new Error('Invalid promo ID provided!'),
+        });
+    });
+
+    it('should render the error messages on Edit Promo Image view when an valid id is provided', async () => {
+        const req: any = {
+            params: {
+                id: 'invalid id',
+            },
+        };
+
+        const res: any = {
+            locals: {
+                user: 'user@abc.com',
+            },
+            render: jest.fn(),
+        };
+
+        (Promo.findById as jest.Mock) = jest.fn().mockReturnValueOnce({
+            sort: jest.fn().mockReturnThis(),
+            exec: jest.fn().mockReturnValueOnce(mockPromoDetails),
+        });
+
+        await getEditPromoImage(req, res);
+        
+        expect(Promo.findById).not.toHaveBeenCalled();
+        expect(res.render).toHaveBeenCalledWith('promoImageEdit', {
+            title: 'Promo Edit Image',
+            username: res.locals.user,
+            error: new Error('Invalid promo ID provided!'),
+        });
+    });
+
+    it('should render the error messages on Edit Promo Image view when a promo is not found', async () => {
+        const req: any = {
+            params: {
+                id: mockPromoDetails._id,
+            },
+        };
+
+        const res: any = {
+            locals: {
+                user: 'user@abc.com',
+            },
+            render: jest.fn(),
+        };
+
+        (Promo.findById as jest.Mock) = jest.fn().mockReturnValueOnce({
+            sort: jest.fn().mockReturnThis(),
+            exec: jest.fn().mockReturnValueOnce(null),
+        });
+
+        await getEditPromoImage(req, res);
+        
+        expect(res.render).toHaveBeenCalledWith('promoImageEdit', {
+            title: 'Promo Edit Image',
+            username: res.locals.user,
+            error: new Error('Promo not found!'),
         });
     });
 });

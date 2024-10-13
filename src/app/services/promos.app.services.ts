@@ -96,9 +96,7 @@ export const updatePromo = async (promoId:string, promoDetails: {
         },
         category: trimMultipleWhiteSpaces(
             promoCategories[promoDetails.promoCategory - 1].name,
-        ),
-        // imageUrl: `promos/carousel/${promoDetails.newUploadFileName}`,
-        // imageFilename: promoDetails.newUploadFileName,
+        ),        
         status: trimMultipleWhiteSpaces(promoDetails.promoStatus),
         startsOn: trimMultipleWhiteSpaces(promoDetails.promoStartDate),
         endsOn: trimMultipleWhiteSpaces(promoDetails.promoEndDate),

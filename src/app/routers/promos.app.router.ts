@@ -34,6 +34,6 @@ promosAppRouter.post('/:id/edit', redirectToLogin, promosControllers.postEditPro
 
 promosAppRouter.get('/:id/edit/image', redirectToLogin, promosControllers.getEditPromoImage);
 
-promosAppRouter.post('/:id/edit/image', redirectToLogin, promosControllers.postEditPromoImage);
+promosAppRouter.post('/:id/edit/image', redirectToLogin, fileUpload(), promosControllers.postEditPromoImage);
 
 export default promosAppRouter;

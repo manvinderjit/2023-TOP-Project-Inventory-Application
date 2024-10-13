@@ -10,6 +10,7 @@ import {
     getDeletePromo,
     postDeletePromo,
     getEditPromoImage,
+    postEditPromoImage,
 } from '../../../src/app/controllers/promos.app.controllers';
 import { deletePromo, getPromoImageName, promoCategories } from '../../../src/app/services/promos.app.services';
 import fs, { unlink } from 'node:fs';
@@ -1426,7 +1427,7 @@ describe('GET Edit Promo Image', () => {
         });
     });
 
-    it('should render the error messages on Edit Promo Image view when an valid id is provided', async () => {
+    it('should render the error messages on Edit Promo Image view when an invalid id is provided', async () => {
         const req: any = {
             params: {
                 id: 'invalid id',
@@ -1480,6 +1481,199 @@ describe('GET Edit Promo Image', () => {
             title: 'Promo Edit Image',
             username: res.locals.user,
             error: new Error('Promo not found!'),
+        });
+    });
+});
+
+
+describe('POST Edit Promo Image', () => {
+    it('should update the promo image and redirect succesfully', async () => {
+        const req: any = {
+            params: {
+                id: mockPromoDetails._id,
+            },
+            files: {
+                promoImage: {
+                    name: 'image.png',
+                    mv: jest.fn((path, callback: any) => callback(null)),
+                },
+            },
+        };
+
+        const res: any = {
+            locals: {
+                user: 'user@abc.com',
+            },
+            render: jest.fn(),
+            redirect: jest.fn(),
+        };
+
+        (Promo.findById as jest.Mock) = jest.fn().mockReturnValueOnce({
+            sort: jest.fn().mockReturnThis(),
+            exec: jest.fn().mockReturnValueOnce(mockPromoDetails),
+        });
+
+        await postEditPromoImage(req, res);
+        expect(res.redirect).toHaveBeenCalledWith(
+            `/promos/${req.params.id}/edit/image`,
+        );
+    });
+
+    it('should render the error messages on POST Edit Promo Image when no promo id is provided', async () => {
+        const req: any = {
+            params: {},
+        };
+
+        const res: any = {
+            locals: {
+                user: 'user@abc.com',
+            },
+            render: jest.fn(),
+        };
+
+        (Promo.findById as jest.Mock) = jest.fn().mockReturnValueOnce({
+            sort: jest.fn().mockReturnThis(),
+            exec: jest.fn().mockReturnValueOnce(mockPromoDetails),
+        });
+
+        await postEditPromoImage(req, res);
+        
+        expect(res.render).toHaveBeenCalledWith('promoImageEdit', {
+            title: 'Promo Edit Image',
+            username: res.locals.user,
+            error: new Error('Invalid promo ID provided!'),
+        });
+    });
+
+    it('should render the error messages on POST Edit Promo Image when an invalid id is provided', async () => {
+        const req: any = {
+            params: {
+                id: 'invalid id',
+            },
+        };
+
+        const res: any = {
+            locals: {
+                user: 'user@abc.com',
+            },
+            render: jest.fn(),
+        };
+
+        (Promo.findById as jest.Mock) = jest.fn().mockReturnValueOnce({
+            sort: jest.fn().mockReturnThis(),
+            exec: jest.fn().mockReturnValueOnce(mockPromoDetails),
+        });
+
+        await postEditPromoImage(req, res);
+
+        expect(Promo.findById).not.toHaveBeenCalled();
+        expect(res.render).toHaveBeenCalledWith('promoImageEdit', {
+            title: 'Promo Edit Image',
+            username: res.locals.user,
+            error: new Error('Invalid promo ID provided!'),
+        });
+    });
+
+    it('should render the error messages on POST Edit Promo Image when no image file is provided', async () => {
+        const req: any = {
+            params: {
+                id: mockPromoDetails._id,
+            },
+        };
+
+        const res: any = {
+            locals: {
+                user: 'user@abc.com',
+            },
+            render: jest.fn(),
+        };
+
+        (Promo.findById as jest.Mock) = jest.fn().mockReturnValueOnce({
+            sort: jest.fn().mockReturnThis(),
+            exec: jest.fn().mockReturnValueOnce(mockPromoDetails),
+        });
+
+        await postEditPromoImage(req, res);
+        
+        expect(res.render).toHaveBeenCalledWith('promoImageEdit', {
+            title: 'Promo Edit Image',
+            username: res.locals.user,
+            error: new Error('No image uploaded!'),
+            promoData: {
+                promoName: mockPromoDetails.name,
+                promoImage: mockPromoDetails.imageFilename,
+                promoCaption: mockPromoDetails.caption?.heading,
+                promoDescription: mockPromoDetails.caption?.description,
+                promoUrl: `/promos/${mockPromoDetails._id}`,
+            },
+        });
+    });
+
+    it('should render the error if it does not find promo details while uploading file', async () => {
+        const req: any = {
+            params: {
+                id: mockPromoDetails._id,
+            },
+            files: {
+                promoImage: {
+                    name: 'image.png',
+                    mv: jest.fn((path, callback: any) => callback(null)),
+                },
+            },
+        };
+
+        const res: any = {
+            locals: {
+                user: 'user@abc.com',
+            },
+            render: jest.fn(),
+            redirect: jest.fn(),
+        };
+
+        (Promo.findById as jest.Mock) = jest.fn().mockReturnValueOnce({
+            sort: jest.fn().mockReturnThis(),
+            exec: jest.fn().mockReturnValueOnce(null),
+        });
+
+        await postEditPromoImage(req, res);
+        expect(res.render).toHaveBeenCalledWith('promoImageEdit', {
+            title: 'Promo Edit Image',
+            username: res.locals.user,
+            error: new Error('File upload failed!'),            
+        });
+    });
+
+    it('should render the error if it fails tp upload file', async () => {
+        const req: any = {
+            params: {
+                id: mockPromoDetails._id,
+            },
+            files: {
+                promoImage: {
+                    name: 'image.png',
+                    mv: jest.fn((path, callback: any) => callback(null)),
+                },
+            },
+        };
+
+        const res: any = {
+            locals: {
+                user: 'user@abc.com',
+            },
+            render: jest.fn(),
+            redirect: jest.fn(),
+        };
+
+        (Promo.findById as jest.Mock) = jest.fn().mockReturnValueOnce({
+            sort: jest.fn().mockReturnThis(),
+            exec: jest.fn().mockReturnValueOnce(null),
+        });
+
+        await postEditPromoImage(req, res);
+        expect(res.render).toHaveBeenCalledWith('promoImageEdit', {
+            title: 'Promo Edit Image',
+            username: res.locals.user,
+            error: new Error('File upload failed!'),
         });
     });
 });

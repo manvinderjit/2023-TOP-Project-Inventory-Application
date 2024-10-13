@@ -445,8 +445,81 @@ export const getEditPromoImage = async (req: Request, res: Response): Promise<vo
 
 export const postEditPromoImage = async (req: Request, res: Response): Promise<void> => {
     try {
-        res.send('Not implemented yet!');
+        // Check if there is a vaild promo id in the request
+        if (!req.params.id || !validateIsMongoObjectId(req.params.id)) {
+            // If no or invalid promo id, throw error
+            throw new Error('Invalid promo ID provided!');
+        }
+        // Check if a file was uploaded
+        else if (!req.files || Object.keys(req.files).length === 0) {
+            // Fetch promo details
+            const promoDetails = await fetchPromoDetails(req.params.id);                   
+            
+            if (
+                promoDetails &&
+                promoDetails !== null &&
+                promoDetails._id.toString() === req.params.id
+            ) {
+                res.render('promoImageEdit', {
+                    title: 'Promo Edit Image',
+                    username: res.locals.user,
+                    error: new Error('No image uploaded!'),
+                    promoData:
+                        promoDetails &&
+                        promoDetails !== null &&
+                        promoDetails._id.toString() === req.params.id
+                            ? {
+                                    promoName: promoDetails.name,
+                                    promoImage: promoDetails.imageFilename,
+                                    promoCaption: promoDetails.caption?.heading,
+                                    promoDescription:
+                                        promoDetails.caption?.description,
+                                    promoUrl: `/promos/${promoDetails._id}`,
+                              }
+                            : '',
+                });
+            }
+        } else {
+            // Try uploading the image file
+            // The name of the input field (i.e. "promoImage") is used to retrieve the uploaded file
+            const reqFiles = (req as ExpressFileUploadRequest).files;
+            const uploadedFile = reqFiles.promoImage;            
+            let uploadPath: PathLike;
+            
+            const promoDetails = await fetchPromoDetails(req.params.id);
+            
+            if (!promoDetails) throw new Error('File upload failed!');
+            // Remove spaces from image name
+            const newUploadFileName = replaceFileNameSpacesWithHyphen(
+                uploadedFile.name,
+                promoDetails.name,
+            );
+            
+            // Set upload path
+            uploadPath = staticsPath + '/images/promos/' + newUploadFileName;
+
+            // Upload files on the server
+            await uploadedFile.mv(uploadPath, async function (err: any) {
+                if(err) {
+                    console.error(err);
+                    res.render('promoImageEdit', {
+                        title: 'Edit Promo Image',
+                        username: res.locals.user,
+                        error: 'File upload failed!',
+                        promoName: req.body.promoName,
+                        promoImage: req.body.imageFilename,
+                        promoUrl: req.body.promoUrl,
+                    });
+                } else {                    
+                    res.redirect(`/promos/${req.params.id}/edit/image`);
+                }
+            })
+        }
     } catch (error) {
-        
+        res.render('promoImageEdit', {
+            title: 'Promo Edit Image',
+            username: res.locals.user,
+            error: error,
+        });
     }
 };

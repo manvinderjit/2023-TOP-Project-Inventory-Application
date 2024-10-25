@@ -25,3 +25,13 @@ interface PromoEditDetails extends Document {
     url: string;
     id: string;
 }
+
+export interface ProductDetails {
+    _id: Types.ObjectId;
+    name: string;
+    description: string;
+    category: Types.ObjectId;
+    price: number;
+    stock: number;
+    imageFilename?: string | null;
+};

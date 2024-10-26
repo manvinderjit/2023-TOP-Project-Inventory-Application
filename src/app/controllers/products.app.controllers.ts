@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from 'express';
 import { fetchCategories } from '../services/category.app.services.js';
-import { fetchProducts } from '../services/products.app.services.js';
+import { fetchProduct, fetchProducts } from '../services/products.app.services.js';
 import { CategoryDetailsDocument, ProductDetails } from '../../types/types.js';
 import { validateIsMongoObjectId } from '../../utilities/validation.js';
 
@@ -37,8 +37,33 @@ export const getManageProducts = async (req: Request, res: Response): Promise<vo
     };
 };
 
-export const postManageProducts = (req: Request, res: Response) => {
-    res.send('Not implemented yet');
+export const getProductDetails = async (req: Request, res: Response): Promise<void> => {
+    try {
+        // Check for a product id in the request
+        if (!req.params.id || !validateIsMongoObjectId(req.params.id)) {
+            throw new Error('Product not found!');
+        } else {
+            // Get the product details
+            const productDetails: ProductDetails | null = await fetchProduct(req.params.id);
+
+            if(productDetails && String(productDetails._id) === req.params.id) {
+                res.render('productView', {
+                    title: 'Product Details',
+                    username: res.locals.user,
+                    productDetails: productDetails,
+                });
+                
+            } else { // If product not found
+                throw new Error('Product not found!');
+            };
+        };  
+    } catch (error) {
+        res.render('productView', {
+            title: 'Product Details',
+            username: res.locals.user,
+            error: error,
+        });
+    };
 };
 
 export const getCreateProducts = (req: Request, res: Response) => {
@@ -46,10 +71,6 @@ export const getCreateProducts = (req: Request, res: Response) => {
 };
 
 export const postCreateProducts = (req: Request, res: Response) => {
-    res.send('Not implemented yet');
-};
-
-export const getProductDetails = (req: Request, res: Response) => {
     res.send('Not implemented yet');
 };
 

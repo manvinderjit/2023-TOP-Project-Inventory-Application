@@ -28,7 +28,7 @@
 
                 <% if(locals.error && error !=='' && error !== undefined) { %>
                     <div class="alert alert-warning w-50 m-auto" role="alert">
-                        Error: <%= error %>
+                        <%= error %>
                     </div>        
                 <% } else if (locals.success && success !=='' && success !== undefined) { %>
                     <div class="alert alert-success w-50 m-auto" role="alert">
@@ -82,7 +82,7 @@
                         <% } %>
                         <hr>
                         <div class="card-body  text-center">
-                            <a href="/allProducts" class="btn btn-primary ">Back To All Products</a>
+                            <a href="/products" class="btn btn-primary ">Back To All Products</a>
                         </div>
                     </div>
                 </div>

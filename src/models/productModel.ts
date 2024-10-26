@@ -59,7 +59,7 @@ productSchema.index({ name: 'text', description: 'text' });
 // Virtual for product's URL
 const productURL = productSchema.virtual('url');
 productURL.get(function () {
-    return `/product/${this._id}`;
+    return `/products/${this._id}`;
 });
 
 const Product = mongoose.model('Product', productSchema);

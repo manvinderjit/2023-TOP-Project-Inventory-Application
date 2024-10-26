@@ -15,3 +15,10 @@ export const fetchProducts = async (productCategory: string | null | undefined):
 
     return products;
 };
+
+export const fetchProduct = async (productId: string): Promise<ProductDetails | null> => {
+    const productDetails: ProductDetails | null = await Product.findById(productId)
+        .populate('category')
+        .exec();
+    return productDetails;
+};

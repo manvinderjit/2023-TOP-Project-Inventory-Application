@@ -1,8 +1,11 @@
 import { jest } from '@jest/globals';
 import Product from '../../../src/models/productModel';
 import Category from '../../../src/models/categoryModel';
-import { getManageProducts } from '../../../src/app/controllers/products.app.controllers';
-import { getProductDetails } from '../../../src/app/controllers/products.app.controllers';
+import {
+    getManageProducts,
+    getProductDetails,
+    getCreateProducts,
+} from '../../../src/app/controllers/products.app.controllers';
 
 const dataMockCategories = [
     {
@@ -404,6 +407,73 @@ describe('Product View', () => {
             title: 'Product Details',
             username: res.locals.user,
             error: new Error('Product not found!'),
+        });
+    });
+});
+
+describe("Create Product", () => {
+    it("should render the GET Create Product view", async() => {
+        const req: any = {};
+
+        const res: any = {
+            locals: {
+                user: 'user@abc.com',
+            },
+            render: jest.fn(),
+        };
+
+        (Category.find as jest.Mock) = jest.fn().mockReturnValueOnce({
+            select: jest.fn().mockReturnThis(),
+            sort: jest.fn().mockReturnThis(),
+            exec: jest.fn().mockReturnValueOnce(dataMockCategories),
+        });
+
+        await getCreateProducts(req, res);
+
+        expect(res.render).toHaveBeenCalledWith('productCreate', {
+            username: res.locals.user,
+            title: 'Create Product',
+            productName: '',
+            productDescription: '',
+            productCategory: '',
+            productPrice: 0.0,
+            productStock: 0,
+            categoryList: dataMockCategories,
+        }); 
+    });
+
+    it('should handle errors gracefully and render messages when error occurs in GET Create Product view', async () => {
+        const req: any = {};
+
+        const res: any = {
+            locals: {
+                user: 'user@abc.com',
+            },
+            render: jest.fn(),
+        };
+
+        (Category.find as jest.Mock) = jest.fn().mockReturnValueOnce({
+            select: jest.fn().mockReturnThis(),
+            sort: jest.fn().mockReturnThis(),
+            exec: jest.fn().mockReturnValueOnce(dataMockCategories),
+        });
+
+        jest.spyOn(res, 'render').mockImplementationOnce(() => {
+            throw new Error('Test Error');
+        });
+
+        await getCreateProducts(req, res);
+
+        expect(res.render).toHaveBeenCalledWith('productCreate', {
+            username: res.locals.user,
+            title: 'Create Product',
+            error: new Error('Test Error'),
+            productName: '',
+            productDescription: '',
+            productCategory: '',
+            productPrice: 0.0,
+            productStock: 0,
+            categoryList: dataMockCategories,
         });
     });
 });

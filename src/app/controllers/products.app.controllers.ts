@@ -66,8 +66,35 @@ export const getProductDetails = async (req: Request, res: Response): Promise<vo
     };
 };
 
-export const getCreateProducts = (req: Request, res: Response) => {
-    res.send('Not implemented yet');
+export const getCreateProducts = async (req: Request, res: Response) => {
+    // Get all categories for selecting products based on categories
+    const productCategories: CategoryDetailsDocument[] = await fetchCategories();
+
+    try {
+        res.render('productCreate', {
+            username: res.locals.user,
+            title: 'Create Product',            
+            productName: '',
+            productDescription: '',
+            productCategory: '',
+            productPrice: 0.0,
+            productStock: 0,
+            categoryList: productCategories,
+        });
+    } catch (error) {
+        console.error(error);
+        res.render('productCreate', {
+            username: res.locals.user,
+            title: 'Create Product',
+            error: error,
+            productName: '',
+            productDescription: '',
+            productCategory: '',
+            productPrice: 0.0,
+            productStock: 0,
+            categoryList: productCategories,
+        });
+    };
 };
 
 export const postCreateProducts = (req: Request, res: Response) => {

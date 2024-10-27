@@ -23,14 +23,14 @@
         <div class="container">
             <h2 class="py-2 text-center ">Add a New Product</h2>
             <div class="card-body text-center">
-                <a href="/allproducts/create" class="btn btn-primary ">Add A New Product </a>
+                <a href="/products/create" class="btn btn-primary ">Add A New Product </a>
             </div>
         </div>
         <hr>
         <div class="container">
             <h2 class="py-2 text-center ">All Products</h2>            
             <div class="row row-cols-1 row-cols-md-3 g-4 m-3">
-                <form method="POST" class="w-50 m-auto">
+                <form method="POST" action="/products" class="w-50 m-auto">
                     <div class="input-group mb-3 m-auto">
                         <label class="input-group-text" for="productCategory">Category</label>
                         <select class="form-select" id="productCategory" name="productCategory">

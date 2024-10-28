@@ -28,7 +28,7 @@
 
                 <% if(locals.error && error !=='' && error !== undefined) { %>
                     <div class="alert alert-warning w-50 m-auto" role="alert">
-                        Error: <%= error %>
+                        <%= error %>
                     </div>        
                 <% } else if (locals.success && success !=='' && success !== undefined) { %>
                     <div class="alert alert-success w-50 m-auto" role="alert">
@@ -37,18 +37,19 @@
                 <% } %>
             </div>
 
+            <% if(locals.productDetails) { %> 
             <div class="container w-50 m-auto">
                 <form method='POST' action="" >
                     <fieldset>
                         <legend class="mb-4 ">Enter Product Details</legend>
                         <div class="mb-3">
                             <label class="form-label" for="productName">Product Name: </label>
-                            <input class="form-control" type="text" id="productName" name="productName" required minlength="3" maxlength="30" required pattern="^[a-zA-Z0-9.\-_\(\) ]{3,30}$" value="<%= productName %>">
+                            <input class="form-control" type="text" id="productName" name="productName" required minlength="3" maxlength="30" required pattern="^[a-zA-Z0-9.\-_\(\) ]{3,30}$" value="<%= productDetails.productName %>">
                             <div id="productNameError" aria-live="polite"></div>
                         </div >
                         <div class="mb-3">
                             <label class="form-label" for="productDescription">Product Description: </label>
-                            <textarea class="form-control" type="text" id="productDescription" name="productDescription" minlength="5" maxlength="100" required><%= productDescription %></textarea>
+                            <textarea class="form-control" type="text" id="productDescription" name="productDescription" minlength="5" maxlength="100" required><%= productDetails.productDescription %></textarea>
                             <div id="productDescriptionError" aria-live="polite"></div>
                         </div >
                         <div class="input-group mb-3">
@@ -57,7 +58,7 @@
                                 <option value='choose'>Choose Category...</option>
                                 <% if(locals.categoryList && categoryList.length > 0) { %>
                                     <% categoryList.forEach((category=> { %>
-                                        <option value='<%= category._id %>' <% if(productCategory && category.name == productCategory.name) { %> selected <% } %> ><%= category.name %></option>
+                                        <option value='<%= category._id %>' <% if(productDetails.productCategory && category.name == productDetails.productCategory.name) { %> selected <% } %> ><%= category.name %></option>
                                     <% })) %>
                                 <% } %>
                             </select>
@@ -65,17 +66,17 @@
                         </div>
                         <div class="mb-3">
                             <label class="form-label" for="productPrice">Product Price: </label>
-                            <input class="form-control" type="number" id="productPrice" name="productPrice" min="0.00" step="0.01" required value="<%= productPrice %>"/>
+                            <input class="form-control" type="number" id="productPrice" name="productPrice" min="0.00" step="0.01" required value="<%= productDetails.productPrice %>"/>
                             <div id="productPriceError" aria-live="polite"></div>
                         </div>
                         <div class="mb-3">
                             <label class="form-label" for="productStock">Product Stock: </label>
-                            <input class="form-control"  type="number" id="productStock" name="productStock" min="0" step="1" required value="<%= productStock %>"/>
+                            <input class="form-control"  type="number" id="productStock" name="productStock" min="0" step="1" required value="<%= productDetails.productStock %>"/>
                             <div id="productStockError" aria-live="polite"></div>
                         </div>
                         <div class="mb-3">
                             <div class="form-label" >Current Product Image: </div>
-                            <img id="currentProductImage" src="/images/products/<%= productImage %> " class="img-fluid rounded">
+                            <img id="currentProductImage" src="/images/products/<%= productDetails.productImage %> " class="img-fluid rounded">
                         </div>  
                     </fieldset>
                     <div class="mb-3 d-flex justify-content-center">
@@ -85,15 +86,16 @@
             </div>
             <hr>
             <div class="card-body text-center">
-                <a href="<%= `${productUrl}/edit/image` %>" class="btn btn-primary ">Change Image: <%= productName %></a>
+                <a href="<%= `${productDetails.productUrl}/edit/image` %>" class="btn btn-primary ">Change Image: <%= productDetails.productName %></a>
             </div>
             <div class="card-body text-center">
-                <a href=<%= `${productUrl}` %> class="btn btn-primary ">View <%= productName %></a>
-                <a href=<%= `${productUrl}/delete` %> class="btn btn-primary ">Delete <%= productName %></a>
+                <a href=<%= `${productDetails.productUrl}` %> class="btn btn-primary ">View <%= productDetails.productName %></a>
+                <a href=<%= `${productDetails.productUrl}/delete` %> class="btn btn-primary ">Delete <%= productDetails.productName %></a>
             </div>
+            <% } %> 
             <hr>
             <div class="card-body  text-center">
-                <a href="/allProducts" class="btn btn-primary ">Back To All Products</a>
+                <a href="/products" class="btn btn-primary ">Back To All Products</a>
             </div>
             
         </div>

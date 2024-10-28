@@ -6,6 +6,7 @@ import {
     getProductDetails,
     getCreateProducts,
     postCreateProduct,
+    getEditProduct,
 } from '../../../src/app/controllers/products.app.controllers';
 import { unlink } from 'fs';
 
@@ -769,6 +770,175 @@ describe("POST Create Product", () => {
             productCategory: req.body.productCategory,
             productPrice: req.body.productPrice,
             productStock: req.body.productStock,
+            categoryList: dataMockCategories,
+        });
+    });
+});
+
+describe("GET Edit Product Details", () => {
+    it("should render the Edit Product view with product details to edit a product", async () => {
+        const req: any = {
+            params: {                 
+                id: '65cea4a2b9d6ae606013be23',
+            },
+        };
+
+        const res: any = {
+            locals: {
+                user: 'user@abc.com',
+            },
+            render: jest.fn(),
+        };
+
+        const expectedData = dataMockProducts.filter(product => product._id === req.params.id);
+
+        (Category.find as jest.Mock) = jest.fn().mockReturnValueOnce({
+            select: jest.fn().mockReturnThis(),
+            sort: jest.fn().mockReturnThis(),
+            exec: jest.fn().mockReturnValueOnce(dataMockCategories),
+        });
+        
+        (Product.findById as jest.Mock) = jest.fn().mockReturnValueOnce({
+            populate: jest.fn().mockReturnThis(),            
+            exec: jest.fn().mockReturnValueOnce(expectedData[0]),
+        });
+
+        await getEditProduct(req, res);
+
+        expect(res.render).toHaveBeenCalledWith('productEdit', {
+            title: 'Product Edit',
+            username: res.locals.user,
+            productDetails: {
+                productName: expectedData[0].name,
+                productDescription: expectedData[0].description,
+                productCategory: expectedData[0].category,
+                productImage: expectedData[0].imageFilename,
+                productPrice: expectedData[0].price,
+                productStock: expectedData[0].stock,
+                productUrl: `/products/${expectedData[0]._id}`,
+            },
+            categoryList: dataMockCategories,
+        });
+    });
+
+    it('should handle error gracefully and render error message when a product id is not provided', async () => {
+        const req: any = {
+            params: {},
+            body: {},
+        };
+
+        const res: any = {
+            locals: {
+                user: 'user@abc.com',
+            },
+            render: jest.fn(),
+        };
+
+        const expectedData = dataMockProducts.filter(
+            (product) => product._id === req.params.id,
+        );
+
+        (Category.find as jest.Mock) = jest.fn().mockReturnValueOnce({
+            select: jest.fn().mockReturnThis(),
+            sort: jest.fn().mockReturnThis(),
+            exec: jest.fn().mockReturnValueOnce(dataMockCategories),
+        });
+
+        (Product.findById as jest.Mock) = jest.fn().mockReturnValueOnce({
+            populate: jest.fn().mockReturnThis(),
+            exec: jest.fn().mockReturnValueOnce(null),
+        });
+
+        await getEditProduct(req, res);
+        expect(Product.findById).not.toHaveBeenCalled();
+
+        expect(res.render).toHaveBeenCalledWith('productEdit', {
+            title: 'Product Edit',
+            username: res.locals.user,
+            error: new Error('Product not found!'),
+            productUrl: req.body.productUrl,
+            categoryList: dataMockCategories,
+        });
+    });
+
+    it('should handle error gracefully and render error message when an invalid product id is provided', async () => {
+        const req: any = {
+            params: {
+                id: 'invalid id',
+            },
+            body: {}
+        };
+
+        const res: any = {
+            locals: {
+                user: 'user@abc.com',
+            },
+            render: jest.fn(),
+        };
+
+        const expectedData = dataMockProducts.filter(
+            (product) => product._id === req.params.id,
+        );
+
+        (Category.find as jest.Mock) = jest.fn().mockReturnValueOnce({
+            select: jest.fn().mockReturnThis(),
+            sort: jest.fn().mockReturnThis(),
+            exec: jest.fn().mockReturnValueOnce(dataMockCategories),
+        });
+
+        (Product.findById as jest.Mock) = jest.fn().mockReturnValueOnce({
+            populate: jest.fn().mockReturnThis(),
+            exec: jest.fn().mockReturnValueOnce(null),
+        });
+
+        await getEditProduct(req, res);
+        expect(Product.findById).not.toHaveBeenCalled();
+
+        expect(res.render).toHaveBeenCalledWith('productEdit', {
+            title: 'Product Edit',
+            username: res.locals.user,
+            error: new Error('Product not found!'),
+            productUrl: req.body.productUrl,
+            categoryList: dataMockCategories,
+        });
+    });
+
+    it('should handle error gracefully and render error message when product details are not found', async () => {
+        const req: any = {
+            params: {
+                id: '65cea4a2b9d6ae606013be23',
+            },
+            body: {},
+        };
+
+        const res: any = {
+            locals: {
+                user: 'user@abc.com',
+            },
+            render: jest.fn(),
+        };
+
+        const expectedData = dataMockProducts.filter(
+            (product) => product._id === req.params.id,
+        );
+
+        (Category.find as jest.Mock) = jest.fn().mockReturnValueOnce({
+            select: jest.fn().mockReturnThis(),
+            sort: jest.fn().mockReturnThis(),
+            exec: jest.fn().mockReturnValueOnce(dataMockCategories),
+        });
+
+        (Product.findById as jest.Mock) = jest.fn().mockReturnValueOnce({
+            populate: jest.fn().mockReturnThis(),
+            exec: jest.fn().mockReturnValueOnce(null),
+        });
+
+        await getEditProduct(req, res);
+        expect(res.render).toHaveBeenCalledWith('productEdit', {
+            title: 'Product Edit',
+            username: res.locals.user,
+            error: new Error('Product not found!'),
+            productUrl: req.body.productUrl,
             categoryList: dataMockCategories,
         });
     });

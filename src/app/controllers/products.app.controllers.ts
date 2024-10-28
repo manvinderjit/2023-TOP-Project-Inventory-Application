@@ -243,8 +243,49 @@ export const postCreateProduct = async (req: Request, res: Response): Promise<vo
     )};
 };
 
-export const getEditProduct = (req: Request, res: Response) => {
-    res.send('Not implemented yet');
+export const getEditProduct = async (req: Request, res: Response): Promise<void> => {
+    // Get all categories for selecting products based on categories
+    const productCategories: CategoryDetailsDocument[] = await fetchCategories();
+    
+    try {
+        // Validate product Id in request
+        if (!req.params.id || !validateIsMongoObjectId(req.params.id)) {
+            // If no or invalid product id, throw error
+            throw new Error('Product not found!');
+        } else {
+            // Fetch product details            
+            const productDetails: ProductDetails | null = await fetchProduct(req.params.id);
+
+            if(productDetails && String(productDetails._id) === req.params.id) {
+                res.render('productEdit', {
+                    title: 'Product Edit',
+                    username: res.locals.user,
+                    productDetails: {
+                        productName: productDetails.name,
+                        productDescription: productDetails.description,
+                        productCategory: productDetails.category,
+                        productImage: productDetails.imageFilename,
+                        productPrice: productDetails.price,
+                        productStock: productDetails.stock,
+                        productUrl: `/products/${productDetails._id}`,
+                    },
+                    categoryList: productCategories,
+                });
+            } else {
+                throw new Error('Product not found!');
+            };
+        }
+
+    } catch (error) {
+        console.error(error);
+        res.render('productEdit', {
+            title: 'Product Edit',
+            username: res.locals.user,
+            error: error,            
+            productUrl: req.body.productUrl,
+            categoryList: productCategories,
+        });
+    };
 };
 
 export const postEditProduct = (req: Request, res: Response) => {

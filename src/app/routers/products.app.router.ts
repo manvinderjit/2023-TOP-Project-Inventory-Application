@@ -15,7 +15,7 @@ productsAppRouter.post('/', redirectToLogin, productsControllers.getManageProduc
 productsAppRouter.get('/create', redirectToLogin, productsControllers.getCreateProducts);
 
 // POST request to create a new product
-productsAppRouter.post('/create', redirectToLogin, fileUpload(), productsControllers.postCreateProducts);
+productsAppRouter.post('/create', redirectToLogin, fileUpload(), productsControllers.postCreateProduct);
 
 // GET request to fetch product details by Product Id
 productsAppRouter.get('/:id', redirectToLogin, productsControllers.getProductDetails);

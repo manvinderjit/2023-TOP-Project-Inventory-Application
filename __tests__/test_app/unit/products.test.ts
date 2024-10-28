@@ -5,7 +5,9 @@ import {
     getManageProducts,
     getProductDetails,
     getCreateProducts,
+    postCreateProduct,
 } from '../../../src/app/controllers/products.app.controllers';
+import { unlink } from 'fs';
 
 const dataMockCategories = [
     {
@@ -78,6 +80,14 @@ const dataMockProducts = [
         stock: 23,
     },
 ];
+
+const dataMockCreateProduct = {
+    productName: 'Dummy',
+    productDescription: 'Dummy',
+    productCategory: '652624671853eb7ecdacd6b8',
+    productPrice: '10',
+    productStock: '5',
+};
 
 describe('Manage Products View', () => {
     it('should render the Manage Products view with all the fetched products', async () => {
@@ -473,6 +483,292 @@ describe("Create Product", () => {
             productCategory: '',
             productPrice: 0.0,
             productStock: 0,
+            categoryList: dataMockCategories,
+        });
+    });
+});
+
+describe("POST Create Product", () => {
+    it("should create a new product and render success message", async () => {
+
+        const dataCreatedProduct = {
+            name: 'Dummy',
+            description: 'Dummy',
+            price: '10',
+            stock: '5',
+            _id: '65cea4a2b9d6ae606013be23',
+            imageFilename: 'abc-27g2sp-monitor.jpg',
+            category: {
+                _id: '652624671853eb7ecdacd6b8',
+                name: 'Computer Keyboards',
+            },            
+        };
+
+        const req: any = {
+            body: dataMockCreateProduct,
+            files: {
+                productImage: {
+                    name: 'image.png',
+                    mv: jest.fn((path, callback: any) => callback(null)),
+                },
+            },
+        };
+
+        const res: any = {
+            render: jest.fn(),
+            locals: {
+                user: 'user@abc.com',
+            },
+        };
+
+        (Category.find as jest.Mock) = jest.fn().mockReturnValueOnce({
+            select: jest.fn().mockReturnThis(),
+            sort: jest.fn().mockReturnThis(),
+            exec: jest.fn().mockReturnValueOnce(dataMockCategories),
+        });
+
+        (Product.create as jest.Mock) = jest.fn().mockReturnValueOnce(dataCreatedProduct);
+
+        await postCreateProduct(req, res);
+
+        expect(res.render).toHaveBeenCalled();
+        expect(req.files.productImage.mv).toHaveBeenCalled();
+        expect(Product.create).toHaveBeenCalled();
+        expect(res.render).toHaveBeenCalledWith('productCreate', {
+            title: 'Create Product',
+            username: res.locals.user,
+            success: `Product created with name ${dataMockCreateProduct.productName}`,
+            productName: '',
+            productDescription: '',
+            productCategory: '',
+            productPrice: '',
+            productStock: '',
+            categoryList: dataMockCategories,
+        });
+    });
+
+    it('should handle error gracefully and render error message when a file is not uploaded', async () => {
+        const req: any = {
+            body: dataMockCreateProduct,
+        };
+
+        const res: any = {
+            render: jest.fn(),
+            locals: {
+                user: 'user@abc.com',
+            },
+        };
+
+        (Category.find as jest.Mock) = jest.fn().mockReturnValueOnce({
+            select: jest.fn().mockReturnThis(),
+            sort: jest.fn().mockReturnThis(),
+            exec: jest.fn().mockReturnValueOnce(dataMockCategories),
+        });
+
+        (Product.create as jest.Mock) = jest
+            .fn()
+            .mockReturnValueOnce(null);
+
+        await postCreateProduct(req, res);
+
+        expect(res.render).toHaveBeenCalled();        
+        expect(Product.create).not.toHaveBeenCalled();
+        expect(res.render).toHaveBeenCalledWith('productCreate', {
+            title: 'Create Product',
+            username: res.locals.user,
+            error: new Error('No file was uploaded!'),
+            productName: req.body.productName,
+            productDescription: req.body.productDescription,
+            productCategory: req.body.productCategory,
+            productPrice: req.body.productPrice,
+            productStock: req.body.productStock,            
+            categoryList: dataMockCategories,
+        });
+    });
+
+    it('should handle error gracefully and render error messages when fields are not provided', async () => {
+        const req: any = {
+            body: {},
+            files: {
+                productImage: {
+                    name: 'image.png',
+                    mv: jest.fn((path, callback: any) => callback(null)),
+                },
+            },
+        };
+
+        const res: any = {
+            render: jest.fn(),
+            locals: {
+                user: 'user@abc.com',
+            },
+        };
+
+        (Category.find as jest.Mock) = jest.fn().mockReturnValueOnce({
+            select: jest.fn().mockReturnThis(),
+            sort: jest.fn().mockReturnThis(),
+            exec: jest.fn().mockReturnValueOnce(dataMockCategories),
+        });
+
+        (Product.create as jest.Mock) = jest.fn().mockReturnValueOnce(null);
+
+        await postCreateProduct(req, res);
+
+        expect(res.render).toHaveBeenCalled();
+        expect(Product.create).not.toHaveBeenCalled();
+        expect(res.render).toHaveBeenCalledWith('productCreate', {
+            title: 'Create Product',
+            username: res.locals.user,
+            error: new Error('Please check  Product Name, Product Description, Product Category, Product Price, Product Stock'),
+            productName: req.body.productName,
+            productDescription: req.body.productDescription,
+            productCategory: req.body.productCategory,
+            productPrice: req.body.productPrice,
+            productStock: req.body.productStock,
+            categoryList: dataMockCategories,
+        });
+    });
+
+    it('should handle error gracefully and render error messages when fields are invalid', async () => {
+        const req: any = {
+            body: {
+                productName: '   ',
+                productDescription: '   ',
+                productCategory: '6526671853eb7ecdacd6b8',
+                productPrice: 'aa',
+                productStock: 'a',
+            },
+            files: {
+                productImage: {
+                    name: 'image.png',
+                    mv: jest.fn((path, callback: any) => callback(null)),
+                },
+            },
+        };
+
+        const res: any = {
+            render: jest.fn(),
+            locals: {
+                user: 'user@abc.com',
+            },
+        };
+
+        (Category.find as jest.Mock) = jest.fn().mockReturnValueOnce({
+            select: jest.fn().mockReturnThis(),
+            sort: jest.fn().mockReturnThis(),
+            exec: jest.fn().mockReturnValueOnce(dataMockCategories),
+        });
+
+        (Product.create as jest.Mock) = jest.fn().mockReturnValueOnce(null);
+
+        await postCreateProduct(req, res);
+
+        expect(res.render).toHaveBeenCalled();
+        expect(Product.create).not.toHaveBeenCalled();
+        expect(res.render).toHaveBeenCalledWith('productCreate', {
+            title: 'Create Product',
+            username: res.locals.user,
+            error: new Error(
+                'Please check  Product Name, Product Description, Product Category, Product Price, Product Stock',
+            ),
+            productName: req.body.productName,
+            productDescription: req.body.productDescription,
+            productCategory: req.body.productCategory,
+            productPrice: req.body.productPrice,
+            productStock: req.body.productStock,
+            categoryList: dataMockCategories,
+        });
+    });
+
+    it('should handle error gracefully and render error messages when file upload fails', async () => {
+        const req: any = {
+            body: dataMockCreateProduct,
+            files: {
+                productImage: {
+                    name: 'image.png',
+                    mv: jest.fn((path, callback: any) => callback(new Error('Upload failed!'))),
+                },
+            },
+        };
+
+        const res: any = {
+            render: jest.fn(),
+            locals: {
+                user: 'user@abc.com',
+            },
+        };
+
+        (Category.find as jest.Mock) = jest.fn().mockReturnValueOnce({
+            select: jest.fn().mockReturnThis(),
+            sort: jest.fn().mockReturnThis(),
+            exec: jest.fn().mockReturnValueOnce(dataMockCategories),
+        });
+
+        (Product.create as jest.Mock) = jest.fn().mockReturnValueOnce(null);
+
+        await postCreateProduct(req, res);
+
+        expect(req.files.productImage.mv).toHaveBeenCalled();
+        expect(Product.create).not.toHaveBeenCalled();
+        expect(res.render).toHaveBeenCalledWith('productCreate', {
+            title: 'Create Product',
+            username: res.locals.user,
+            error: new Error(
+                'Upload failed!',
+            ),
+            productName: req.body.productName,
+            productDescription: req.body.productDescription,
+            productCategory: req.body.productCategory,
+            productPrice: req.body.productPrice,
+            productStock: req.body.productStock,
+            categoryList: dataMockCategories,
+        });
+    });
+
+    it('should handle error gracefully and render error message when product creation fails', async () => {
+        const req: any = {
+            body: dataMockCreateProduct,
+            files: {
+                productImage: {
+                    name: 'image.png',
+                    mv: jest.fn((path, callback: any) => callback(null)),
+                },
+            },
+        };
+
+        const res: any = {
+            render: jest.fn(),
+            locals: {
+                user: 'user@abc.com',
+            },
+        };
+
+        (Category.find as jest.Mock) = jest.fn().mockReturnValueOnce({
+            select: jest.fn().mockReturnThis(),
+            sort: jest.fn().mockReturnThis(),
+            exec: jest.fn().mockReturnValueOnce(dataMockCategories),
+        });
+
+        (Product.create as jest.Mock) = jest.fn().mockReturnValueOnce(null);
+
+        jest.spyOn({ unlink }, 'unlink').mockImplementationOnce(
+            (path, callback) => callback(null),
+        );
+
+        await postCreateProduct(req, res);
+
+        expect(res.render).toHaveBeenCalled();
+        expect(req.files.productImage.mv).toHaveBeenCalled();
+        expect(Product.create).toHaveBeenCalled();
+        expect(res.render).toHaveBeenCalledWith('productCreate', {
+            title: 'Create Product',
+            username: res.locals.user,
+            error: new Error('Product creation failed!'),
+            productName: req.body.productName,
+            productDescription: req.body.productDescription,
+            productCategory: req.body.productCategory,
+            productPrice: req.body.productPrice,
+            productStock: req.body.productStock,
             categoryList: dataMockCategories,
         });
     });

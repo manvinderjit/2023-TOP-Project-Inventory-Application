@@ -1,6 +1,8 @@
 import Product from "../../models/productModel.js";
 import { validateIsMongoObjectId } from "../../utilities/validation.js";
 import { ProductDetails } from "../../types/types.js";
+import { trimMultipleWhiteSpaces } from "../../utilities/stringFormatting.js";
+import { Types } from "mongoose";
 
 export const fetchProducts = async (productCategory: string | null | undefined): Promise<ProductDetails[]> => {
     let query = {};
@@ -21,4 +23,27 @@ export const fetchProduct = async (productId: string): Promise<ProductDetails | 
         .populate('category')
         .exec();
     return productDetails;
+};
+
+export const createProduct = async (productDetails: {
+    productName: string;
+    productDescription: string;
+    newUploadFileName: any;
+    productCategory: string;
+    productPrice: string;
+    productStock: string;
+}) => {
+    const product: Omit<ProductDetails, '_id'> = {
+        name: trimMultipleWhiteSpaces(productDetails.productName),
+        description: trimMultipleWhiteSpaces(productDetails.productDescription),
+        imageFilename: productDetails.newUploadFileName,
+        category: trimMultipleWhiteSpaces(
+            productDetails.productCategory,
+        ) as unknown as Types.ObjectId,
+        price: Number(trimMultipleWhiteSpaces(productDetails.productPrice)),
+        stock: Number(trimMultipleWhiteSpaces(productDetails.productStock)),
+    };
+
+    const createdProduct = await Product.create(product);
+    return createdProduct;
 };

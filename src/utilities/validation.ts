@@ -91,6 +91,29 @@ const validateFieldValues = (
     return invalidFields;
 };
 
+const validateRequiredFieldsInBody = (
+    fieldsAndValidators: {
+        field: string;
+        value: string;
+        validator: (name: string) => boolean;
+        label: string;
+    }[],
+    reqBody: { [x: string]: string },
+): string[] => {
+    const invalidFields: string[] = [];
+    fieldsAndValidators.forEach((fieldAndValidator) => {
+        if (
+            !reqBody[fieldAndValidator.field] ||
+            reqBody[fieldAndValidator.field] === null ||
+            reqBody[fieldAndValidator.field] === undefined ||
+            reqBody[fieldAndValidator.field].trim() === '' ||
+            !fieldAndValidator.validator(fieldAndValidator.value)
+        )
+            invalidFields.push(' ' + fieldAndValidator.label);
+    });
+    return invalidFields;
+};
+
 export {
     validateEmail,
     validatePassword,
@@ -103,4 +126,5 @@ export {
     validateEnums,
     validateFieldValues,
     validateDate,
+    validateRequiredFieldsInBody,
 };

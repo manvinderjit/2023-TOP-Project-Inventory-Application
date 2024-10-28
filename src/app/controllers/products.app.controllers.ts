@@ -2,7 +2,7 @@ import { NextFunction, Request, Response } from 'express';
 import { fetchCategories } from '../services/category.app.services.js';
 import { createProduct, fetchProduct, fetchProducts } from '../services/products.app.services.js';
 import { CategoryDetailsDocument, ProductDetails } from '../../types/types.js';
-import { validateDescription, validateIsMongoObjectId, validateIsNumber, validateName } from '../../utilities/validation.js';
+import { validateDescription, validateIsMongoObjectId, validateIsNumber, validateName, validateRequiredFieldsInBody } from '../../utilities/validation.js';
 import { PathLike, unlink } from 'node:fs';
 import { replaceFileNameSpacesWithHyphen } from '../../utilities/fileFormatting.js';
 import { fileURLToPath } from 'node:url';
@@ -11,29 +11,6 @@ const staticsPath = fileURLToPath(new URL('../../public', import.meta.url));
 
 interface ExpressFileUploadRequest extends Request {
     files: any;
-};
-
-const validateFields = (
-    fieldsAndValidators: {
-        field: string;
-        value: string;
-        validator: (name: string) => boolean;
-        label:string;
-    }[],
-    reqBody: { [x: string]: string },
-): string[] => {
-    const invalidFields: string[] = [];
-    fieldsAndValidators.forEach((fieldAndValidator) => {
-        if (
-            !reqBody[fieldAndValidator.field] ||
-            reqBody[fieldAndValidator.field] === null ||
-            reqBody[fieldAndValidator.field] === undefined ||
-            reqBody[fieldAndValidator.field].trim() === '' ||
-            !fieldAndValidator.validator(fieldAndValidator.value)
-        )
-            invalidFields.push(' ' + fieldAndValidator.label);
-    });
-    return invalidFields;
 };
 
 export const getManageProducts = async (req: Request, res: Response): Promise<void> => {
@@ -180,7 +157,7 @@ export const postCreateProduct = async (req: Request, res: Response): Promise<vo
             throw new Error('No file was uploaded!');
 
         // Check missing or invalid fields
-        const invalidFields: string[] = validateFields(
+        const invalidFields: string[] = validateRequiredFieldsInBody(
             requiredFieldsAndValidators,
             req.body,
         );

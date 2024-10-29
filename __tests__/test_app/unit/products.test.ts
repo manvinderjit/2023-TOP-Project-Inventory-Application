@@ -10,6 +10,7 @@ import {
     postEditProduct,
     getDeleteProduct,
     postDeleteProduct,
+    getEditProductImage,
 } from '../../../src/app/controllers/products.app.controllers';
 import { unlink } from 'fs';
 
@@ -1597,6 +1598,168 @@ describe("POST Delete Product", () => {
             username: res.locals.user,
             error: new Error('Deletion failed!'),
             productDetails: '',
+        });
+    });
+});
+
+describe("GET Edit Product Image", () => {
+    it("should render the Edit Product Image with product details for a valid product Id", async () =>{
+        const req: any = {
+            params: {
+                id: '65cea4a2b9d6ae606013be23',
+            },
+        };
+
+        const res: any = {
+            locals: {
+                user: 'user@abc.com',
+            },
+            render: jest.fn(),
+        };
+
+        const expectedData = dataMockProducts.filter(product => product._id === req.params.id);
+        
+        (Product.findById as jest.Mock) = jest.fn().mockReturnValueOnce({
+            populate: jest.fn().mockReturnThis(),
+            exec: jest.fn().mockReturnValueOnce(expectedData[0]),
+        });
+
+        await getEditProductImage(req, res);
+
+        expect(res.render).toHaveBeenCalledWith('productImageEdit', {
+            title: 'Product Image Edit',
+            username: res.locals.user,
+            productData: {
+                productName: expectedData[0].name,
+                productImage: expectedData[0].imageFilename,
+                productUrl: `/products/${expectedData[0]._id}`,
+            },
+        });
+    });
+
+    it("should handle errors gracefully and render error messages when no product Id is provided", async () =>{
+        const req: any = {
+            params: {},
+        };
+
+        const res: any = {
+            locals: {
+                user: 'user@abc.com',
+            },
+            render: jest.fn(),
+        };
+
+        (Product.findById as jest.Mock) = jest.fn().mockReturnValueOnce({
+            populate: jest.fn().mockReturnThis(),
+            exec: jest.fn().mockReturnValueOnce(null),
+        });
+
+        await getEditProductImage(req, res);
+
+        expect(Product.findById).not.toHaveBeenCalled();
+
+        expect(res.render).toHaveBeenCalledWith('productImageEdit', {
+            title: 'Product Image Edit',
+            username: res.locals.user,
+            error: new Error('Product not found!'),
+        });
+    });
+
+    it("should handle errors gracefully and render error messages when an invalid product Id is provided", async () =>{
+        const req: any = {
+            params: {
+                id: '65cea4a2b9d6ae606013be2',
+            },
+        };
+
+        const res: any = {
+            locals: {
+                user: 'user@abc.com',
+            },
+            render: jest.fn(),
+        };
+
+        (Product.findById as jest.Mock) = jest.fn().mockReturnValueOnce({
+            populate: jest.fn().mockReturnThis(),
+            exec: jest.fn().mockReturnValueOnce(null),
+        });
+
+        await getEditProductImage(req, res);
+
+        expect(Product.findById).not.toHaveBeenCalled();
+
+        expect(res.render).toHaveBeenCalledWith('productImageEdit', {
+            title: 'Product Image Edit',
+            username: res.locals.user,
+            error: new Error('Product not found!'),
+        });
+    });
+
+    it('should handle errors gracefully and render error messages when product details are not found', async () => {
+        const req: any = {
+            params: {
+                id: '65cea4a2b9d6ae606013be23',
+            },
+        };
+
+        const res: any = {
+            locals: {
+                user: 'user@abc.com',
+            },
+            render: jest.fn(),
+        };
+
+        (Product.findById as jest.Mock) = jest.fn().mockReturnValueOnce({
+            populate: jest.fn().mockReturnThis(),
+            exec: jest.fn().mockReturnValueOnce(null),
+        });
+
+        await getEditProductImage(req, res);
+        expect(res.render).toHaveBeenCalledWith('productImageEdit', {
+            title: 'Product Image Edit',
+            username: res.locals.user,
+            error: new Error('Product not found!'),
+        });
+    });
+
+    it('should handle errors gracefully and render error messages when product details id mismatch occurs', async () => {
+        const req: any = {
+            params: {
+                id: '65cea4a2b9d6ae606013be23',
+            },
+        };
+
+        const res: any = {
+            locals: {
+                user: 'user@abc.com',
+            },
+            render: jest.fn(),
+        };
+
+        // Data with mismatched id
+        const mismatchedProductData = {
+            name: 'New Name',
+            description: 'New Description',
+            price: 20,
+            stock: 10,
+            _id: '65cea4a2b9d6ae606013be21',
+            imageFilename: 'abc-27g2sp-monitor.jpg',
+            category: {
+                _id: '652624671853eb7ecdacd6b8',
+                name: 'Computer Keyboards',
+            },
+        };
+
+        (Product.findById as jest.Mock) = jest.fn().mockReturnValueOnce({
+            populate: jest.fn().mockReturnThis(),
+            exec: jest.fn().mockReturnValueOnce(mismatchedProductData),
+        });
+
+        await getEditProductImage(req, res);
+        expect(res.render).toHaveBeenCalledWith('productImageEdit', {
+            title: 'Product Image Edit',
+            username: res.locals.user,
+            error: new Error('Product not found!'),
         });
     });
 });

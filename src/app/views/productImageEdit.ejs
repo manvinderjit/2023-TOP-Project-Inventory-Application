@@ -28,7 +28,7 @@
 
                 <% if(locals.error && error !=='' && error !== undefined) { %>
                     <div class="alert alert-warning w-50 m-auto" role="alert">
-                        Error: <%= error %>
+                        <%= error %>
                     </div>        
                 <% } else if (locals.success && success !=='' && success !== undefined) { %>
                     <div class="alert alert-success w-50 m-auto" role="alert">
@@ -36,17 +36,18 @@
                     </div>
                 <% } %>
             </div>
-
+            
+            <% if(locals.productData && productData !=='' && productData !== undefined) { %>
             <div class="container w-50 m-auto">
                 <form method='POST' action="" encType="multipart/form-data">
                     <fieldset>
                         <legend class="mb-4 ">Upload Product Image</legend>
                         <div class="mb-3">
-                            <div class="form-label" ><strong> Product Name:</strong> <%= productName %></div>
+                            <div class="form-label" ><strong> Product Name:</strong> <%= productData.productName %></div>
                         </div >
                         <div class="mb-3">
                             <div class="form-label" ><strong>Current Product Image:</strong> </div>
-                            <img id="currentProductImage" src="/images/products/<%= productImage %> " class="img-fluid rounded">                            
+                            <img id="currentProductImage" src="/images/products/<%= productData.productImage %> " class="img-fluid rounded">                            
                         </div>
                         <div class="mb-3">
                             <label class="form-label" for="productImage"><strong>Upload New Product Image: </strong></label>
@@ -61,15 +62,16 @@
             </div>
             <hr>
             <div class="card-body text-center">
-                <a href="<%= `${productUrl}/edit` %>" class="btn btn-primary ">Edit <%= productName %></a>
+                <a href="<%= `${productData.productUrl}/edit` %>" class="btn btn-primary ">Edit <%= productData.productName %></a>
             </div>
             <div class="card-body text-center">
-                <a href=<%= `${productUrl}` %> class="btn btn-primary ">View <%= productName %></a>
-                <a href=<%= `${productUrl}/delete` %> class="btn btn-primary ">Delete <%= productName %></a>
+                <a href=<%= `${productData.productUrl}` %> class="btn btn-primary ">View <%= productData.productName %></a>
+                <a href=<%= `${productData.productUrl}/delete` %> class="btn btn-primary ">Delete <%= productData.productName %></a>
             </div>
+            <% } %>
             <hr>
             <div class="card-body  text-center">
-                <a href="/allProducts" class="btn btn-primary ">Back To All Products</a>
+                <a href="/products" class="btn btn-primary ">Back To All Products</a>
             </div>
             
         </div>

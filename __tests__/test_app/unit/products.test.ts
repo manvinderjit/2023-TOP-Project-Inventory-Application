@@ -11,6 +11,7 @@ import {
     getDeleteProduct,
     postDeleteProduct,
     getEditProductImage,
+    postEditProductImage,
 } from '../../../src/app/controllers/products.app.controllers';
 import { unlink } from 'fs';
 
@@ -1760,6 +1761,316 @@ describe("GET Edit Product Image", () => {
             title: 'Product Image Edit',
             username: res.locals.user,
             error: new Error('Product not found!'),
+        });
+    });
+});
+
+describe('POST Edit Product Image', () => {
+    it('should update the product image and redirect after updating image successfully', async () => {
+        const req: any = {
+            params: {
+                id: '65cea4a2b9d6ae606013be23',
+            },
+            files: {
+                productImage: {
+                    name: 'image.png',
+                    mv: jest.fn((path, callback: any) => callback(null)),
+                },
+            },
+            body: {
+                productName: 'ABC 27G2SP Monitor',
+                productDescription: 'ABC 27G2SP Monitor',                
+            },
+        };
+
+        const res: any = {
+            locals: {
+                user: 'user@abc.com',
+            },
+            render: jest.fn(),
+            redirect: jest.fn(),
+        };
+
+        const expectedData = dataMockProducts.filter(product => product._id === req.params.id);
+
+        (Product.findById as jest.Mock) = jest.fn().mockReturnValueOnce({
+            populate: jest.fn().mockReturnThis(),
+            exec: jest.fn().mockReturnValueOnce(expectedData[0]),
+        });
+
+        await postEditProductImage(req, res);
+
+        expect(res.render).not.toHaveBeenCalled();
+        expect(res.redirect).toHaveBeenCalledWith(
+            `/products/${req.params.id}/edit/image`,
+        );
+    });
+
+    it('should handle errors gracefully and render error messages when a product id is not provided', async () => {
+        const req: any = {
+            params: {},
+            files: {
+                productImage: {
+                    name: 'image.png',
+                    mv: jest.fn((path, callback: any) => callback(null)),
+                },
+            },
+            body: {
+                productName: 'ABC 27G2SP Monitor',
+                productDescription: 'ABC 27G2SP Monitor',
+            },
+        };
+
+        const res: any = {
+            locals: {
+                user: 'user@abc.com',
+            },
+            render: jest.fn(),
+            redirect: jest.fn(),
+        };
+
+        (Product.findById as jest.Mock) = jest.fn().mockReturnValueOnce({
+            populate: jest.fn().mockReturnThis(),
+            exec: jest.fn().mockReturnValueOnce(null),
+        });
+
+        await postEditProductImage(req, res);
+        
+        expect(Product.findById).not.toHaveBeenCalledWith();
+        expect(res.redirect).not.toHaveBeenCalledWith();
+        expect(res.render).toHaveBeenCalledWith('productImageEdit', {
+            title: 'Product Image Edit',
+            username: res.locals.user,
+            error: new Error('Product not found!'),
+            productData: {
+                productName: req.body.productName,
+                productImage: req.body.currProductImage,
+                productUrl: `/products/${req.params.id}`,
+            },
+        });
+    });
+
+    it('should handle errors gracefully and render error messages when an invalid product id is provided', async () => {
+        const req: any = {
+            params: {
+                id: 'invalid id',
+            },
+            files: {
+                productImage: {
+                    name: 'image.png',
+                    mv: jest.fn((path, callback: any) => callback(null)),
+                },
+            },
+            body: {
+                productName: 'ABC 27G2SP Monitor',
+                productDescription: 'ABC 27G2SP Monitor',
+            },
+        };
+
+        const res: any = {
+            locals: {
+                user: 'user@abc.com',
+            },
+            render: jest.fn(),
+            redirect: jest.fn(),
+        };
+
+        (Product.findById as jest.Mock) = jest.fn().mockReturnValueOnce({
+            populate: jest.fn().mockReturnThis(),
+            exec: jest.fn().mockReturnValueOnce(null),
+        });
+
+        await postEditProductImage(req, res);
+
+        expect(Product.findById).not.toHaveBeenCalledWith();
+        expect(res.redirect).not.toHaveBeenCalledWith();
+        expect(res.render).toHaveBeenCalledWith('productImageEdit', {
+            title: 'Product Image Edit',
+            username: res.locals.user,
+            error: new Error('Product not found!'),
+            productData: {
+                productName: req.body.productName,
+                productImage: req.body.currProductImage,
+                productUrl: `/products/${req.params.id}`,
+            },
+        });
+    });
+
+    it('should handle errors gracefully and render error messages when an invalid product id is provided', async () => {
+        const req: any = {
+            params: {
+                id: 'invalid id',
+            },
+            files: {
+                productImage: {
+                    name: 'image.png',
+                    mv: jest.fn((path, callback: any) => callback(null)),
+                },
+            },
+            body: {
+                productName: 'ABC 27G2SP Monitor',
+                productDescription: 'ABC 27G2SP Monitor',
+            },
+        };
+
+        const res: any = {
+            locals: {
+                user: 'user@abc.com',
+            },
+            render: jest.fn(),
+            redirect: jest.fn(),
+        };
+
+        (Product.findById as jest.Mock) = jest.fn().mockReturnValueOnce({
+            populate: jest.fn().mockReturnThis(),
+            exec: jest.fn().mockReturnValueOnce(null),
+        });
+
+        await postEditProductImage(req, res);
+
+        expect(Product.findById).not.toHaveBeenCalledWith();
+        expect(res.redirect).not.toHaveBeenCalledWith();
+        expect(res.render).toHaveBeenCalledWith('productImageEdit', {
+            title: 'Product Image Edit',
+            username: res.locals.user,
+            error: new Error('Product not found!'),
+            productData: {
+                productName: req.body.productName,
+                productImage: req.body.currProductImage,
+                productUrl: `/products/${req.params.id}`,
+            },
+        });
+    });
+
+    it('should handle errors gracefully and render error messages when no file is uploaded', async () => {
+        const req: any = {
+            params: {
+                id: '65cea4a2b9d6ae606013be23',
+            },
+            body: {
+                productName: 'ABC 27G2SP Monitor',
+                productDescription: 'ABC 27G2SP Monitor',
+            },
+        };
+
+        const res: any = {
+            locals: {
+                user: 'user@abc.com',
+            },
+            render: jest.fn(),
+            redirect: jest.fn(),
+        };
+
+        (Product.findById as jest.Mock) = jest.fn().mockReturnValueOnce({
+            populate: jest.fn().mockReturnThis(),
+            exec: jest.fn().mockReturnValueOnce(null),
+        });
+
+        await postEditProductImage(req, res);
+
+        expect(Product.findById).not.toHaveBeenCalledWith();
+        expect(res.redirect).not.toHaveBeenCalledWith();
+        expect(res.render).toHaveBeenCalledWith('productImageEdit', {
+            title: 'Product Image Edit',
+            username: res.locals.user,
+            error: new Error('No file was uploaded!'),
+            productData: {
+                productName: req.body.productName,
+                productImage: req.body.currProductImage,
+                productUrl: `/products/${req.params.id}`,
+            },
+        });
+    });
+
+    it('should handle errors gracefully and render error messages when product details are not retrieved', async () => {
+        const req: any = {
+            params: {
+                id: '65cea4a2b9d6ae606013be23',
+            },
+            files: {
+                productImage: {
+                    name: 'image.png',
+                    mv: jest.fn((path, callback: any) => callback(null)),
+                },
+            },
+            body: {
+                productName: 'ABC 27G2SP Monitor',
+                productDescription: 'ABC 27G2SP Monitor',
+            },
+        };
+
+        const res: any = {
+            locals: {
+                user: 'user@abc.com',
+            },
+            render: jest.fn(),
+            redirect: jest.fn(),
+        };
+
+        (Product.findById as jest.Mock) = jest.fn().mockReturnValueOnce({
+            populate: jest.fn().mockReturnThis(),
+            exec: jest.fn().mockReturnValueOnce(null),
+        });
+
+        await postEditProductImage(req, res);
+
+        expect(res.redirect).not.toHaveBeenCalledWith();
+        expect(res.render).toHaveBeenCalledWith('productImageEdit', {
+            title: 'Product Image Edit',
+            username: res.locals.user,
+            error: new Error('File upload failed!'),
+            productData: {
+                productName: req.body.productName,
+                productImage: req.body.currProductImage,
+                productUrl: `/products/${req.params.id}`,
+            },
+        });
+    });
+
+    it('should handle errors gracefully and render error messages when file upload fails', async () => {
+        const req: any = {
+            params: {
+                id: '65cea4a2b9d6ae606013be23',
+            },
+            files: {
+                productImage: {
+                    name: 'image.png',
+                    mv: jest.fn((path, callback: any) => callback(new Error('Upload failed!'))),
+                },
+            },
+            body: {
+                productName: 'ABC 27G2SP Monitor',
+                productDescription: 'ABC 27G2SP Monitor',
+            },
+        };
+
+        const res: any = {
+            locals: {
+                user: 'user@abc.com',
+            },
+            render: jest.fn(),
+            redirect: jest.fn(),
+        };
+
+        const expectedData = dataMockProducts.filter(product => product._id === req.params.id);
+
+        (Product.findById as jest.Mock) = jest.fn().mockReturnValueOnce({
+            populate: jest.fn().mockReturnThis(),
+            exec: jest.fn().mockReturnValueOnce(expectedData[0]),
+        });
+
+        await postEditProductImage(req, res);
+
+        expect(res.redirect).not.toHaveBeenCalledWith();
+        expect(res.render).toHaveBeenCalledWith('productImageEdit', {
+            title: 'Product Image Edit',
+            username: res.locals.user,
+            error: new Error('File upload failed!'),
+            productData: {
+                productName: req.body.productName,
+                productImage: req.body.currProductImage,
+                productUrl: `/products/${req.params.id}`,
+            },
         });
     });
 });

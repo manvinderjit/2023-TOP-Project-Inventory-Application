@@ -453,7 +453,7 @@ export const postEditPromoImage = async (req: Request, res: Response): Promise<v
         // Check if a file was uploaded
         else if (!req.files || Object.keys(req.files).length === 0) {
             // Fetch promo details
-            const promoDetails = await fetchPromoDetails(req.params.id);                   
+            const promoDetails = await fetchPromoDetails(req.params.id);               
             
             if (
                 promoDetails &&

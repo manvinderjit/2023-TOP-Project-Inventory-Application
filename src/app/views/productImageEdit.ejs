@@ -44,10 +44,12 @@
                         <legend class="mb-4 ">Upload Product Image</legend>
                         <div class="mb-3">
                             <div class="form-label" ><strong> Product Name:</strong> <%= productData.productName %></div>
+                            <input type="hidden" name="productName" value=<%= productData.productName %>>
                         </div >
                         <div class="mb-3">
                             <div class="form-label" ><strong>Current Product Image:</strong> </div>
-                            <img id="currentProductImage" src="/images/products/<%= productData.productImage %> " class="img-fluid rounded">                            
+                            <img id="currentProductImage" src="/images/products/<%= productData.productImage %> " class="img-fluid rounded">
+                            <input type="hidden" name="currProductImage" value=<%= productData.productImage %>>
                         </div>
                         <div class="mb-3">
                             <label class="form-label" for="productImage"><strong>Upload New Product Image: </strong></label>

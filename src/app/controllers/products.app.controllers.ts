@@ -406,8 +406,55 @@ export const getEditProductImage = async (req: Request, res: Response): Promise<
     }
 };
 
-export const postEditProductImage = (req: Request, res: Response) => {
-    res.send('Not implemented yet');
+export const postEditProductImage = async (req: Request, res: Response): Promise<void> => {
+    try {
+        if (!req.params.id || !validateIsMongoObjectId(req.params.id)) {
+            // If no or invalid product id, throw error
+            throw new Error('Product not found!');
+        } else {
+            // If no file was uploaded throw error
+            if (!req.files || Object.keys(req.files).length === 0) {
+                throw new Error('No file was uploaded!');
+            }
+            // If a file was uploaded
+            else {
+                // Try uploading the image file
+                // The name of the input field (i.e. "productImage") is used to retrieve the uploaded file
+                const reqFiles = (req as ExpressFileUploadRequest).files;
+                const uploadedFile = reqFiles.productImage;
+                let uploadPath: PathLike;
+
+                const productDetails = await fetchProduct(req.params.id);
+
+                if (!productDetails) throw new Error('File upload failed!');
+
+                // Set upload path
+                uploadPath =
+                    staticsPath + '/images/products/' + productDetails.imageFilename;
+
+                // Upload files on the server
+                await uploadedFile.mv(uploadPath, async function (err: any) {
+                    if (err) {
+                        console.error(err);
+                        throw new Error('File upload failed!')
+                    } else {
+                        res.redirect(`/products/${req.params.id}/edit/image`);
+                    }
+                });
+            }
+        }
+    } catch (error) {
+        res.render('productImageEdit', {
+            title: 'Product Image Edit',
+            username: res.locals.user,
+            error: error,
+            productData: {
+                productName: req.body.productName,
+                productImage: req.body.currProductImage,
+                productUrl: `/products/${req.params.id}`,
+            },
+        });
+    }
 };
 
 export const getDeleteProduct = async (req: Request, res: Response): Promise<void> => {

@@ -9,6 +9,7 @@ import {
     getEditProduct,
     postEditProduct,
     getDeleteProduct,
+    postDeleteProduct,
 } from '../../../src/app/controllers/products.app.controllers';
 import { unlink } from 'fs';
 
@@ -1440,6 +1441,161 @@ describe("GET Delete Product", () => {
             title: 'Product Delete',
             username: res.locals.user,
             error: new Error('Product not found!'),
+            productDetails: '',
+        });
+    });
+});
+
+describe("POST Delete Product", () => {
+    it("should delete product successfully and redirect to the Manage Product page", async () => {
+        const req: any = {
+            params: {
+                id: '65cea4a2b9d6ae606013be23',
+            },
+        };
+
+        const res: any = {
+            locals: {
+                user: 'user@abc.com',
+            },
+            render: jest.fn(),
+            redirect: jest.fn(),
+        };
+
+        const expectedData = dataMockProducts.filter(product => product._id === req.params.id);
+        
+        (Product.findByIdAndDelete as jest.Mock) = jest.fn().mockReturnValueOnce(expectedData[0]);
+
+        await postDeleteProduct(req, res);
+
+        expect(res.render).not.toHaveBeenCalled();
+        expect(res.redirect).toHaveBeenCalledWith('/products');
+    });
+
+    it("should handle errors gracefully and render error messages when a product id is not provided", async () => {
+        const req: any = {
+            params: {},
+        };
+
+        const res: any = {
+            locals: {
+                user: 'user@abc.com',
+            },
+            render: jest.fn(),
+            redirect: jest.fn(),
+        };
+        
+        (Product.findByIdAndDelete as jest.Mock) = jest.fn().mockReturnValueOnce(null);
+
+        await postDeleteProduct(req, res);
+
+        expect(res.redirect).not.toHaveBeenCalled();
+        expect(Product.findByIdAndDelete).not.toHaveBeenCalled();
+        expect(res.render).toHaveBeenCalledWith('productDelete', {
+            title: 'Product Delete',
+            username: res.locals.user,
+            error: new Error('Product not found!'),
+            productDetails: '',
+        });
+    });
+
+    it("should handle errors gracefully and render error messages when an invalid product id is provided", async () => {
+        const req: any = {
+            params: {
+                id: '65cea4a2b9d6ae606013be2',
+            },
+        };
+
+        const res: any = {
+            locals: {
+                user: 'user@abc.com',
+            },
+            render: jest.fn(),
+            redirect: jest.fn(),
+        };
+
+        (Product.findByIdAndDelete as jest.Mock) = jest.fn().mockReturnValueOnce(null);
+
+        await postDeleteProduct(req, res);
+
+        expect(res.redirect).not.toHaveBeenCalled();
+        expect(Product.findByIdAndDelete).not.toHaveBeenCalled();
+        expect(res.render).toHaveBeenCalledWith('productDelete', {
+            title: 'Product Delete',
+            username: res.locals.user,
+            error: new Error('Product not found!'),
+            productDetails: '',
+        });
+    });
+
+    it("should handle errors gracefully and render error messages when deletion fails", async () => {
+        const req: any = {
+            params: {
+                id: '65cea4a2b9d6ae606013be23',
+            },
+        };
+
+        const res: any = {
+            locals: {
+                user: 'user@abc.com',
+            },
+            render: jest.fn(),
+            redirect: jest.fn(),
+        };
+
+        (Product.findByIdAndDelete as jest.Mock) = jest.fn().mockReturnValueOnce(new Error(''));
+
+        await postDeleteProduct(req, res);
+
+        expect(res.redirect).not.toHaveBeenCalled();        
+        expect(res.render).toHaveBeenCalledWith('productDelete', {
+            title: 'Product Delete',
+            username: res.locals.user,
+            error: new Error('Deletion failed!'),
+            productDetails: '',
+        });
+    });
+
+    it("should handle errors gracefully and render error messages when deletion results in an id mismatch", async () => {
+        const req: any = {
+            params: {
+                id: '65cea4a2b9d6ae606013be23',
+            },
+        };
+
+        const res: any = {
+            locals: {
+                user: 'user@abc.com',
+            },
+            render: jest.fn(),
+            redirect: jest.fn(),
+        };
+
+        // Data with mismatched id
+        const mismatchedProductData = {
+            name: 'New Name',
+            description: 'New Description',
+            price: 20,
+            stock: 10,
+            _id: '65cea4a2b9d6ae606013be21',
+            imageFilename: 'abc-27g2sp-monitor.jpg',
+            category: {
+                _id: '652624671853eb7ecdacd6b8',
+                name: 'Computer Keyboards',
+            },
+        };
+
+        (Product.findByIdAndDelete as jest.Mock) = jest
+            .fn()
+            .mockReturnValueOnce(mismatchedProductData);
+
+        await postDeleteProduct(req, res);
+
+        expect(res.redirect).not.toHaveBeenCalled();
+        expect(res.render).toHaveBeenCalledWith('productDelete', {
+            title: 'Product Delete',
+            username: res.locals.user,
+            error: new Error('Deletion failed!'),
             productDetails: '',
         });
     });

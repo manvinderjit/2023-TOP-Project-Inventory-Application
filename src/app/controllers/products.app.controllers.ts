@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from 'express';
 import { fetchCategories } from '../services/category.app.services.js';
-import { createProduct, fetchProduct, fetchProducts, updateProduct } from '../services/products.app.services.js';
+import { createProduct, deleteProductById, fetchProduct, fetchProducts, updateProduct } from '../services/products.app.services.js';
 import { CategoryDetailsDocument, ProductDetails } from '../../types/types.js';
 import { validateDescription, validateIsMongoObjectId, validateIsNumber, validateName, validateRequiredFieldsInBody } from '../../utilities/validation.js';
 import { PathLike, unlink } from 'node:fs';
@@ -413,6 +413,24 @@ export const getDeleteProduct = async (req: Request, res: Response): Promise<voi
     }
 };
 
-export const postDeleteProduct = (req: Request, res: Response) => {
-    res.send('Not implemented yet');
+export const postDeleteProduct = async (req: Request, res: Response) => {
+    try {
+        // Validate product Id in request
+        if (!req.params.id || !validateIsMongoObjectId(req.params.id)) {
+            // If no or invalid product id, throw error
+            throw new Error('Product not found!');
+        } else {
+            const deleteStatus = await deleteProductById(req.params.id);            
+            if(deleteStatus && String(deleteStatus._id) === req.params.id) res.redirect('/products');
+            else throw new Error('Deletion failed!');
+        }
+    } catch (error) {
+        console.error(error);
+        res.render('productDelete', {
+            title: 'Product Delete',
+            username: res.locals.user,
+            error: error,
+            productDetails: '',
+        });
+    }
 };

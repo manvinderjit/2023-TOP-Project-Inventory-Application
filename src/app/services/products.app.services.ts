@@ -48,7 +48,7 @@ export const createProduct = async (productDetails: {
     return createdProduct;
 };
 
-export const updateProduct = async (productId: string, productData: { productName: string; productDescription: string; productCategory: string; productPrice: string; productStock: string; }) => {
+export const updateProduct = async (productId: string, productData: { productName: string; productDescription: string; productCategory: string; productPrice: string; productStock: string; }): Promise<ProductDetails | null> => {
 
     const updatedProductDetails = {
         name: trimMultipleWhiteSpaces(productData.productName),
@@ -58,9 +58,14 @@ export const updateProduct = async (productId: string, productData: { productNam
         stock: trimMultipleWhiteSpaces(productData.productStock),
     };
 
-    const updatedProductData = await Product.findByIdAndUpdate(
+    const updatedProductData: ProductDetails | null = await Product.findByIdAndUpdate(
         productId,
         updatedProductDetails,
     );
     return updatedProductData;
+};
+
+export const deleteProductById = async (productId: string): Promise<ProductDetails | null> => {
+    const result: ProductDetails | null = await Product.findByIdAndDelete(productId);
+    return result;
 };

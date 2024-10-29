@@ -7,6 +7,7 @@ import registerAppRouter from './register.app.router.js';
 import categoryAppRouter from './category.app.router.js';
 import promosAppRouter from './promos.app.router.js';
 import productsAppRouter from './products.app.router.js';
+import ordersAppRouter from './orders.app.routers.js';
 
 const appRouter: Router = express.Router();
 
@@ -25,5 +26,7 @@ appRouter.use('/categories', redirectToLogin, categoryAppRouter);
 appRouter.use('/promos', redirectToLogin, promosAppRouter);
 
 appRouter.use('/products', redirectToLogin, productsAppRouter);
+
+appRouter.use('/orders', redirectToLogin, ordersAppRouter);
 
 export default appRouter;

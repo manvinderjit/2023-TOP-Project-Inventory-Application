@@ -491,7 +491,7 @@ export const getDeleteProduct = async (req: Request, res: Response): Promise<voi
     }
 };
 
-export const postDeleteProduct = async (req: Request, res: Response) => {
+export const postDeleteProduct = async (req: Request, res: Response): Promise<void> => {
     try {
         // Validate product Id in request
         if (!req.params.id || !validateIsMongoObjectId(req.params.id)) {

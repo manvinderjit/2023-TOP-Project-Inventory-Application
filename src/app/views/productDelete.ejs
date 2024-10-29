@@ -28,7 +28,7 @@
 
                 <% if(locals.error && error !=='' && error !== undefined) { %>
                     <div class="alert alert-warning w-50 m-auto" role="alert">
-                        Error: <%= error %>
+                        <%= error %>
                     </div>        
                 <% } else if (locals.success && success !=='' && success !== undefined) { %>
                     <div class="alert alert-success w-50 m-auto" role="alert">
@@ -36,10 +36,11 @@
                     </div>
                 <% } %>
             </div>
-
+            
             <div class="row row-cols-1 row-cols-md-1 g-4 m-3">
                 <div class="col m-6">
                     <div class="card w-50 m-auto text-center">
+                        <% if(locals.productDetails) { %>
                         <div class="card-header">
                             <%= productDetails.name %> Category
                         </div>
@@ -80,9 +81,10 @@
                             <a href=<%= `${productDetails.url}` %> class="btn btn-primary ">View <%= productDetails.name %></a>
                             <a href=<%= `${productDetails.url}/edit` %> class="btn btn-primary ">Edit <%= productDetails.name %></a>
                         </div>
+                        <% } %>
                         <hr>
                         <div class="card-body  text-center">
-                            <a href="/allProducts" class="btn btn-primary ">Back To All Products</a>
+                            <a href="/products" class="btn btn-primary ">Back To All Products</a>
                         </div>
                     </div>
                 </div>

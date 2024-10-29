@@ -372,16 +372,45 @@ export const postEditProduct = async (req: Request, res: Response): Promise<void
     };
 };
 
-export const getEditProductImage = (req: Request, res: Response) => {
-    res.send('Not implemented yet');
+export const getEditProductImage = async (req: Request, res: Response): Promise<void> => {
 };
 
 export const postEditProductImage = (req: Request, res: Response) => {
     res.send('Not implemented yet');
 };
 
-export const getDeleteProduct = (req: Request, res: Response) => {
-    res.send('Not implemented yet');
+export const getDeleteProduct = async (req: Request, res: Response): Promise<void> => {
+    try {
+        // Validate product Id in request
+        if (!req.params.id || !validateIsMongoObjectId(req.params.id)) {
+            // If no or invalid product id, throw error
+            throw new Error('Product not found!');
+        } else {
+            // Get the product details
+            const productDetails: ProductDetails | null = await fetchProduct(
+                req.params.id,
+            );
+
+            if (
+                productDetails &&
+                String(productDetails._id) === req.params.id
+            ) {
+                res.render('productDelete', {
+                    title: 'Product Delete',
+                    username: res.locals.user,
+                    productDetails: productDetails,
+                });
+            } else throw new Error ('Product not found!')
+        }
+    } catch (error) {
+        console.error(error);
+        res.render('productDelete', {
+            title: 'Product Delete',
+            username: res.locals.user,
+            error: error,
+            productDetails: '',
+        });
+    }
 };
 
 export const postDeleteProduct = (req: Request, res: Response) => {

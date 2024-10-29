@@ -47,3 +47,20 @@ export const createProduct = async (productDetails: {
     const createdProduct = await Product.create(product);
     return createdProduct;
 };
+
+export const updateProduct = async (productId: string, productData: { productName: string; productDescription: string; productCategory: string; productPrice: string; productStock: string; }) => {
+
+    const updatedProductDetails = {
+        name: trimMultipleWhiteSpaces(productData.productName),
+        description: trimMultipleWhiteSpaces(productData.productDescription),
+        category: trimMultipleWhiteSpaces(productData.productCategory),
+        price: trimMultipleWhiteSpaces(productData.productPrice),
+        stock: trimMultipleWhiteSpaces(productData.productStock),
+    };
+
+    const updatedProductData = await Product.findByIdAndUpdate(
+        productId,
+        updatedProductDetails,
+    );
+    return updatedProductData;
+};

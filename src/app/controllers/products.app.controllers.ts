@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from 'express';
 import { fetchCategories } from '../services/category.app.services.js';
-import { createProduct, fetchProduct, fetchProducts } from '../services/products.app.services.js';
+import { createProduct, fetchProduct, fetchProducts, updateProduct } from '../services/products.app.services.js';
 import { CategoryDetailsDocument, ProductDetails } from '../../types/types.js';
 import { validateDescription, validateIsMongoObjectId, validateIsNumber, validateName, validateRequiredFieldsInBody } from '../../utilities/validation.js';
 import { PathLike, unlink } from 'node:fs';
@@ -255,7 +255,7 @@ export const getEditProduct = async (req: Request, res: Response): Promise<void>
         } else {
             // Fetch product details            
             const productDetails: ProductDetails | null = await fetchProduct(req.params.id);
-
+            // Render product view
             if(productDetails && String(productDetails._id) === req.params.id) {
                 res.render('productEdit', {
                     title: 'Product Edit',
@@ -271,7 +271,7 @@ export const getEditProduct = async (req: Request, res: Response): Promise<void>
                     },
                     categoryList: productCategories,
                 });
-            } else {
+            } else { // If product not found, throw error
                 throw new Error('Product not found!');
             };
         }
@@ -288,8 +288,88 @@ export const getEditProduct = async (req: Request, res: Response): Promise<void>
     };
 };
 
-export const postEditProduct = (req: Request, res: Response) => {
-    res.send('Not implemented yet');
+export const postEditProduct = async (req: Request, res: Response): Promise<void> => {
+    // Get all categories for selecting products based on categories
+    const productCategories: CategoryDetailsDocument[] = await fetchCategories();
+
+    try {
+        // Validate product Id in request
+        if (!req.params.id || !validateIsMongoObjectId(req.params.id)) {
+            // If no or invalid product id, throw error
+            throw new Error('Product not found!');
+        } else {
+            const requiredFieldsAndValidators = [
+                {
+                    field: 'productName',
+                    validator: validateName,
+                    value: req.body.productName,
+                    label: 'Product Name',
+                },
+                {
+                    field: 'productDescription',
+                    validator: validateDescription,
+                    value: req.body.productDescription,
+                    label: 'Product Description',
+                },
+                {
+                    field: 'productCategory',
+                    validator: validateIsMongoObjectId,
+                    value: req.body.productCategory,
+                    label: 'Product Category',
+                },
+                {
+                    field: 'productPrice',
+                    validator: validateIsNumber,
+                    value: req.body.productPrice,
+                    label: 'Product Price',
+                },
+                {
+                    field: 'productStock',
+                    validator: validateIsNumber,
+                    value: req.body.productStock,
+                    label: 'Product Stock',
+                },
+            ];
+
+            // Check missing or invalid fields
+            const invalidFields: string[] = validateRequiredFieldsInBody(
+                requiredFieldsAndValidators,
+                req.body,
+            );
+
+            // If invalid fields
+            if (invalidFields.length !== 0)
+                throw new Error(`Please check ${invalidFields}`);
+
+            else if (invalidFields.length === 0) {
+                const newProductData = {
+                    productName: req.body.productName,
+                    productDescription: req.body.productDescription,
+                    productCategory: req.body.productCategory,
+                    productPrice: req.body.productPrice,
+                    productStock: req.body.productStock,
+                };
+
+                // Try updating product details
+                const updatedProductData = await updateProduct(req.params.id, newProductData);
+
+                if(updatedProductData && String(updatedProductData._id) === req.params.id) res.redirect(`/products/${req.params.id}`);
+
+                else throw new Error('Product update failed!');
+            };
+        }
+
+        // Validate fields
+    } catch (error) {
+        console.error(error);
+        res.render('productEdit', {
+            title: 'Product Edit',
+            username: res.locals.user,
+            error: error,
+            productUrl: req.body.productUrl,
+            categoryList: productCategories,
+        });
+    };
 };
 
 export const getEditProductImage = (req: Request, res: Response) => {

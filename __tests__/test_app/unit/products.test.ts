@@ -7,6 +7,7 @@ import {
     getCreateProducts,
     postCreateProduct,
     getEditProduct,
+    postEditProduct,
 } from '../../../src/app/controllers/products.app.controllers';
 import { unlink } from 'fs';
 
@@ -502,7 +503,7 @@ describe("POST Create Product", () => {
             category: {
                 _id: '652624671853eb7ecdacd6b8',
                 name: 'Computer Keyboards',
-            },            
+            },    
         };
 
         const req: any = {
@@ -916,11 +917,7 @@ describe("GET Edit Product Details", () => {
                 user: 'user@abc.com',
             },
             render: jest.fn(),
-        };
-
-        const expectedData = dataMockProducts.filter(
-            (product) => product._id === req.params.id,
-        );
+        };       
 
         (Category.find as jest.Mock) = jest.fn().mockReturnValueOnce({
             select: jest.fn().mockReturnThis(),
@@ -938,6 +935,340 @@ describe("GET Edit Product Details", () => {
             title: 'Product Edit',
             username: res.locals.user,
             error: new Error('Product not found!'),
+            productUrl: req.body.productUrl,
+            categoryList: dataMockCategories,
+        });
+    });
+});
+
+describe("POST Product Edit", () => {
+    it("should edit product succesfully and redirect to the product page", async () => {
+        const req: any = {
+            params: {
+                id: '65cea4a2b9d6ae606013be23',
+            },
+            body: {
+                productName: 'New Name',
+                productDescription: 'New Description',
+                productCategory: '652624671853eb7ecdacd6b8',
+                productPrice: '20',
+                productStock: '10',
+            },
+        };
+
+        const updatedProductData = {
+            name: 'New Name',
+            description: 'New Description',
+            price: 20,
+            stock: 10,
+            _id: '65cea4a2b9d6ae606013be23',
+            imageFilename: 'abc-27g2sp-monitor.jpg',
+            category: {
+                _id: '652624671853eb7ecdacd6b8',
+                name: 'Computer Keyboards',
+            },
+        };
+
+        const res: any = {
+            locals: {
+                user: 'user@abc.com',
+            },
+            render: jest.fn(),
+            redirect: jest.fn(),
+        };
+
+        (Category.find as jest.Mock) = jest.fn().mockReturnValueOnce({
+            select: jest.fn().mockReturnThis(),
+            sort: jest.fn().mockReturnThis(),
+            exec: jest.fn().mockReturnValueOnce(dataMockCategories),
+        });
+
+        (Product.findByIdAndUpdate as jest.Mock) = jest.fn().mockReturnValueOnce(updatedProductData);
+
+        await postEditProduct(req, res);
+        
+        expect(res.render).not.toHaveBeenCalled();
+        expect(res.redirect).toHaveBeenCalledWith(`/products/${req.params.id}`);
+    });
+
+    it('should handle errors gracefully and render error message when an invalid product id is provided', async () => {
+        const req: any = {
+            params: {
+                id: '65cea4a2b9d6ae606013be',
+            },
+            body: {
+                productName: 'New Name',
+                productDescription: 'New Description',
+                productCategory: '652624671853eb7ecdacd6b8',
+                productPrice: '20',
+                productStock: '10',
+            },
+        };
+
+        const res: any = {
+            locals: {
+                user: 'user@abc.com',
+            },
+            render: jest.fn(),
+            redirect: jest.fn(),
+        };
+
+        (Category.find as jest.Mock) = jest.fn().mockReturnValueOnce({
+            select: jest.fn().mockReturnThis(),
+            sort: jest.fn().mockReturnThis(),
+            exec: jest.fn().mockReturnValueOnce(dataMockCategories),
+        });
+
+        (Product.findByIdAndUpdate as jest.Mock) = jest
+            .fn()
+            .mockReturnValueOnce(null);
+
+        await postEditProduct(req, res);
+
+        expect(res.redirect).not.toHaveBeenCalled();
+        expect(Product.findByIdAndUpdate).not.toHaveBeenCalled();
+        expect(res.render).toHaveBeenCalledWith('productEdit', {
+            title: 'Product Edit',
+            username: res.locals.user,
+            error: new Error('Product not found!'),
+            productUrl: req.body.productUrl,
+            categoryList: dataMockCategories,
+        });
+    });
+
+    it('should handle errors gracefully and render error message when a product id is not provided', async () => {
+        const req: any = {
+            params: {},
+            body: {
+                productName: 'New Name',
+                productDescription: 'New Description',
+                productCategory: '652624671853eb7ecdacd6b8',
+                productPrice: '20',
+                productStock: '10',
+            },
+        };
+
+        const res: any = {
+            locals: {
+                user: 'user@abc.com',
+            },
+            render: jest.fn(),
+            redirect: jest.fn(),
+        };
+
+        (Category.find as jest.Mock) = jest.fn().mockReturnValueOnce({
+            select: jest.fn().mockReturnThis(),
+            sort: jest.fn().mockReturnThis(),
+            exec: jest.fn().mockReturnValueOnce(dataMockCategories),
+        });
+
+        (Product.findByIdAndUpdate as jest.Mock) = jest
+            .fn()
+            .mockReturnValueOnce(null);
+
+        await postEditProduct(req, res);
+
+        expect(res.redirect).not.toHaveBeenCalled();
+        expect(Product.findByIdAndUpdate).not.toHaveBeenCalled();
+        expect(res.render).toHaveBeenCalledWith('productEdit', {
+            title: 'Product Edit',
+            username: res.locals.user,
+            error: new Error('Product not found!'),
+            productUrl: req.body.productUrl,
+            categoryList: dataMockCategories,
+        });
+    });
+
+    it('should handle errors gracefully and render error messages when fields are invalid', async () => {
+        const req: any = {
+            params: {
+                id: '65cea4a2b9d6ae606013be23',
+            },
+            body: {
+                productName: '   ',
+                productDescription: '   ',
+                productCategory: '6526671853eb7ecdacd6b8',
+                productPrice: 'aa',
+                productStock: 'a',
+            },
+        };
+
+        const res: any = {
+            locals: {
+                user: 'user@abc.com',
+            },
+            render: jest.fn(),
+            redirect: jest.fn(),
+        };
+
+        (Category.find as jest.Mock) = jest.fn().mockReturnValueOnce({
+            select: jest.fn().mockReturnThis(),
+            sort: jest.fn().mockReturnThis(),
+            exec: jest.fn().mockReturnValueOnce(dataMockCategories),
+        });
+
+        (Product.findByIdAndUpdate as jest.Mock) = jest
+            .fn()
+            .mockReturnValueOnce(null);
+
+        await postEditProduct(req, res);
+
+        expect(res.redirect).not.toHaveBeenCalled();
+        expect(Product.findByIdAndUpdate).not.toHaveBeenCalled();
+        expect(res.render).toHaveBeenCalledWith('productEdit', {
+            title: 'Product Edit',
+            username: res.locals.user,
+            error: new Error('Please check  Product Name, Product Description, Product Category, Product Price, Product Stock'),
+            productUrl: req.body.productUrl,
+            categoryList: dataMockCategories,
+        });
+    });
+
+    it('should handle errors gracefully and render error messages when product update fails', async () => {
+        const req: any = {
+            params: {
+                id: '65cea4a2b9d6ae606013be23',
+            },
+            body: {
+                productName: 'New Name',
+                productDescription: 'New Description',
+                productCategory: '652624671853eb7ecdacd6b8',
+                productPrice: '20',
+                productStock: '10',
+            },
+        };
+
+        const res: any = {
+            locals: {
+                user: 'user@abc.com',
+            },
+            render: jest.fn(),
+            redirect: jest.fn(),
+        };
+
+        (Category.find as jest.Mock) = jest.fn().mockReturnValueOnce({
+            select: jest.fn().mockReturnThis(),
+            sort: jest.fn().mockReturnThis(),
+            exec: jest.fn().mockReturnValueOnce(dataMockCategories),
+        });
+
+        (Product.findByIdAndUpdate as jest.Mock) = jest
+            .fn()
+            .mockReturnValueOnce(() => {throw new Error('Failure')});
+
+        await postEditProduct(req, res);
+
+        expect(res.redirect).not.toHaveBeenCalled();        
+        expect(res.render).toHaveBeenCalledWith('productEdit', {
+            title: 'Product Edit',
+            username: res.locals.user,
+            error: new Error(
+                'Product update failed!',
+            ),
+            productUrl: req.body.productUrl,
+            categoryList: dataMockCategories,
+        });
+    });
+
+    it('should handle errors gracefully and render error messages when product update returns nothing', async () => {
+        const req: any = {
+            params: {
+                id: '65cea4a2b9d6ae606013be23',
+            },
+            body: {
+                productName: 'New Name',
+                productDescription: 'New Description',
+                productCategory: '652624671853eb7ecdacd6b8',
+                productPrice: '20',
+                productStock: '10',
+            },
+        };
+
+        const res: any = {
+            locals: {
+                user: 'user@abc.com',
+            },
+            render: jest.fn(),
+            redirect: jest.fn(),
+        };
+
+        (Category.find as jest.Mock) = jest.fn().mockReturnValueOnce({
+            select: jest.fn().mockReturnThis(),
+            sort: jest.fn().mockReturnThis(),
+            exec: jest.fn().mockReturnValueOnce(dataMockCategories),
+        });
+
+        (Product.findByIdAndUpdate as jest.Mock) = jest
+            .fn()
+            .mockReturnValueOnce(null);
+
+        await postEditProduct(req, res);
+
+        expect(res.redirect).not.toHaveBeenCalled();        
+        expect(res.render).toHaveBeenCalledWith('productEdit', {
+            title: 'Product Edit',
+            username: res.locals.user,
+            error: new Error(
+                'Product update failed!',
+            ),
+            productUrl: req.body.productUrl,
+            categoryList: dataMockCategories,
+        });
+    });
+
+    it('should handle errors gracefully and render error messages when product update returns a mismatched id', async () => {
+        const req: any = {
+            params: {
+                id: '65cea4a2b9d6ae606013be23',
+            },
+            body: {
+                productName: 'New Name',
+                productDescription: 'New Description',
+                productCategory: '652624671853eb7ecdacd6b8',
+                productPrice: '20',
+                productStock: '10',
+            },
+        };
+
+        const res: any = {
+            locals: {
+                user: 'user@abc.com',
+            },
+            render: jest.fn(),
+            redirect: jest.fn(),
+        };
+
+        // Data with mismatched id
+        const updatedProductData = {
+            name: 'New Name',
+            description: 'New Description',
+            price: 20,
+            stock: 10,
+            _id: '65cea4a2b9d6ae606013be21',
+            imageFilename: 'abc-27g2sp-monitor.jpg',
+            category: {
+                _id: '652624671853eb7ecdacd6b8',
+                name: 'Computer Keyboards',
+            },
+        };
+
+        (Category.find as jest.Mock) = jest.fn().mockReturnValueOnce({
+            select: jest.fn().mockReturnThis(),
+            sort: jest.fn().mockReturnThis(),
+            exec: jest.fn().mockReturnValueOnce(dataMockCategories),
+        });
+
+        (Product.findByIdAndUpdate as jest.Mock) = jest
+            .fn()
+            .mockReturnValueOnce(updatedProductData);
+
+        await postEditProduct(req, res);
+
+        expect(res.redirect).not.toHaveBeenCalled();
+        expect(res.render).toHaveBeenCalledWith('productEdit', {
+            title: 'Product Edit',
+            username: res.locals.user,
+            error: new Error('Product update failed!'),
             productUrl: req.body.productUrl,
             categoryList: dataMockCategories,
         });

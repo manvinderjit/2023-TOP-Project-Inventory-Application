@@ -1,11 +1,11 @@
-import { Document, Types } from "mongoose";
+import { Document, Types } from 'mongoose';
 
 export interface CategoryDetailsDocument extends Document {
     _id: Types.ObjectId;
     name: string;
     description: string;
     url: string;
-};
+}
 
 interface PromoEditDetails extends Document {
     caption: {
@@ -34,4 +34,18 @@ export interface ProductDetails {
     price: number;
     stock: number;
     imageFilename?: string | null;
-};
+}
+
+export interface OrderItemDetails {
+    itemId: Types.ObjectId;
+    itemQuantity: number;
+    itemPrice: number;
+}
+
+export interface OrderDetails {
+    _id: Types.ObjectId;
+    customerId: Types.ObjectId;
+    items: OrderItemDetails[];
+    totalAmount: number;
+    status: string;
+}

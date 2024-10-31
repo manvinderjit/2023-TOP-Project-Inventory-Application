@@ -1,7 +1,7 @@
 import Order from "../../models/ordersModel.js";
 import { OrderDetails } from "../../types/types.js";
 
-const allowedOrderStatuses = [
+export const allowedOrderStatuses = [
     'Ordered' ,
     'Processed' ,
     'Shipped' ,
@@ -21,8 +21,7 @@ export const fetchOrders = async (
         orderCategory !== 'all' &&
         allowedOrderStatuses.includes(orderCategory)
     )
-        query = { status: orderCategory };
-        console.log(query)
+        query = { status: orderCategory };        
 
     const orders: OrderDetails[] | null = await Order.find(query)
         .populate({
@@ -33,4 +32,16 @@ export const fetchOrders = async (
         .exec();
 
     return orders;
+};
+
+export const fetchOrderById = async (orderId: string): Promise<OrderDetails | null> => {
+    
+    const orderData: OrderDetails | null = await Order.findById(orderId)
+        .populate({
+            path: 'items.itemDetails',
+            select: 'name description',
+        })
+        .exec();
+
+    return orderData;
 };

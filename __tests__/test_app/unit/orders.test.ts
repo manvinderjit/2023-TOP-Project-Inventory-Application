@@ -1,7 +1,7 @@
 import { jest } from '@jest/globals';
 import Orders from '../../../src/models/ordersModel';
 import Category from '../../../src/models/categoryModel';
-import { getAllOrders } from '../../../src/app/controllers/orders.app.controller.js';
+import { getAllOrders, getOrderById } from '../../../src/app/controllers/orders.app.controller.js';
 
 const orderStatusList = [
     { id: 1, name: 'Ordered' },
@@ -387,6 +387,159 @@ describe("GET Manage Orders", () => {
             error: new Error('Invalid Order Category!'),
             orderCategoryList: orderStatusList,
             selectedOrderCategory: req.body.orderCategory,
+        });
+    });
+});
+
+describe("GET Manage An Order", () => {
+    it("should render the data for an order after fetching order data", async () => {
+        const req: any = {
+            params: {
+                id: '65e776668ab602638976d41f',
+            },
+        };
+
+        const res: any = {
+            locals: {
+                user: 'user@abc.com',
+            },
+            render: jest.fn(),
+        };
+
+        (Orders.findById as jest.Mock) = jest.fn().mockReturnValueOnce({
+            populate: jest.fn().mockReturnThis(),
+            exec: jest.fn().mockReturnValueOnce(dataMockOrders.filter(order => order._id === req.params.id)[0]),
+        });
+
+        await getOrderById(req, res);
+
+        expect(Orders.findById).toHaveBeenCalledWith(req.params.id);
+        
+        expect(res.render).toHaveBeenCalledWith('orderView', {
+            title: 'Customer Order Details',
+            username: res.locals.user,
+            orderDetails: dataMockOrders[0],
+            orderStatusList: orderStatusList,
+        });
+    });
+
+    it('should handle error gracefully and render error messages when no order id is provided', async () => {
+        const req: any = {
+            params: {},
+        };
+
+        const res: any = {
+            locals: {
+                user: 'user@abc.com',
+            },
+            render: jest.fn(),
+        };
+
+        (Orders.findById as jest.Mock) = jest.fn().mockReturnValueOnce({
+            populate: jest.fn().mockReturnThis(),
+            exec: jest.fn().mockReturnValueOnce(null),
+        });
+
+        await getOrderById(req, res);
+
+        expect(Orders.findById).not.toHaveBeenCalledWith(req.params.id);
+
+        expect(res.render).toHaveBeenCalledWith('orderView', {
+            title: 'Customer Order Details',
+            username: res.locals.user,
+            error: new Error('Order not found!'),
+            orderStatusList: orderStatusList,
+        });
+    });
+
+    it('should handle error gracefully and render error messages when an invalid order id is provided', async () => {
+        const req: any = {
+            params: {
+                id: 'abc'
+            },
+        };
+
+        const res: any = {
+            locals: {
+                user: 'user@abc.com',
+            },
+            render: jest.fn(),
+        };
+
+        (Orders.findById as jest.Mock) = jest.fn().mockReturnValueOnce({
+            populate: jest.fn().mockReturnThis(),
+            exec: jest.fn().mockReturnValueOnce(null),
+        });
+
+        await getOrderById(req, res);
+
+        expect(Orders.findById).not.toHaveBeenCalledWith(req.params.id);
+
+        expect(res.render).toHaveBeenCalledWith('orderView', {
+            title: 'Customer Order Details',
+            username: res.locals.user,
+            error: new Error('Order not found!'),
+            orderStatusList: orderStatusList,
+        });
+    });
+
+    it('should handle error gracefully and render error messages when data for an order is not found', async () => {
+        const req: any = {
+            params: {
+                id: '65e776668ab602638976d412',
+            },
+        };
+
+        const res: any = {
+            locals: {
+                user: 'user@abc.com',
+            },
+            render: jest.fn(),
+        };
+
+        (Orders.findById as jest.Mock) = jest.fn().mockReturnValueOnce({
+            populate: jest.fn().mockReturnThis(),
+            exec: jest.fn().mockReturnValueOnce(dataMockOrders.filter(order => order._id === req.params.id)[0]),
+        });
+
+        await getOrderById(req, res);
+
+        expect(res.render).toHaveBeenCalledWith('orderView', {
+            title: 'Customer Order Details',
+            username: res.locals.user,
+            error: new Error('Order not found!'),
+            orderStatusList: orderStatusList,
+        });
+    });
+
+    it('should handle error gracefully and render error messages when there order id mismatch occurs', async () => {
+        const req: any = {
+            params: {
+                id: '65e776668ab602638976d413',
+            },
+        };
+
+        const res: any = {
+            locals: {
+                user: 'user@abc.com',
+            },
+            render: jest.fn(),
+        };
+
+        (Orders.findById as jest.Mock) = jest.fn().mockReturnValueOnce({
+            populate: jest.fn().mockReturnThis(),
+            exec: jest
+                .fn()
+                .mockReturnValueOnce(dataMockOrders[0]),
+        });
+
+        await getOrderById(req, res);
+
+        expect(res.render).toHaveBeenCalledWith('orderView', {
+            title: 'Customer Order Details',
+            username: res.locals.user,
+            error: new Error('Order not found!'),
+            orderStatusList: orderStatusList,
         });
     });
 });

@@ -18,14 +18,7 @@
                 <button class="btn btn-outline-primary me-2">Logout</button>        
             </form>
 
-        </div>
-        <!-- <hr> -->
-        <!-- <div class="container">
-            <h2 class="py-2 text-center ">Manage Orders</h2>
-            <div class="card-body text-center">
-                <a href="/promos/create" class="btn btn-primary ">Add A New Promo </a>
-            </div>
-        </div> -->
+        </div>       
         <hr>
         <div class="container">
             <h2 class="py-2 text-center ">Manage Order</h2>            
@@ -35,7 +28,7 @@
                 <div class="container w-100">
                 <% if(locals.error && error !=='' && error !== undefined) { %>
                     <div class="alert alert-warning w-50 m-auto" role="alert">
-                        Error: <%= error %>
+                        <%= error %>
                     </div>        
                 <% } else if (locals.success && success !=='' && success !== undefined) { %>
                     <div class="alert alert-success w-50 m-auto" role="alert">

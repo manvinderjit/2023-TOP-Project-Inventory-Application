@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
-import { fetchOrders } from '../services/orders.app.services.js';
+import { allowedOrderStatuses, fetchOrderById, fetchOrders } from '../services/orders.app.services.js';
+import { validateIsMongoObjectId } from '../../utilities/validation.js';
 
 const orderStatusList = [
     { id: 1, name: 'Ordered' },
@@ -67,7 +68,35 @@ export const getAllOrders = async (req: Request, res: Response): Promise<void> =
 };
 
 export const getOrderById = async (req: Request, res: Response): Promise<void> => {
-    res.send('Not Implemented Yet');
+    try {
+        if (!req.params.id || !validateIsMongoObjectId(req.params.id)) {
+            throw new Error('Order not found!');
+        } else {
+            const { id } = req.params;
+            
+            // Fetch order data
+            const orderDetails = await fetchOrderById(id);
+            // If order data found
+            if(orderDetails && String(orderDetails._id) === id) {
+                res.render('orderView', {
+                    title: 'Customer Order Details',
+                    username: res.locals.user,
+                    orderDetails: orderDetails,
+                    orderStatusList: orderStatusList,
+                });
+            } 
+            // Throw error if no order data or id mismatch
+            else throw new Error('Order not found!');
+        }
+    } catch (error) {
+        console.error(error);
+        res.render('orderView', {
+            title: 'Customer Order Details',
+            username: res.locals.user,
+            error: error,
+            orderStatusList: orderStatusList,
+        });
+    }
 };
 
 export const postFullfillOrder = async (req: Request, res: Response): Promise<void> => {

@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
-import { allowedOrderStatuses, fetchOrderById, fetchOrders } from '../services/orders.app.services.js';
-import { validateIsMongoObjectId } from '../../utilities/validation.js';
+import { allowedOrderStatuses, fetchOrderById, fetchOrders, updateOrderStatusById } from '../services/orders.app.services.js';
+import { validateIsMongoObjectId, validateIsNumber } from '../../utilities/validation.js';
 
 const orderStatusList = [
     { id: 1, name: 'Ordered' },
@@ -69,6 +69,7 @@ export const getAllOrders = async (req: Request, res: Response): Promise<void> =
 
 export const getOrderById = async (req: Request, res: Response): Promise<void> => {
     try {
+        // Validate order id
         if (!req.params.id || !validateIsMongoObjectId(req.params.id)) {
             throw new Error('Order not found!');
         } else {
@@ -99,6 +100,53 @@ export const getOrderById = async (req: Request, res: Response): Promise<void> =
     }
 };
 
-export const postFullfillOrder = async (req: Request, res: Response): Promise<void> => {
-    res.send('Not Implemented Yet');
+export const postFulfillOrder = async (req: Request, res: Response): Promise<void> => {
+    try {
+        // Validate order id
+        if (!req.params.id || !validateIsMongoObjectId(req.params.id)) {
+            throw new Error('Order not found!');
+        } 
+        else if (
+            !req.body.newOrderStatus ||
+            req.body.newOrderStatus.trim() === '' ||
+            !validateIsNumber(req.body.newOrderStatus.trim()) ||
+            orderStatusList.findIndex(
+                    (item) =>
+                        item.id === Number(req.body.newOrderStatus.trim()),
+                ) === -1
+        ) {
+            let orderDetails = null;
+            const { id } = req.params;
+            // Fetch order data
+            const fetchedOrderData = await fetchOrderById(id);
+            // If order data found
+            if(fetchedOrderData && String(fetchedOrderData._id) === id) orderDetails = fetchedOrderData;
+
+            res.render('orderView', {
+                title: 'Customer Order Details',
+                username: res.locals.user,
+                error: new Error('No order status provided or invalid order status!'),
+                orderDetails,
+                orderStatusList: orderStatusList,
+            });
+
+        } else {
+            const { id } = req.params;
+            const updatedOrder = await updateOrderStatusById(
+                id,
+                orderStatusList[req.body.newOrderStatus - 1].name,
+            );
+            if(updatedOrder && String(updatedOrder._id) === id){
+                res.redirect(`/orders/${id}`);
+            } else throw new Error ('Order status update failed!');
+        }
+    } catch (error) {
+        console.error(error);        
+        res.render('orderView', {
+            title: 'Customer Order Details',
+            username: res.locals.user,
+            error: error,            
+            orderStatusList: orderStatusList,
+        });
+    };
 };

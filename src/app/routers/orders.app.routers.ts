@@ -13,6 +13,6 @@ ordersAppRouter.post('/', orderControllers.getAllOrders);
 ordersAppRouter.get('/:id', orderControllers.getOrderById);
 
 // POST route to fulfill an order by id
-ordersAppRouter.post('/:id', orderControllers.postFullfillOrder);
+ordersAppRouter.post('/:id', orderControllers.postFulfillOrder);
 
 export default ordersAppRouter;

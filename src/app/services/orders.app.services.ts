@@ -45,3 +45,10 @@ export const fetchOrderById = async (orderId: string): Promise<OrderDetails | nu
 
     return orderData;
 };
+
+export const updateOrderStatusById = async (orderId: string, orderStatus: string): Promise<OrderDetails | null> => {
+    const updatedOrder: OrderDetails | null = await Order.findByIdAndUpdate(orderId, {
+        status: orderStatus,
+    });
+    return updatedOrder;
+};

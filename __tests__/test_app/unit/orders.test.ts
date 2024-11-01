@@ -1,7 +1,6 @@
 import { jest } from '@jest/globals';
 import Orders from '../../../src/models/ordersModel';
-import Category from '../../../src/models/categoryModel';
-import { getAllOrders, getOrderById } from '../../../src/app/controllers/orders.app.controller.js';
+import { getAllOrders, getOrderById, postFulfillOrder } from '../../../src/app/controllers/orders.app.controller.js';
 
 const orderStatusList = [
     { id: 1, name: 'Ordered' },
@@ -542,4 +541,349 @@ describe("GET Manage An Order", () => {
             orderStatusList: orderStatusList,
         });
     });
+});
+
+describe("POST Fulfill Order", () => {
+    it("should update the order status successfully when valid data provided", async () => {
+        const req: any = {
+            params: {
+                id: '65e776668ab602638976d41f',
+            },
+            body: {
+                newOrderStatus: '7',
+            },
+        };
+
+        const res: any = {
+            locals: {
+                user: 'user@abc.com',
+            },
+            render: jest.fn(),
+            redirect: jest.fn(),
+        };
+
+        const expectedData = dataMockOrders.filter(order => order._id === req.params.id)[0];
+        expectedData.status = req.body.newOrderStatus;
+
+        (Orders.findByIdAndUpdate as jest.Mock) = jest
+            .fn()
+            .mockReturnValueOnce(expectedData);
+        
+        await postFulfillOrder(req, res);
+
+        const labelOrderStatus = orderStatusList[Number(orderStatusList.findIndex(item => item.id === Number(req.body.newOrderStatus)))].name;
+
+        expect(Orders.findByIdAndUpdate).toHaveBeenCalledWith(req.params.id, {
+            status: labelOrderStatus,
+        });
+        expect(res.redirect).toHaveBeenCalledWith(`/orders/${req.params.id}`);
+        expect(res.render).not.toHaveBeenCalled();
+    });
+
+    it("should handle error gracefully and render error message when there is no order id provided", async () => {
+        const req: any = {
+            params: {
+            },
+            body: {
+                newOrderStatus: '7',
+            },
+        };
+
+        const res: any = {
+            locals: {
+                user: 'user@abc.com',
+            },
+            render: jest.fn(),
+            redirect: jest.fn(),
+        };
+
+        (Orders.findByIdAndUpdate as jest.Mock) = jest
+            .fn()
+            .mockReturnValueOnce(null);
+        
+        await postFulfillOrder(req, res);
+
+        expect(Orders.findByIdAndUpdate).not.toHaveBeenCalled();
+        expect(res.redirect).not.toHaveBeenCalled();
+        expect(res.render).toHaveBeenCalledWith('orderView', {
+            title: 'Customer Order Details',
+            username: res.locals.user,
+            error: new Error('Order not found!'),
+            orderStatusList: orderStatusList,
+        });
+    });
+
+    it('should handle error gracefully and render error message when an invalid order id is provided', async () => {
+        const req: any = {
+            params: {
+                id: 'jahdfa87e124jk'
+            },
+            body: {
+                newOrderStatus: '7',
+            },
+        };
+
+        const res: any = {
+            locals: {
+                user: 'user@abc.com',
+            },
+            render: jest.fn(),
+            redirect: jest.fn(),
+        };
+
+        (Orders.findByIdAndUpdate as jest.Mock) = jest
+            .fn()
+            .mockReturnValueOnce(null);
+
+        await postFulfillOrder(req, res);
+
+        expect(Orders.findByIdAndUpdate).not.toHaveBeenCalled();
+        expect(res.redirect).not.toHaveBeenCalled();
+        expect(res.render).toHaveBeenCalledWith('orderView', {
+            title: 'Customer Order Details',
+            username: res.locals.user,
+            error: new Error('Order not found!'),            
+            orderStatusList: orderStatusList,
+        });
+    });
+
+    it('should handle error gracefully and render error message when no new order status is provided', async () => {
+        const req: any = {
+            params: {
+                id: '65e776668ab602638976d41f',
+            },
+            body: {},
+        };
+
+        const res: any = {
+            locals: {
+                user: 'user@abc.com',
+            },
+            render: jest.fn(),
+            redirect: jest.fn(),
+        };
+
+        (Orders.findByIdAndUpdate as jest.Mock) = jest
+            .fn()
+            .mockReturnValueOnce(null);
+
+        (Orders.findById as jest.Mock) = jest.fn().mockReturnValueOnce({
+            populate: jest.fn().mockReturnThis(),
+            exec: jest.fn().mockReturnValueOnce(dataMockOrders.filter(item => item._id === req.params.id)[0]),
+        });
+
+        await postFulfillOrder(req, res);
+
+        expect(Orders.findByIdAndUpdate).not.toHaveBeenCalled();
+        expect(res.redirect).not.toHaveBeenCalled();
+        expect(res.render).toHaveBeenCalledWith('orderView', {
+            title: 'Customer Order Details',
+            username: res.locals.user,
+            error: new Error('No order status provided or invalid order status!'),
+            orderDetails: dataMockOrders.filter(item => item._id === req.params.id)[0],
+            orderStatusList: orderStatusList,
+        });
+    });
+
+    it('should handle error gracefully and render error message when an invalid, no-number, order status is provided', async () => {
+        const req: any = {
+            params: {
+                id: '65e776668ab602638976d41f',
+            },
+            body: {
+                newOrderStatus: 'abc',
+            },
+        };
+
+        const res: any = {
+            locals: {
+                user: 'user@abc.com',
+            },
+            render: jest.fn(),
+            redirect: jest.fn(),
+        };
+
+        (Orders.findByIdAndUpdate as jest.Mock) = jest
+            .fn()
+            .mockReturnValueOnce(null);
+
+        (Orders.findById as jest.Mock) = jest.fn().mockReturnValueOnce({
+            populate: jest.fn().mockReturnThis(),
+            exec: jest.fn().mockReturnValueOnce(dataMockOrders.filter(item => item._id === req.params.id)[0]),
+        });
+
+        await postFulfillOrder(req, res);
+
+        expect(Orders.findByIdAndUpdate).not.toHaveBeenCalled();
+        expect(res.redirect).not.toHaveBeenCalled();
+        expect(res.render).toHaveBeenCalledWith('orderView', {
+            title: 'Customer Order Details',
+            username: res.locals.user,
+            error: new Error('No order status provided or invalid order status!'),
+            orderDetails: dataMockOrders.filter(item => item._id === req.params.id)[0],
+            orderStatusList: orderStatusList,
+        });
+    });
+
+    it('should handle error gracefully and render error message when an empty order status is provided', async () => {
+        const req: any = {
+            params: {
+                id: '65e776668ab602638976d41f',
+            },
+            body: {
+                newOrderStatus: '  ',
+            },
+        };
+
+        const res: any = {
+            locals: {
+                user: 'user@abc.com',
+            },
+            render: jest.fn(),
+            redirect: jest.fn(),
+        };
+
+        (Orders.findByIdAndUpdate as jest.Mock) = jest
+            .fn()
+            .mockReturnValueOnce(null);
+
+        (Orders.findById as jest.Mock) = jest.fn().mockReturnValueOnce({
+            populate: jest.fn().mockReturnThis(),
+            exec: jest.fn().mockReturnValueOnce(dataMockOrders.filter(item => item._id === req.params.id)[0]),
+        });
+
+        await postFulfillOrder(req, res);
+
+        expect(Orders.findByIdAndUpdate).not.toHaveBeenCalled();
+        expect(res.redirect).not.toHaveBeenCalled();
+        expect(res.render).toHaveBeenCalledWith('orderView', {
+            title: 'Customer Order Details',
+            username: res.locals.user,
+            error: new Error('No order status provided or invalid order status!'),
+            orderDetails: dataMockOrders.filter(item => item._id === req.params.id)[0],
+            orderStatusList: orderStatusList,
+        });
+    });
+
+    it('should handle error gracefully and render error message when an order status does not exists', async () => {
+        const req: any = {
+            params: {
+                id: '65e776668ab602638976d41f',
+            },
+            body: {
+                newOrderStatus: '999',
+            },
+        };
+
+        const res: any = {
+            locals: {
+                user: 'user@abc.com',
+            },
+            render: jest.fn(),
+            redirect: jest.fn(),
+        };
+
+        (Orders.findByIdAndUpdate as jest.Mock) = jest
+            .fn()
+            .mockReturnValueOnce(null);
+
+        (Orders.findById as jest.Mock) = jest.fn().mockReturnValueOnce({
+            populate: jest.fn().mockReturnThis(),
+            exec: jest.fn().mockReturnValueOnce(dataMockOrders.filter(item => item._id === req.params.id)[0]),
+        });
+
+        await postFulfillOrder(req, res);
+
+        expect(Orders.findByIdAndUpdate).not.toHaveBeenCalled();
+        expect(res.redirect).not.toHaveBeenCalled();
+        expect(res.render).toHaveBeenCalledWith('orderView', {
+            title: 'Customer Order Details',
+            username: res.locals.user,
+            error: new Error('No order status provided or invalid order status!'),
+            orderDetails: dataMockOrders.filter(item => item._id === req.params.id)[0],
+            orderStatusList: orderStatusList,
+        });
+    });
+
+    it('should handle error gracefully and render error message when the order status update fails', async () => {
+        const req: any = {
+            params: {
+                id: '65e776668ab602638976d41f',
+            },
+            body: {
+                newOrderStatus: '7',
+            },
+        };
+
+        const res: any = {
+            locals: {
+                user: 'user@abc.com',
+            },
+            render: jest.fn(),
+            redirect: jest.fn(),
+        };
+
+        (Orders.findByIdAndUpdate as jest.Mock) = jest
+            .fn()
+            .mockReturnValueOnce(null);
+
+        (Orders.findById as jest.Mock) = jest.fn().mockReturnValueOnce({
+            populate: jest.fn().mockReturnThis(),
+            exec: jest.fn().mockReturnValueOnce(dataMockOrders.filter(item => item._id === req.params.id)[0]),
+        });
+
+        await postFulfillOrder(req, res);
+        
+        expect(res.redirect).not.toHaveBeenCalled();
+        expect(res.render).toHaveBeenCalledWith('orderView', {
+            title: 'Customer Order Details',
+            username: res.locals.user,
+            error: new Error('Order status update failed!'),            
+            orderStatusList: orderStatusList,
+        });
+    });
+
+    it('should handle error gracefully and render error message when order id mismatch occurs', async () => {
+        const req: any = {
+            params: {
+                id: '65e776668ab602638976d41f',
+            },
+            body: {
+                newOrderStatus: '7',
+            },
+        };
+
+        const res: any = {
+            locals: {
+                user: 'user@abc.com',
+            },
+            render: jest.fn(),
+            redirect: jest.fn(),
+        };
+
+        const expectedData = dataMockOrders.filter(order => order._id === req.params.id)[0];
+        expectedData.status = orderStatusList[orderStatusList.findIndex(status => status.id === Number(req.body.newOrderStatus))].name;
+        expectedData._id = '65e776668ab602638976d410';
+
+        (Orders.findByIdAndUpdate as jest.Mock) = jest
+            .fn()
+            .mockReturnValueOnce(expectedData);
+
+        (Orders.findById as jest.Mock) = jest.fn().mockReturnValueOnce({
+            populate: jest.fn().mockReturnThis(),
+            exec: jest.fn().mockReturnValueOnce(dataMockOrders.filter(item => item._id === req.params.id)[0]),
+        });
+
+        await postFulfillOrder(req, res);
+
+        expect(Orders.findByIdAndUpdate).not.toHaveBeenCalledWith();
+        expect(res.redirect).not.toHaveBeenCalled();
+        expect(res.render).toHaveBeenCalledWith('orderView', {
+            title: 'Customer Order Details',
+            username: res.locals.user,
+            error: new Error('Order status update failed!'),            
+            orderStatusList: orderStatusList,
+        });
+    });
+
 });

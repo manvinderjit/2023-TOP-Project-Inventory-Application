@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { allowedOrderStatuses, fetchOrderById, fetchOrders, updateOrderStatusById } from '../services/orders.app.services.js';
+import { fetchOrderById, fetchOrders, updateOrderStatusById } from '../services/orders.app.services.js';
 import { validateIsMongoObjectId, validateIsNumber } from '../../utilities/validation.js';
 
 const orderStatusList = [

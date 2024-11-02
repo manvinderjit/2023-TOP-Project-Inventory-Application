@@ -5,7 +5,7 @@ import 'dotenv/config';
 import User from "../../models/apiUserModel.js";
 import { Types } from "mongoose";
 import { validateEmail } from "../../utilities/validation.js";
-import { fetchUserByEmail } from "../services/login.api.services.js";
+import { fetchUserByEmail } from "../services/auth.api.services.js";
 
 const secret: string = process.env['JWT_SECRET'] as string;
 

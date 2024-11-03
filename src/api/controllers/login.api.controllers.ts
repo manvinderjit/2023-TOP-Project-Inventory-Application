@@ -2,7 +2,6 @@ import { Request, Response, NextFunction } from "express";
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
 import 'dotenv/config';
-import User from "../../models/apiUserModel.js";
 import { Types } from "mongoose";
 import { validateEmail } from "../../utilities/validation.js";
 import { fetchUserByEmail } from "../services/auth.api.services.js";
@@ -39,7 +38,7 @@ export const postLoginUser = async (req: Request, res: Response, next: NextFunct
                     token: generateToken(user._id, user.email),
                 });
             } else {
-                res.status(400).json({
+                res.status(401).json({
                     error: 'Invalid email or password!',
                 });
             }

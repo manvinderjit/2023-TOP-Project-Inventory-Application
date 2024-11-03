@@ -36,7 +36,7 @@ describe("Login API User", () => {
         await postLoginUser(req, res, next);
 
         expect(res.status).toHaveBeenCalledWith(201);
-        expect(res.send).toHaveBeenCalledWith({ token: 'fakeToken' });        
+        expect(res.send).toHaveBeenCalledWith({ token: 'fakeToken' });
     });
 
     it('should handle errors gracefully and return appropriate response and status code when there is no userEmail', async () => {
@@ -224,7 +224,7 @@ describe("Login API User", () => {
         await postLoginUser(req, res, next);
 
         expect(jwt.sign).not.toHaveBeenCalled();
-        expect(res.status).toHaveBeenCalledWith(400);
+        expect(res.status).toHaveBeenCalledWith(401);
         expect(res.json).toHaveBeenCalledWith({
             error: 'Invalid email or password!',
         });
@@ -256,7 +256,7 @@ describe("Login API User", () => {
         
         expect(bcrypt.compare).not.toHaveBeenCalled();
         expect(jwt.sign).not.toHaveBeenCalled();
-        expect(res.status).toHaveBeenCalledWith(400);
+        expect(res.status).toHaveBeenCalledWith(401);
         expect(res.json).toHaveBeenCalledWith({
             error: 'Invalid email or password!',
         });

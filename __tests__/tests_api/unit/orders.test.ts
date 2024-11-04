@@ -1,5 +1,5 @@
 import { jest } from '@jest/globals';
-import { getUserOrders } from '../../../src/api/controllers/orders.api.controllers';
+import { getUserOrders, postCancelAnOrder } from '../../../src/api/controllers/orders.api.controllers';
 import Order from '../../../src/models/ordersModel';
 
 const dataMockOrders = [
@@ -554,7 +554,6 @@ const dataMockOrders = [
 
 describe("GET User Orders", () => {
     it("should fetch users orders for a default with request with no page number", async () => {
-        
         const req: any = {
             query: {},
             userId: '654715c5941455dd27f32425',
@@ -761,6 +760,348 @@ describe("GET User Orders", () => {
             new TypeError('res.status(...).json is not a function'),
         );
         expect(Order.find).not.toHaveBeenCalled();
-        expect(Order.countDocuments).not.toHaveBeenCalled();        
+        expect(Order.countDocuments).not.toHaveBeenCalled();
+    });
+});
+
+describe("Post Cancel API User Order", () => {
+    it("should cancel an order succefully when valid data is provided and user is authenticated", async () => {
+        const req: any = {
+            userId: '654715c5941455dd27f32425',
+            body: {
+                orderId: '65e773c28ab602638976d2a4',
+            },
+        };
+
+        const res: any = {
+            json: jest.fn(),
+            status: jest.fn().mockReturnThis(),
+            send: jest.fn(),
+        };
+
+        const next: any = jest.fn();
+
+        const orderToCancel = dataMockOrders.filter(
+            (order) =>
+                order._id === req.body.orderId &&
+                order.customerId === req.userId &&
+                (order.status === 'Ordered' || order.status === 'Processed'),
+        )[0];
+        
+        const cancelledOrder = orderToCancel;
+        cancelledOrder.status = 'Cancelled';
+
+        (Order.findOneAndUpdate as jest.Mock) = jest.fn().mockReturnValueOnce(cancelledOrder);
+
+        await postCancelAnOrder(req, res, next);
+
+        expect(next).not.toHaveBeenCalled();
+        expect(Order.findOneAndUpdate).toHaveBeenCalledWith(
+            {
+                _id: req.body.orderId,
+                customerId: req.userId,
+                $or: [{ status: 'Ordered' }, { status: 'Processed' }],
+            },
+            { status: 'Cancelled' },
+            { new: true },
+        );
+        expect(res.status).toHaveBeenCalledWith(201);
+        expect(res.json).toHaveBeenCalledWith({
+            message: 'Order cancelled successfully!',
+            orderDetails: cancelledOrder,
+        });
+    });
+
+    it("should handle errors gracefully and render error messages when a userId is not provided in the request", async () => {
+        const req: any = {
+            body: {
+                orderId: '65e773c28ab602638976d2a4',
+            },
+        };
+
+        const res: any = {
+            json: jest.fn(),
+            status: jest.fn().mockReturnThis(),
+            send: jest.fn(),
+        };
+
+        const next: any = jest.fn();
+
+        (Order.findOneAndUpdate as jest.Mock) = jest.fn().mockReturnValueOnce(null);
+
+        await postCancelAnOrder(req, res, next);
+
+        expect(next).not.toHaveBeenCalled();
+        expect(Order.findOneAndUpdate).not.toHaveBeenCalled();
+        expect(res.status).toHaveBeenCalledWith(401);
+        expect(res.json).toHaveBeenCalledWith({
+            error: 'You are not authorized to do that!',
+        });
+    });
+
+    it("should handle errors gracefully and render error messages when a userId is empty", async () => {
+        const req: any = {
+            userId: '',
+            body: {
+                orderId: '65e773c28ab602638976d2a4',
+            },
+        };
+
+        const res: any = {
+            json: jest.fn(),
+            status: jest.fn().mockReturnThis(),
+            send: jest.fn(),
+        };
+
+        const next: any = jest.fn();
+
+        (Order.findOneAndUpdate as jest.Mock) = jest.fn().mockReturnValueOnce(null);
+
+        await postCancelAnOrder(req, res, next);
+
+        expect(next).not.toHaveBeenCalled();
+        expect(Order.findOneAndUpdate).not.toHaveBeenCalled();
+        expect(res.status).toHaveBeenCalledWith(401);
+        expect(res.json).toHaveBeenCalledWith({
+            error: 'You are not authorized to do that!',
+        });
+    });
+
+    it("should handle errors gracefully and render error messages when a userId is invalid", async () => {
+        const req: any = {
+            userId: '654715c5941455dd27f3245',
+            body: {
+                orderId: '65e773c28ab602638976d2a4',
+            },
+        };
+
+        const res: any = {
+            json: jest.fn(),
+            status: jest.fn().mockReturnThis(),
+            send: jest.fn(),
+        };
+
+        const next: any = jest.fn();
+
+        (Order.findOneAndUpdate as jest.Mock) = jest.fn().mockReturnValueOnce(null);
+
+        await postCancelAnOrder(req, res, next);
+
+        expect(next).not.toHaveBeenCalled();
+        expect(Order.findOneAndUpdate).not.toHaveBeenCalled();
+        expect(res.status).toHaveBeenCalledWith(401);
+        expect(res.json).toHaveBeenCalledWith({
+            error: 'You are not authorized to do that!',
+        });
+    });
+
+    it("should handle errors gracefully and render error messages when an orderId is not provided in request body", async () => {
+        const req: any = {
+            userId: '654715c5941455dd27f32425',
+            body: {},
+        };
+
+        const res: any = {
+            json: jest.fn(),
+            status: jest.fn().mockReturnThis(),
+            send: jest.fn(),
+        };
+
+        const next: any = jest.fn();
+
+        (Order.findOneAndUpdate as jest.Mock) = jest.fn().mockReturnValueOnce(null);
+
+        await postCancelAnOrder(req, res, next);
+
+        expect(next).not.toHaveBeenCalled();
+        expect(Order.findOneAndUpdate).not.toHaveBeenCalled();
+        expect(res.status).toHaveBeenCalledWith(401);
+        expect(res.json).toHaveBeenCalledWith({
+            error: 'Order cancellation failed, order not found!',
+        });
+    });
+
+    it("should handle errors gracefully and render error messages when an orderId is empty", async () => {
+        const req: any = {
+            userId: '654715c5941455dd27f32425',
+            body: {
+                orderId: '',
+            },
+        };
+
+        const res: any = {
+            json: jest.fn(),
+            status: jest.fn().mockReturnThis(),
+            send: jest.fn(),
+        };
+
+        const next: any = jest.fn();
+
+        (Order.findOneAndUpdate as jest.Mock) = jest.fn().mockReturnValueOnce(null);
+
+        await postCancelAnOrder(req, res, next);
+
+        expect(next).not.toHaveBeenCalled();
+        expect(Order.findOneAndUpdate).not.toHaveBeenCalled();
+        expect(res.status).toHaveBeenCalledWith(401);
+        expect(res.json).toHaveBeenCalledWith({
+            error: 'Order cancellation failed, order not found!',
+        });
+    });
+
+    it("should handle errors gracefully and render error messages when an orderId is null", async () => {
+        const req: any = {
+            userId: '654715c5941455dd27f32425',
+            body: {
+                orderId: null,
+            },
+        };
+
+        const res: any = {
+            json: jest.fn(),
+            status: jest.fn().mockReturnThis(),
+            send: jest.fn(),
+        };
+
+        const next: any = jest.fn();
+
+        (Order.findOneAndUpdate as jest.Mock) = jest.fn().mockReturnValueOnce(null);
+
+        await postCancelAnOrder(req, res, next);
+
+        expect(next).not.toHaveBeenCalled();
+        expect(Order.findOneAndUpdate).not.toHaveBeenCalled();
+        expect(res.status).toHaveBeenCalledWith(401);
+        expect(res.json).toHaveBeenCalledWith({
+            error: 'Order cancellation failed, order not found!',
+        });
+    });
+
+    it("should handle errors gracefully and render error messages when an orderId is invalid", async () => {
+        const req: any = {
+            userId: '654715c5941455dd27f32425',
+            body: {
+                orderId: '654715c5941455dd27f324',
+            },
+        };
+
+        const res: any = {
+            json: jest.fn(),
+            status: jest.fn().mockReturnThis(),
+            send: jest.fn(),
+        };
+
+        const next: any = jest.fn();
+
+        (Order.findOneAndUpdate as jest.Mock) = jest.fn().mockReturnValueOnce(null);
+
+        await postCancelAnOrder(req, res, next);
+
+        expect(next).not.toHaveBeenCalled();
+        expect(Order.findOneAndUpdate).not.toHaveBeenCalled();
+        expect(res.status).toHaveBeenCalledWith(401);
+        expect(res.json).toHaveBeenCalledWith({
+            error: 'Order cancellation failed, order not found!',
+        });
+    });
+
+    it("should handle errors gracefully and return appropriate response when the order status is not Ordered or Processed", async () => {
+        const req: any = {
+            userId: '65e776668ab602638976d41f',
+            body: {
+                orderId: '654715c5941455dd27f32425',
+            },
+        };
+
+        const res: any = {
+            json: jest.fn(),
+            status: jest.fn().mockReturnThis(),
+            send: jest.fn(),
+        };
+
+        const next: any = jest.fn();
+
+        const orderToCancel = dataMockOrders.filter(
+            (order) =>
+                order._id === req.body.orderId &&
+                order.customerId === req.userId &&
+                (order.status === 'Ordered' || order.status === 'Processed'),
+        )[0];
+
+        (Order.findOneAndUpdate as jest.Mock) = jest.fn().mockReturnValueOnce(orderToCancel);
+
+        await postCancelAnOrder(req, res, next);
+
+        expect(next).not.toHaveBeenCalled();
+        expect(res.status).toHaveBeenCalledWith(400);
+        expect(res.json).toHaveBeenCalledWith({
+            error: 'Order cancellation failed!',
+        });
+    });
+
+    it("should handle errors gracefully and return appropriate response when the customer did not place the order to be cancelled", async () => {
+        const req: any = {
+            userId: '654715c5941455dd27f32424',
+            body: {
+                orderId: '65e776668ab602638976d41f',
+            },
+        };
+
+        const res: any = {
+            json: jest.fn(),
+            status: jest.fn().mockReturnThis(),
+            send: jest.fn(),
+        };
+
+        const next: any = jest.fn();
+
+        const orderToCancel = dataMockOrders.filter(
+            (order) =>
+                order._id === req.body.orderId &&
+                order.customerId === req.userId &&
+                (order.status === 'Ordered' || order.status === 'Processed'),
+        )[0];
+
+        (Order.findOneAndUpdate as jest.Mock) = jest.fn().mockReturnValueOnce(orderToCancel);
+
+        await postCancelAnOrder(req, res, next);
+
+        expect(next).not.toHaveBeenCalled();
+        expect(res.status).toHaveBeenCalledWith(400);
+        expect(res.json).toHaveBeenCalledWith({
+            error: 'Order cancellation failed!',
+        });
+    });
+
+    it("should handle errors gracefully and return appropriate response when an unexpected error occurs", async () => {
+        const req: any = {
+            userId: '654715c5941455dd27f32425',
+            body: {
+                orderId: '65e776668ab602638976d410',
+            },
+        };
+
+        const res: any = {
+            json: jest.fn(),
+            status: jest.fn().mockReturnValue(() => { throw new Error('')}),
+            send: jest.fn(),
+        };
+
+        const next: any = jest.fn();
+
+        const orderToCancel = dataMockOrders.filter(
+            (order) =>
+                order._id === req.body.orderId &&
+                order.customerId === req.userId &&
+                (order.status === 'Ordered' || order.status === 'Processed'),
+        )[0];
+
+        (Order.findOneAndUpdate as jest.Mock) = jest.fn().mockReturnValueOnce(orderToCancel);
+
+        await postCancelAnOrder(req, res, next);
+
+        expect(next).toHaveBeenCalledWith(
+            new TypeError('res.status(...).json is not a function'),
+        );
     });
 });

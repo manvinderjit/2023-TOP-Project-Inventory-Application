@@ -23,3 +23,15 @@ export const fetchUserOrders = async (userId: string, page: number | null | unde
     
     return userOrders;
 };
+
+export const cancelUserOrder = async (orderId: string, userId: string): Promise<OrderDetails | null> => {
+    const updatedOrderData = { status: 'Cancelled' };
+    
+    // Can't update a shipped order, must be returned
+    const updatedOrder: OrderDetails | null = await Order.findOneAndUpdate(
+        { _id: orderId, customerId: userId, $or: [{ status: 'Ordered'}, { status: 'Processed' }]},
+        updatedOrderData,
+        { new: true },
+    );
+    return updatedOrder;
+};

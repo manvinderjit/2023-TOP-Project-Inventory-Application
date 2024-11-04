@@ -6,4 +6,6 @@ const apiOrdersRouter: Router = express.Router();
 
 apiOrdersRouter.get('/', apiOrdersController.getUserOrders);
 
+apiOrdersRouter.post('/cancel', apiOrdersController.postCancelAnOrder);
+
 export default apiOrdersRouter;

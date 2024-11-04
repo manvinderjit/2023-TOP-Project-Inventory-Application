@@ -1,12 +1,12 @@
 import { NextFunction, Request, Response } from 'express';
-import { fetchTotalPageCountForOrders, fetchUserOrders } from '../services/orders.services.js';
+import { cancelUserOrder, fetchTotalPageCountForOrders, fetchUserOrders } from '../services/orders.services.js';
 import { OrderDetails } from '../../types/types.js';
-import { validateIsNumber } from '../../utilities/validation.js';
+import { validateIsMongoObjectId, validateIsNumber } from '../../utilities/validation.js';
 
 export const getUserOrders = async(req: Request, res: Response, next: NextFunction) => {
     try {
         const perPageLimit: number = 7;
-        const { userId } = req;        
+        const { userId } = req;
         const pageNumber: number =
             req.query.page &&
             !Array.isArray(req.query.page) &&
@@ -35,6 +35,41 @@ export const getUserOrders = async(req: Request, res: Response, next: NextFuncti
             }); 
         }
     } catch (error) {
+        console.error(error);
+        next(error);
+    }
+};
+
+export const postCancelAnOrder = async(req: Request, res: Response, next: NextFunction) => {
+    try {        
+        const { userId } = req;
+        const { orderId } = req.body;
+        // Validate UserId
+        if(!userId || userId === null || !validateIsMongoObjectId(userId)) {
+            return res.status(401).json({
+                error: 'You are not authorized to do that!',
+            }); 
+        }
+        // Validate Order Id
+        else if(!orderId || orderId === null || !validateIsMongoObjectId(orderId)) {
+            res.status(401).json({
+                error: 'Order cancellation failed, order not found!',
+            });
+        } else {
+            const cancelledOrderDetails = await cancelUserOrder(orderId, userId);
+            if(cancelledOrderDetails && String(cancelledOrderDetails._id) === orderId) {
+                res.status(201).json({
+                    message: 'Order cancelled successfully!',
+                    orderDetails: cancelledOrderDetails,
+                });
+            } else {
+                res.status(400).json({
+                    error: 'Order cancellation failed!',
+                }); 
+            }
+        }
+    } catch (error) {
+        console.error(error);
         next(error);
     }
 };

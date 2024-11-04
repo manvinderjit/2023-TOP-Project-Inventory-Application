@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from 'express';
-import * as apiPromoServices from '../services/promos.services.js';
+import * as apiPromoServices from '../services/promos.api.services.js';
 
 const getCarouselPromos = async(req: Request, res: Response, next: NextFunction) => {
     try {

@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from 'express';
 import createHttpError from 'http-errors';
-import { fetchProductsService, fetchTotalPagesBasedOnLimit } from '../services/products.services.js';
+import { fetchProductsService, fetchTotalPagesBasedOnLimit } from '../services/products.api.services.js';
 import {
     validateIsMongoObjectId,
     validateQuery,

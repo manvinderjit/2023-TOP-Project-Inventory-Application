@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from 'express';
-import { cancelUserOrder, fetchTotalPageCountForOrders, fetchUserOrders } from '../services/orders.services.js';
+import { cancelUserOrder, fetchTotalPageCountForOrders, fetchUserOrders } from '../services/orders.api.services.js';
 import { OrderDetails } from '../../types/types.js';
 import { validateIsMongoObjectId, validateIsNumber } from '../../utilities/validation.js';
 

@@ -1,0 +1,120 @@
+<%- include('./partials/headerProtected'); -%>
+
+            <li class="nav-item"><a href="/" class="nav-link ">Dashboard</a></li>
+            <li class="nav-item"><a href="/categories" class="nav-link  ">Categories</a></li>      
+            <li class="nav-item"><a href="/products" class="nav-link  ">Products</a></li>
+            <li class="nav-item"><a href="/promos" class="nav-link  ">Promos</a></li>
+            <li class="nav-item"><a href="/orders" class="nav-link  active">Orders</a></li>
+            <li class="nav-item"><a href="/guide" class="nav-link" >Guide</a></li>
+        </ul>
+    </header>
+
+    <main class="flex-shrink-0">
+        <div class="container py-3  ">
+
+            <p>Welcome, <%= username %> !</p>
+
+            <form method="POST" action="/logout">
+                <button class="btn btn-outline-primary me-2">Logout</button>        
+            </form>
+
+        </div>
+        <!-- <hr> -->
+        <!-- <div class="container">
+            <h2 class="py-2 text-center ">Manage Orders</h2>
+            <div class="card-body text-center">
+                <a href="/promos/create" class="btn btn-primary ">Add A New Promo </a>
+            </div>
+        </div> -->
+        <hr>
+        <div class="container">
+            <h2 class="py-2 text-center ">Manage Orders</h2>            
+            <div class="row row-cols-1 row-cols-md-3 g-4 m-3">
+                <form method="POST" class="w-50 m-auto">
+                    <div class="input-group mb-3 m-auto">
+                        <label class="input-group-text" for="orderCategory">Order Category</label>
+                        <select class="form-select" id="orderCategory" name="orderCategory">
+                            <option value="all">All</option>
+                            <% if(locals.orderCategoryList && orderCategoryList.length > 0) { %>
+                                <% orderCategoryList.forEach((orderCategory=> { %>
+                                    <option value="<%= orderCategory.id %>" <% if(orderCategory.id == selectedOrderCategory) { %> selected <% } %> ><%= orderCategory.name %></option>
+                                <% })) %>
+                            <% } %>
+                        </select>
+                        <button type="submit" class="btn btn-primary ">Get Orders</button>
+                    </div>
+                    
+                </form>
+                
+                <div class="container w-100">
+                <% if(locals.error && error !=='' && error !== undefined) { %>
+                    <div class="alert alert-warning w-50 m-auto" role="alert">
+                        <%= error %>
+                    </div>        
+                <% } else if (locals.success && success !=='' && success !== undefined) { %>
+                    <div class="alert alert-success w-50 m-auto" role="alert">
+                        Success: <%= success %>
+                    </div>
+                <% } %>
+                <% if(locals.ordersList && ordersList.length > 0) { %>
+                    <!-- <div class="container">
+                        <div class="row">
+                            <div class="col-1 border d-flex align-items-center justify-content-center py-2">S. No.</div>
+                            <div class="col-3 border d-flex align-items-center justify-content-center py-2"><p>Order Id</p></div>
+                            <div class="col-3 border d-flex align-items-center justify-content-center py-2">Customer Id</div>
+                            <div class="col-2 border d-flex align-items-center justify-content-center py-2">Order Date</div>
+                            <div class="col-1 border d-flex align-items-center justify-content-center py-2">Amount</div>   
+                            <div class="col border d-flex align-items-center justify-content-center py-2">Status</div>
+                        </div>
+                    </div>                     -->
+                    <% ordersList.forEach( (order, index) => { %>
+                        
+                        <div class="container mb-3">
+                            <div class="row bg-secondary bg-gradient text-light">
+                                <div class="col-1  d-flex flex-column align-items-center justify-content-center py-2 "><strong>S. No.</strong><%= index + 1 %></div>
+                                <div class="col-3  d-flex flex-column align-items-center justify-content-center py-2"><strong>Order Id</strong><%= order._id %></div>
+                                <div class="col-3  d-flex flex-column align-items-center justify-content-center py-2"><strong>Customer Id</strong><%= order.customerId %></div>
+                                <div class="col-2  d-flex flex-column align-items-center justify-content-center py-2"><strong>Order Date</strong><%= order.createdAt %></div>
+                                <div class="col-1  d-flex flex-column align-items-center justify-content-center py-2"><strong>Amount</strong><%= order.totalAmount %></div>                                
+                                <div class="col  d-flex flex-column align-items-center justify-content-center py-2"><strong>Status</strong><%= order.status %></div>
+                            </div>
+                            <div class="row">
+                                <div class="container">
+                                    <% if(order.items.length > 0) { %>
+                                        <div class="row">
+                                            <div class="col border d-flex align-items-center justify-content-center py-2">Item ID</div>
+                                            <div class="col border d-flex align-items-center justify-content-center py-2">Item Name</div>
+                                            <div class="col border d-flex align-items-center justify-content-center py-2">Item Quantity</div>
+                                            <div class="col border d-flex align-items-center justify-content-center py-2">Item Price</div>
+                                        </div>
+                                    <% order.items.forEach ((item) => { %>
+                                        <div class="row">
+                                            <div class="col border d-flex align-items-center justify-content-center py-2"><%= item._id %></div>
+                                            <div class="col border d-flex align-items-center justify-content-center py-2"><%= item.itemDetails.name %></div>
+                                            <div class="col border d-flex align-items-center justify-content-center py-2"><%= item.itemQuantity %></div>
+                                            <div class="col border d-flex align-items-center justify-content-center py-2"><%= item.itemPrice %></div>
+                                        </div>
+                                    <% }) %>
+                                <% } %>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col border d-flex align-items-center justify-content-center py-2">
+                                    <a href="/orders/<%= order._id %>" class="btn btn-primary ">Manage Order</a>
+                                </div>
+                            </div>
+                        </div>
+                    <% }); } %>
+                    </div>
+                </div>
+
+                <div class="card-body  text-center">
+                    <a href="/" class="btn btn-primary ">Back To Dashboard</a>
+                </div>
+            
+            
+            
+        </div>
+    </main>
+    
+<%- include('./partials/footer'); -%>

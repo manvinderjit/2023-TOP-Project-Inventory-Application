@@ -1,0 +1,106 @@
+<%- include('./partials/headerProtected'); -%>
+
+            <li class="nav-item"><a href="/" class="nav-link ">Dashboard</a></li>
+            <li class="nav-item"><a href="/categories" class="nav-link">Categories</a></li>      
+            <li class="nav-item"><a href="/products" class="nav-link">Products</a></li>
+            <li class="nav-item"><a href="/promos" class="nav-link  active">Promos</a></li>
+            <li class="nav-item"><a href="/guide" class="nav-link" >Guide</a></li>
+        </ul>
+        </header>
+    <main class="flex-shrink-0">
+        <div class="container py-3">
+            
+            <p>Welcome, <%= username %> !</p>
+
+            <form method="POST" action="/logout">
+                <button class="btn btn-outline-primary me-2">Logout</button>        
+            </form>
+
+        </div>
+        <hr>
+        <div class="container">
+            <h2 class="py-2 text-center "><%= title %></h2>            
+        </div>
+        <hr>
+        <div class="container">
+            <div class="row row-cols-1 row-cols-md-3 g-4 m-3">
+
+                <% if(locals.error && error !=='' && error !== undefined) { %>
+                    <div class="alert alert-warning w-50 m-auto" role="alert">
+                        Error: <%= error %>
+                    </div>        
+                <% } else if (locals.success && success !=='' && success !== undefined) { %>
+                    <div class="alert alert-success w-50 m-auto" role="alert">
+                        Success: <%= success %>
+                    </div>
+                <% } %>
+            </div>
+
+            <div class="container w-50 m-auto">
+                <form method='POST' action="" encType="multipart/form-data">
+                    <fieldset>
+                        <legend class="mb-4 ">Enter Promo Details</legend>
+                        <div class="mb-3">
+                            <label class="form-label" for="promoName">Promo Name: </label>
+                            <input class="form-control" type="text" id="promoName" name="promoName" required minlength="3" maxlength="30" required pattern="^[a-zA-Z0-9.\-_\(\) ]{3,30}$" value="<%= promoName %> ">
+                            <div id="promoNameError" aria-live="polite"></div>
+                        </div >
+                        <div class="mb-3">
+                            <label class="form-label" for="promoCaption">Promo Caption: </label>
+                            <input class="form-control" type="text" id="promoCaption" name="promoCaption" minlength="5" maxlength="100" required value="<%= promoCaption %>"/>
+                            <div id="promoCaptionError" aria-live="polite"></div>
+                        </div >
+                        <div class="mb-3">
+                            <label class="form-label" for="promoDescription">Promo Description: </label>
+                            <textarea class="form-control" type="text" id="promoDescription" name="promoDescription" minlength="5" maxlength="100" required><%= promoDescription %></textarea>
+                            <div id="promoDescriptionError" aria-live="polite"></div>
+                        </div >
+                        <div class="mb-3">
+                            <label class="form-label" for="promoImage">Upload Promo Image:</label>
+                            <input class="form-control" type="file" id="promoImage" name="promoImage" accept="image/png, image/jpeg" >
+                       </div>
+                        <div class="input-group mb-3">
+                            <label class="input-group-text" for="promoCategory">Promo Category</label>
+                            <select class="form-select" id="promoCategory" name="promoCategory">
+                                <option selected value='choose'>Choose Category...</option>
+                                <% if(locals.promoCategoryList && promoCategoryList.length > 0) { %>
+                                    <% promoCategoryList.forEach((promoCategory=> { %>
+                                        <option value="<%= promoCategory.id %>" <% if(promoCategory.id == selectedPromoCategory) { %> selected <% } %>  ><%= promoCategory.name %></option>
+                                    <% })) %>
+                                <% } %>
+                            </select>
+                            <div id="promoCategoryError" aria-live="polite"></div>
+                        </div>
+                       
+                       <div class="input-group mb-3">
+                            <label class="input-group-text" for="promoStatus">Promo Status</label>
+                            <select class="form-select" id="promoStatus" name="promoStatus">                                
+                                <option value="Active" selected >Active</option>
+                                <option value="Expired" >Expired</option>
+                            </select>
+                            <div id="promoStatusError" aria-live="polite"></div>
+                        </div>
+                        <div class="input-group mb-3">
+                            <label class="input-group-text" for="promoStartDate">Promo Start Date</label>
+                            <input class="form-control" type="date" id="promoStartDate" name="promoStartDate" />
+                        </div>
+                        <div class="input-group mb-3">
+                            <label class="input-group-text" for="promoEndDate">Promo End Date</label>
+                            <input class="form-control" type="date" id="promoEndDate" name="promoEndDate"/>
+                        </div>
+                    </fieldset>
+                    <div class="mb-3 d-flex justify-content-center">
+                        <button type="submit" class="btn btn-primary">Add Promo</button>
+                    </div>
+                </form>
+            </div>
+            <hr>
+            <div class="card-body  text-center">
+                <a href="/promos" class="btn btn-primary ">Back To All Promos</a>
+            </div>
+            
+        </div>
+    </main>
+    <!-- <script src="/scripts/productCreate.js" defer></script> -->
+    
+<%- include('./partials/footer'); -%>

@@ -1,0 +1,93 @@
+<%- include('./partials/header'); -%>
+
+            <li class="nav-item"><a href="login" class="nav-link active" aria-current="page">Login</a></li>
+            <li class="nav-item"><a href="register" class="nav-link">Register</a></li>        
+            <li class="nav-item"><a href="guide" class="nav-link" aria-current="page">Guide</a></li>
+        </ul>
+    </header>
+
+    <main class="flex-shrink-0">
+        <div class="container w-25">
+            
+            <h2 class="mt-5 mb-4 py-3 border-bottom"><%= title %></h2>            
+            <% if(error == '') { '' } else { %>
+                <div class="alert alert-danger" role="alert">
+                    <%= error %>
+                </div>
+            <% } %>
+              
+            <form method='POST' action="/login" >
+                <fieldset>
+                    <legend class="mb-4 ">Enter Your Information</legend>
+                    <div class="mb-3">
+                        <label class="form-label" for="email">Email Address: </label>
+                        <input class="form-control" type="email" id="email" name="email" required minlength="3" maxlength="30" value=<%= email %> >
+                        <div id="emailError" aria-live="polite"></div>
+                    </div >
+                    <div class="mb-3">
+                        <label class="form-label" for="password">Password: </label>
+                        <input class="form-control" type="password" id="password" name="password" minlength="5" pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{5,}" required>
+                        <div id="passwordError" aria-live="polite"></div>
+                    </div >
+                </fieldset>
+                <div class="mb-3  d-flex justify-content-center">
+                    <button type="submit" class="btn btn-primary">Login</button>
+                </div>
+            </form>
+        </div>
+        <hr/>
+        <div class="mt-5 d-flex flex-column justify-content-center align-items-center text-center">
+            <h4>Use the following demo credentials for quick login</h4>
+            <p>                
+                <ul class="d-flex flex-column justify-content-start">
+                    <li>email: <i><strong>e@abc.com</strong></i></li>
+                    <li>password: <i><strong>Admin1</strong></i></li>
+                </ul>
+                <br/>
+            </p>
+             <div class="d-flex justify-content-center"><strong>Note:</strong>&nbsp;
+            Refer to the<strong><i>&nbsp;<a class="link-primary" href="/guide" target="_blank">Guide</a>&nbsp;</i></strong> page for a description and project walkthrough.
+        </div>
+        </div>
+        <hr>
+       
+        <div class="d-flex flex-column align-items-center">
+                <h5>RESTful APIs</h5>
+                <p>
+                    <strong>Note:</strong>&nbsp;
+                        This Inventory App also provides the following RESTful APIs for the<strong><i>&nbsp;<a class="link-primary" href="https://2023-top-project-shopping-cart.pages.dev/" target="_blank">Shopping Cart REACT App</a>&nbsp;</i></strong>:
+                </p>
+                <h6>Public Routes</h6>
+                <ul class="d-flex flex-column align-items-start justify-content-start">
+                    <li>
+                        <strong>All Products: </strong><a href="https://ia.manvinderjit.com/api/products" target="_blank">https://ia.manvinderjit.com/api/products</a>
+                    </li>
+                    <li>
+                        <strong>All Promos: </strong><a href="https://ia.manvinderjit.com/api/promos/carousel" target="_blank">https://ia.manvinderjit.com/api/promos/carousel</a>
+                    </li>
+                    <li>
+                        <strong>Login Route (GET + POST): </strong><a href="https://ia.manvinderjit.com/api/login" target=”_blank”>http://localhost:5000/api/login</a>
+                    </li>
+                    <li>
+                        <strong>Register Route (GET + POST): </strong><a href="https://ia.manvinderjit.com/api/register" target=”_blank”>http://localhost:5000/api/register</a>
+                    </li>
+                </ul>
+                <h6>Protected Routes</h6>
+                <ul class="d-flex flex-column align-items-start justify-content-start">
+                    <li>
+                        <strong>User Dashboard Route (GET): </strong><a href="https://ia.manvinderjit.com/api/dash" target=”_blank”>http://localhost:5000/api/dash</a>
+                    </li>
+                    <li>
+                        <strong>User Orders Route (GET): </strong><a href="https://ia.manvinderjit.com/api/orders" target=”_blank”>http://localhost:5000/api/orders</a>
+                    </li>
+
+                    <li>
+                        <strong>Checkout Route (GET): </strong><a href="https://ia.manvinderjit.com/api/checkout" target=”_blank”>http://localhost:5000/api/checkout</a>
+                    </li>
+                </ul>
+            </div>
+    </main>
+
+   
+
+<%- include('./partials/footer'); -%>

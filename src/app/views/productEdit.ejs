@@ -1,0 +1,105 @@
+<%- include('./partials/headerProtected'); -%>
+
+            <li class="nav-item"><a href="/" class="nav-link ">Dashboard</a></li>
+            <li class="nav-item"><a href="/categories" class="nav-link  ">Categories</a></li>      
+            <li class="nav-item"><a href="/products" class="nav-link  active">Products</a></li>
+            <li class="nav-item"><a href="/promos" class="nav-link ">Promos</a></li>
+            <li class="nav-item"><a href="/guide" class="nav-link" aria-current="page">Guide</a></li>
+        </ul>
+    </header>
+
+    <main class="flex-shrink-0">
+        <div class="container py-3  ">
+            
+            <p>Welcome, <%= username %> !</p>
+
+            <form method="POST" action="/logout">
+                <button class="btn btn-outline-primary me-2">Logout</button>        
+            </form>
+
+        </div>
+        <hr>
+        <div class="container">
+            <h2 class="py-2 text-center "><%= title %></h2>            
+        </div>
+        <hr>
+        <div class="container">
+            <div class="row row-cols-1 row-cols-md-3 g-4 m-3">
+
+                <% if(locals.error && error !=='' && error !== undefined) { %>
+                    <div class="alert alert-warning w-50 m-auto" role="alert">
+                        <%= error %>
+                    </div>        
+                <% } else if (locals.success && success !=='' && success !== undefined) { %>
+                    <div class="alert alert-success w-50 m-auto" role="alert">
+                        Success: <%= success %>
+                    </div>
+                <% } %>
+            </div>
+
+            <% if(locals.productDetails) { %> 
+            <div class="container w-50 m-auto">
+                <form method='POST' action="" >
+                    <fieldset>
+                        <legend class="mb-4 ">Enter Product Details</legend>
+                        <div class="mb-3">
+                            <label class="form-label" for="productName">Product Name: </label>
+                            <input class="form-control" type="text" id="productName" name="productName" required minlength="3" maxlength="30" required pattern="^[a-zA-Z0-9.\-_\(\) ]{3,30}$" value="<%= productDetails.productName %>">
+                            <div id="productNameError" aria-live="polite"></div>
+                        </div >
+                        <div class="mb-3">
+                            <label class="form-label" for="productDescription">Product Description: </label>
+                            <textarea class="form-control" type="text" id="productDescription" name="productDescription" minlength="5" maxlength="100" required><%= productDetails.productDescription %></textarea>
+                            <div id="productDescriptionError" aria-live="polite"></div>
+                        </div >
+                        <div class="input-group mb-3">
+                            <label class="input-group-text" for="productCategory">Category</label>
+                            <select class="form-select" id="productCategory" name="productCategory">
+                                <option value='choose'>Choose Category...</option>
+                                <% if(locals.categoryList && categoryList.length > 0) { %>
+                                    <% categoryList.forEach((category=> { %>
+                                        <option value='<%= category._id %>' <% if(productDetails.productCategory && category.name == productDetails.productCategory.name) { %> selected <% } %> ><%= category.name %></option>
+                                    <% })) %>
+                                <% } %>
+                            </select>
+                            <div id="productCategoryError" aria-live="polite"></div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label" for="productPrice">Product Price: </label>
+                            <input class="form-control" type="number" id="productPrice" name="productPrice" min="0.00" step="0.01" required value="<%= productDetails.productPrice %>"/>
+                            <div id="productPriceError" aria-live="polite"></div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label" for="productStock">Product Stock: </label>
+                            <input class="form-control"  type="number" id="productStock" name="productStock" min="0" step="1" required value="<%= productDetails.productStock %>"/>
+                            <div id="productStockError" aria-live="polite"></div>
+                        </div>
+                        <div class="mb-3">
+                            <div class="form-label" >Current Product Image: </div>
+                            <img id="currentProductImage" src="/images/products/<%= productDetails.productImage %> " class="img-fluid rounded">
+                        </div>  
+                    </fieldset>
+                    <div class="mb-3 d-flex justify-content-center">
+                        <button type="submit" class="btn btn-primary">Update Product</button>
+                    </div>
+                </form>
+            </div>
+            <hr>
+            <div class="card-body text-center">
+                <a href="<%= `${productDetails.productUrl}/edit/image` %>" class="btn btn-primary ">Change Image: <%= productDetails.productName %></a>
+            </div>
+            <div class="card-body text-center">
+                <a href=<%= `${productDetails.productUrl}` %> class="btn btn-primary ">View <%= productDetails.productName %></a>
+                <a href=<%= `${productDetails.productUrl}/delete` %> class="btn btn-primary ">Delete <%= productDetails.productName %></a>
+            </div>
+            <% } %> 
+            <hr>
+            <div class="card-body  text-center">
+                <a href="/products" class="btn btn-primary ">Back To All Products</a>
+            </div>
+            
+        </div>
+    </main>
+    <script src="/scripts/productCreate.js" defer></script>
+    
+<%- include('./partials/footer'); -%>

@@ -203,3 +203,10 @@ The application provides the following protected routes:
 `~/api/checkout`: POST request to checkout the cart items for the logged-in user.
 
 `~/api/orders`: POST request to cancel an order based on the `order id` provided in the request body.
+
+# 5. Test Coverage
+
+### Current Test Coverage Report:
+The following is the current test coverage report screenshot for the main branch.
+
+![alt text](testCoverage.png)

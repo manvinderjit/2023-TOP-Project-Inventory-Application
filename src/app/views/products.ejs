@@ -1,0 +1,104 @@
+<%- include('./partials/headerProtected'); -%>
+
+            <li class="nav-item"><a href="/" class="nav-link ">Dashboard</a></li>
+            <li class="nav-item"><a href="/categories" class="nav-link  ">Categories</a></li>      
+            <li class="nav-item"><a href="/products" class="nav-link  active">Products</a></li>
+            <li class="nav-item"><a href="/promos" class="nav-link ">Promos</a></li>
+            <li class="nav-item"><a href="/orders" class="nav-link  ">Orders</a></li>
+            <li class="nav-item"><a href="/guide" class="nav-link" aria-current="page">Guide</a></li>
+        </ul>
+    </header>
+
+    <main class="flex-shrink-0">
+        <div class="container py-3  ">
+
+            <p>Welcome, <%= username %> !</p>
+
+            <form method="POST" action="/logout">
+                <button class="btn btn-outline-primary me-2">Logout</button>        
+            </form>
+
+        </div>
+        <hr>
+        <div class="container">
+            <h2 class="py-2 text-center ">Add a New Product</h2>
+            <div class="card-body text-center">
+                <a href="/products/create" class="btn btn-primary ">Add A New Product </a>
+            </div>
+        </div>
+        <hr>
+        <div class="container">
+            <h2 class="py-2 text-center ">All Products</h2>            
+            <div class="row row-cols-1 row-cols-md-3 g-4 m-3">
+                <form method="POST" action="/products" class="w-50 m-auto">
+                    <div class="input-group mb-3 m-auto">
+                        <label class="input-group-text" for="productCategory">Category</label>
+                        <select class="form-select" id="productCategory" name="productCategory">
+                            <option value="all">All</option>
+                            <% if(locals.categoryList && categoryList.length > 0) { %>
+                                <% categoryList.forEach((category=> { %>
+                                    <option value="<%= category._id %>" <% if(category._id == selectedCategory) { %> selected <% } %> ><%= category.name %></option>
+                                <% })) %>
+                            <% } %>
+                        </select>
+                        <button type="submit" class="btn btn-primary ">Get Products</button>
+                    </div>
+                    
+                </form>
+                
+                <div class="container w-100">
+                <% if(locals.error && error !=='' && error !== undefined) { %>
+                    <div class="alert alert-warning w-50 m-auto" role="alert">
+                        <%= error %>
+                    </div>        
+                <% } else if (locals.success && success !=='' && success !== undefined) { %>
+                    <div class="alert alert-success w-50 m-auto" role="alert">
+                        Success: <%= success %>
+                    </div>
+                <% } %>
+                <% if(locals.allProductsList && allProductsList.length > 0) { %>
+                    <div class="container">
+                        <div class="row">
+                            <div class="col-1 border d-flex align-items-center justify-content-center py-2">S. No.</div>
+                            <div class="col-1 border d-flex align-items-center justify-content-center py-2">Name</div>
+                            <div class="col-2 border d-flex align-items-center justify-content-center py-2">Description</div>
+                            <div class="col-1 border d-flex align-items-center justify-content-center py-2">Image</div>
+                            <div class="col-2 border d-flex align-items-center justify-content-center py-2">Category</div>
+                            <div class="col-1 border d-flex align-items-center justify-content-center py-2">Price</div>
+                            <div class="col-1 border d-flex align-items-center justify-content-center py-2">Stock</div>
+                            <div class="col-1 border d-flex align-items-center justify-content-center py-2">View</div>
+                            <div class="col-1 border d-flex align-items-center justify-content-center py-2">Edit</div>
+                            <div class="col-1 border d-flex align-items-center justify-content-center py-2">Del</div>
+                        </div>
+                    </div>                    
+                    <% allProductsList.forEach( (product, index) => { %>
+                        
+                        <div class="container">
+                            <div class="row">
+                                <div class="col-1 border d-flex align-items-center justify-content-center py-2"><%= index + 1 %></div>
+                                <div class="col-1 border d-flex align-items-center justify-content-center py-2"><%= product.name %></div>
+                                <div class="col-2 border d-flex align-items-center justify-content-left py-2"><%= product.description %></div>
+                                <div class="col-1 border d-flex align-items-center justify-content-left py-2">
+                                    <img src="/images/products/<%= product.imageFilename %>" class="img-fluid" alt="<%= product.name %>"></div>
+                                <div class="col-2 border d-flex align-items-center justify-content-center py-2"><%= product.category.name %></div>
+                                <div class="col-1 border d-flex align-items-center justify-content-center py-2"><%= product.price %></div>
+                                <div class="col-1 border d-flex align-items-center justify-content-center py-2"><%= product.stock %></div>
+                                <div class="col-1 border d-flex align-items-center justify-content-center py-2"><a href="<%= product.url %>" class="btn btn-primary">View</a></div>
+                                <div class="col-1 border d-flex align-items-center justify-content-center py-2"><a href="<%= product.url %>/edit" class="btn btn-primary">Edit</a></div>
+                                <div class="col-1 border d-flex align-items-center justify-content-center py-2"><a href="<%= product.url %>/delete" class="btn btn-primary">Del</a></div>
+                            </div>
+                        </div>
+                    <% }); } %>
+                    </div>
+                </div>
+
+                <div class="card-body  text-center">
+                    <a href="/categories" class="btn btn-primary ">Back To All Categories</a>
+                </div>
+            
+            
+            
+        </div>
+    </main>
+    
+<%- include('./partials/footer'); -%>

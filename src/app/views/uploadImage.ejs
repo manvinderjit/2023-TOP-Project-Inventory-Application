@@ -1,0 +1,60 @@
+<%- include('./partials/headerProtected'); -%>
+
+            <li class="nav-item"><a href="/" class="nav-link ">Dashboard</a></li>
+            <li class="nav-item"><a href="/categories" class="nav-link ">Categories</a></li>      
+            <li class="nav-item"><a href="/products" class="nav-link ">Products</a></li>
+            <li class="nav-item"><a href="/promos" class="nav-link ">Promos</a></li>
+            <li class="nav-item"><a href="/guide" class="nav-link">Guide</a></li>
+        </ul>
+    </header>
+
+    <main class="flex-shrink-0">
+        <div class="container py-3  ">
+            
+            <p>Welcome, <%= username %> !</p>
+
+            <form method="POST" action="/logout">
+                <button class="btn btn-outline-primary me-2">Logout</button>        
+            </form>
+
+        </div>
+        <hr>
+        <div class="container">
+            <h2 class="py-2 text-center "><%= title %></h2>            
+        </div>
+        <hr>
+        <div class="container">
+            <div class="row row-cols-1 row-cols-md-3 g-4 m-3">
+
+                <% if(locals.error && error !=='' && error !== undefined) { %>
+                    <div class="alert alert-warning w-50 m-auto" role="alert">
+                        Error: <%= error %>
+                    </div>        
+                <% } else if (locals.success && success !=='' && success !== undefined) { %>
+                    <div class="alert alert-success w-50 m-auto" role="alert">
+                        Success: <%= success %>
+                    </div>
+                <% } %>
+            </div>
+
+            <div class="container w-50 m-auto">
+                <form method='POST' action="" encType="multipart/form-data">
+                    <fieldset>
+                        <legend class="mb-4 ">Upload Guide Image</legend>
+                        
+                        <div class="mb-3">
+                            <label class="form-label" for="promoImage"><strong>Upload New promo Image: </strong></label>
+                            <input class="form-control" type="file" id="promoImage" name="promoImage" accept="image/png, image/jpeg" >
+                            <div id="promoImageError" aria-live="polite"></div>
+                        </div>
+                    </fieldset>
+                    <div class="mb-3 d-flex justify-content-center">
+                        <button type="submit" class="btn btn-primary">Upload Guide Image</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </main>
+    
+    
+<%- include('./partials/footer'); -%>

@@ -1,0 +1,88 @@
+<%- include('./partials/headerProtected'); -%>
+
+            <li class="nav-item"><a href="/" class="nav-link  active">Dashboard</a></li>
+            <li class="nav-item"><a href="/categories" class="nav-link ">Categories</a></li>   
+            <li class="nav-item"><a href="/products" class="nav-link  ">Products</a></li>
+            <li class="nav-item"><a href="/promos" class="nav-link  ">Promos</a></li>
+            <li class="nav-item"><a href="/orders" class="nav-link  ">Orders</a></li>
+            <li class="nav-item"><a href="/guide" class="nav-link" aria-current="page">Guide</a></li>
+        </ul>
+    </header>
+
+    <main class="flex-shrink-0">
+        <div class="container py-3  border-bottom">
+
+            <h2 class="mb-4 py-3 border-bottom"><%= title %></h2>            
+            <p>Welcome to the home page, <%= username %> !</p>
+            <% if(error == '') { '' } else { %>
+                <div class="alert alert-danger" role="alert">
+                    <%= error %>
+                </div>
+            <% } %>
+
+            <form method="POST" action="/logout">
+                <button class="btn btn-outline-primary me-2">Logout</button>        
+            </form>
+
+        </div>
+        <div class="container">
+            <div class="row row-cols-1 row-cols-md-3 g-4 m-3">
+                <div class="col m-6 ">
+                    <div class="card w-75 m-auto text-center">
+                        <div class="card-header">
+                            Categories
+                        </div>
+                        <div class="card-body">
+                            <h5 class="card-title">Manage Categories</h5>
+                            <p class="card-text">Perform operations to manage Categories, including viewing, adding, editing, and deleting categories.</p>
+                            <a href="/categories" class="btn btn-primary ">Manage Categories</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="col m-6">
+                    <div class="card w-75 m-auto text-center">
+                        <div class="card-header">
+                            Products
+                        </div>
+                        <div class="card-body">
+                            <h5 class="card-title">Manage Products</h5>
+                            <p class="card-text">Perform operations to manage Products, including viewing, adding, editing, and deleting products and changing stock.</p>
+                            <a href="/products" class="btn btn-primary">Manage Products</a>
+                        </div>
+                        
+                    </div>
+                </div>
+                <div class="col m-6">
+                    <div class="card w-75 m-auto text-center">
+                        <div class="card-header">
+                            Orders
+                        </div>
+                        <div class="card-body">
+                            <h5 class="card-title">Fulfill Orders</h5>
+                            <p class="card-text">Perform operations to manage Customer Orders, including viewing, checking and changing status, and fulfilling orders.</p>
+                            <a href="/orders" class="btn btn-primary">Fulfill Orders</a>
+                        </div>
+                        
+                    </div>
+                </div>
+               
+            </div>
+             <div class="row row-cols-1 row-cols-md-3 g-4 m-3">
+                <div class="col m-6">
+                    <div class="card w-75 m-auto text-center">
+                        <div class="card-header">
+                            Promos
+                        </div>
+                        <div class="card-body">
+                            <h5 class="card-title">Manage Promos</h5>
+                            <p class="card-text">Perform operations to manage promos and promo images, including adding, editing, viewing, managing, deleting, and changing status of promos.</p>
+                            <a href="promos" class="btn btn-primary">Manage Promos</a>
+                        </div>
+                
+                    </div>
+                </div>
+             </div>
+        </div>
+    </main>
+    
+<%- include('./partials/footer'); -%>

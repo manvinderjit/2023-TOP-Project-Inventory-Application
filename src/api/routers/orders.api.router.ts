@@ -8,4 +8,6 @@ apiOrdersRouter.get('/', apiOrdersController.getUserOrders);
 
 apiOrdersRouter.post('/cancel', apiOrdersController.postCancelAnOrder);
 
+apiOrdersRouter.post('/checkout', apiOrdersController.postCreateOrder);
+
 export default apiOrdersRouter;

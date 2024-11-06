@@ -1,7 +1,8 @@
 import { NextFunction, Request, Response } from 'express';
-import { cancelUserOrder, fetchTotalPageCountForOrders, fetchUserOrders } from '../services/orders.api.services.js';
+import { cancelUserOrder, createUserOrder, fetchTotalPageCountForOrders, fetchUserOrders } from '../services/orders.api.services.js';
 import { OrderDetails } from '../../types/types.js';
 import { validateIsMongoObjectId, validateIsNumber } from '../../utilities/validation.js';
+import { OrderItem, validateUserOrder } from '../helpers/orders.api.helpers.js';
 
 export const getUserOrders = async(req: Request, res: Response, next: NextFunction) => {
     try {
@@ -67,6 +68,67 @@ export const postCancelAnOrder = async(req: Request, res: Response, next: NextFu
                     error: 'Order cancellation failed!',
                 }); 
             }
+        }
+    } catch (error) {
+        console.error(error);
+        next(error);
+    }
+};
+
+export const postCreateOrder = async(req: Request, res: Response, next: NextFunction) => {
+    try {
+        const { userId } = req;
+        const { items, totalAmount }: { items: OrderItem[], totalAmount: number } = req.body;        
+        
+        // Validate UserId
+        if(!userId || userId === null || !validateIsMongoObjectId(userId)) {
+            return res.status(401).json({
+                error: 'Login Expired!',
+            }); 
+        } 
+        // Validate request has required field
+        else if(!items || items.length < 1 || !totalAmount || !validateIsNumber(String(totalAmount))) {
+            return res.status(400).json({
+                error: 'Invalid order!',
+            }); 
+        }
+        else {
+            const orderDetails = {
+                customerId: userId,
+                items: items.map((item: OrderItem) => {
+                    return {
+                        itemQuantity: item.itemQuantity,
+                        itemId: item._id,
+                        itemPrice: item.price,
+                    };
+                }),
+                totalAmount: req.body.totalAmount,
+            };
+            
+            // Validate Order Items
+            const orderValidationErrors = await validateUserOrder(items, totalAmount);
+            // If no validation error
+            if (orderValidationErrors === null) {
+                // Create order
+                const createdOrder = await createUserOrder(orderDetails);
+                if(createdOrder) {
+                    res.status(200).json({
+                        message: 'Order created successfully!',
+                        orderDetails: createdOrder,
+                    });
+                } else {
+                    res.status(400).json({
+                        error: `Order creation failed!`
+                    })
+                }
+            } 
+            // If validation error occurs
+            else  {
+                return res.status(401).json({
+                    error: orderValidationErrors,
+                });
+            }
+            
         }
     } catch (error) {
         console.error(error);

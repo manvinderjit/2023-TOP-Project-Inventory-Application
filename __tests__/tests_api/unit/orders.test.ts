@@ -1,6 +1,9 @@
 import { jest } from '@jest/globals';
-import { getUserOrders, postCancelAnOrder } from '../../../src/api/controllers/orders.api.controllers';
+import { getUserOrders, postCancelAnOrder, postCreateOrder } from '../../../src/api/controllers/orders.api.controllers';
 import Order from '../../../src/models/ordersModel';
+import Product from '../../../src/models/productModel';
+import mongoose from 'mongoose';
+import { totalmem } from 'os';
 
 const dataMockOrders = [
     {
@@ -550,6 +553,74 @@ const dataMockOrders = [
         url: '/orders/654af6a8aec94b3bc0191de2',
         id: '654af6a8aec94b3bc0191de2',
     },
+];
+
+const dataMockCreateOrder = {
+    items: [
+        {
+            _id: '671eca8bd8f2398c9cc11182',
+            name: 'Dummy',
+            description: 'Dummy',
+            imageFilename: 'dummy.png',
+            category: {
+                _id: '652624671853eb7ecdacd6b8',
+                name: 'Computer Keyboards',
+                url: '/categories/652624671853eb7ecdacd6b8',
+                id: '652624671853eb7ecdacd6b8',
+            },
+            price: '1.00',
+            stock: 3,
+            url: '/products/671eca8bd8f2398c9cc11182',
+            id: '671eca8bd8f2398c9cc11182',
+            itemQuantity: 1,
+        },
+        {
+            _id: '671fbd76ac8f4cbfe29689b9',
+            name: 'Dummy 2',
+            description: 'Dummy Data 2',
+            imageFilename: 'dummy1730133366940.png',
+            category: {
+                _id: '6534680c8a7ce6a6af7f9cb9',
+                name: 'Mouse',
+                url: '/categories/6534680c8a7ce6a6af7f9cb9',
+                id: '6534680c8a7ce6a6af7f9cb9',
+            },
+            price: '12.00',
+            stock: 2,
+            url: '/products/671fbd76ac8f4cbfe29689b9',
+            id: '671fbd76ac8f4cbfe29689b9',
+            itemQuantity: 1,
+        },
+        {
+            _id: '653c5470189c20f1df257752',
+            name: 'Victsing Keyboard',
+            description: 'Victsing keyboard for offices',
+            category: {
+                _id: '652624671853eb7ecdacd6b8',
+                name: 'Computer Keyboards',
+                url: '/categories/652624671853eb7ecdacd6b8',
+                id: '652624671853eb7ecdacd6b8',
+            },
+            price: '9.99',
+            stock: 48,
+            imageFilename: 'victsing-keyboard.jpg',
+            url: '/products/653c5470189c20f1df257752',
+            id: '653c5470189c20f1df257752',
+            itemQuantity: 1,
+        },
+    ],
+    totalAmount: 37.28,
+}; 
+
+const dataMockItemInventoryStock = [
+    { _id: '671eca8bd8f2398c9cc11182', stock: 10, name: 'Dummy' },
+    { _id: '671fbd76ac8f4cbfe29689b9', stock: 3, name: 'Dummy 2' },
+    { _id: '653c5470189c20f1df257752', stock: 20, name: 'Victsing Keyboard' },
+];
+
+const dataMockItemInventoryStockMissingItem = [
+    { _id: '671eca8bd8f2398c9cc11182', stock: 10, name: 'Dummy' },
+    { _id: '671fbd76ac8f4cbfe29689b9', stock: 3, name: 'Dummy 2' },    
 ];
 
 describe("GET User Orders", () => {
@@ -1103,5 +1174,1010 @@ describe("Post Cancel API User Order", () => {
         expect(next).toHaveBeenCalledWith(
             new TypeError('res.status(...).json is not a function'),
         );
+    });
+});
+
+describe("POST Create Order", () => {
+
+    it("should place an order and return appropriate response when the order information is valid", async () => {
+        const req: any = {
+            userId: '654715c5941455dd27f32425',
+            body: {
+                items: dataMockCreateOrder.items,
+                totalAmount: dataMockCreateOrder.totalAmount,
+            },
+        };
+
+        const res: any = {
+            json: jest.fn(),
+            status: jest.fn().mockReturnThis(),
+            send: jest.fn(),
+        };
+
+        const next: any = jest.fn();
+
+        (Product.find as jest.Mock) = jest.fn().mockReturnValue({
+            select: jest.fn().mockReturnThis(),
+            exec: jest.fn().mockReturnValue(dataMockItemInventoryStock),
+        });
+
+        (Order.create as jest.Mock) = jest
+            .fn()
+            .mockReturnValue(dataMockCreateOrder);
+
+        (Product.bulkWrite as jest.Mock) = jest
+            .fn()
+            .mockReturnValue({
+                modifiedCount: dataMockCreateOrder.items.length,
+            });
+
+        (mongoose.startSession as jest.Mock) = jest.fn().mockReturnValue({
+            startTransaction: jest.fn(),
+            commitTransaction: jest.fn().mockReturnThis(),
+            abortTransaction: jest.fn(),
+            endSession: jest.fn(),
+        });
+        
+
+        await postCreateOrder(req, res, next);
+        
+        expect(next).not.toHaveBeenCalled();
+        expect(res.json).toHaveBeenCalledWith({
+            message: 'Order created successfully!',
+            orderDetails: dataMockCreateOrder,
+        });
+        expect(res.status).toHaveBeenCalledWith(200);
+    });
+
+    it("should handle errors gracefully and return response when no userId is present in the request", async () => {
+        const req: any = {
+            body: {
+                items: dataMockCreateOrder.items,
+                totalAmount: dataMockCreateOrder.totalAmount,
+            },
+        };
+
+        const res: any = {
+            json: jest.fn(),
+            status: jest.fn().mockReturnThis(),
+            send: jest.fn(),
+        };
+
+        const next: any = jest.fn();
+
+        (Product.find as jest.Mock) = jest.fn().mockReturnValue({
+            select: jest.fn().mockReturnThis(),
+            exec: jest.fn().mockReturnValue(dataMockItemInventoryStock),
+        });
+
+        (Order.create as jest.Mock) = jest
+            .fn()
+            .mockReturnValue(dataMockCreateOrder);
+
+        (Product.bulkWrite as jest.Mock) = jest
+            .fn()
+            .mockReturnValue({
+                modifiedCount: dataMockCreateOrder.items.length,
+            });
+
+        (mongoose.startSession as jest.Mock) = jest.fn().mockReturnValue({
+            startTransaction: jest.fn(),
+            commitTransaction: jest.fn().mockReturnThis(),
+            abortTransaction: jest.fn(),
+            endSession: jest.fn(),
+        });
+
+        await postCreateOrder(req, res, next);
+        
+        expect(next).not.toHaveBeenCalled();
+        expect(res.json).toHaveBeenCalledWith({
+            error: 'Login Expired!',
+        });
+        expect(res.status).toHaveBeenCalledWith(401);
+
+        expect(Product.find).not.toHaveBeenCalled();
+        expect(Order.create).not.toHaveBeenCalled();
+        expect(Product.bulkWrite).not.toHaveBeenCalled();
+        expect(mongoose.startSession).not.toHaveBeenCalled();
+    });
+
+    it("should handle errors gracefully and return response when userId is invalid", async () => {
+        const req: any = {
+            userId: 'anInvalidUserId',
+            body: {
+                items: dataMockCreateOrder.items,
+                totalAmount: dataMockCreateOrder.totalAmount,
+            },
+        };
+
+        const res: any = {
+            json: jest.fn(),
+            status: jest.fn().mockReturnThis(),
+            send: jest.fn(),
+        };
+
+        const next: any = jest.fn();
+
+        (Product.find as jest.Mock) = jest.fn().mockReturnValue({
+            select: jest.fn().mockReturnThis(),
+            exec: jest.fn().mockReturnValue(dataMockItemInventoryStock),
+        });
+
+        (Order.create as jest.Mock) = jest
+            .fn()
+            .mockReturnValue(dataMockCreateOrder);
+
+        (Product.bulkWrite as jest.Mock) = jest
+            .fn()
+            .mockReturnValue({
+                modifiedCount: dataMockCreateOrder.items.length,
+            });
+
+        (mongoose.startSession as jest.Mock) = jest.fn().mockReturnValue({
+            startTransaction: jest.fn(),
+            commitTransaction: jest.fn().mockReturnThis(),
+            abortTransaction: jest.fn(),
+            endSession: jest.fn(),
+        });
+
+        await postCreateOrder(req, res, next);
+        
+        expect(next).not.toHaveBeenCalled();
+        expect(res.json).toHaveBeenCalledWith({
+            error: 'Login Expired!',
+        });
+        expect(res.status).toHaveBeenCalledWith(401);
+
+        expect(Product.find).not.toHaveBeenCalled();
+        expect(Order.create).not.toHaveBeenCalled();
+        expect(Product.bulkWrite).not.toHaveBeenCalled();
+        expect(mongoose.startSession).not.toHaveBeenCalled();
+    });
+
+    it("should handle errors gracefully and return response when userId is empty", async () => {
+        const req: any = {
+            userId: '',
+            body: {
+                items: dataMockCreateOrder.items,
+                totalAmount: dataMockCreateOrder.totalAmount,
+            },
+        };
+
+        const res: any = {
+            json: jest.fn(),
+            status: jest.fn().mockReturnThis(),
+            send: jest.fn(),
+        };
+
+        const next: any = jest.fn();
+
+        (Product.find as jest.Mock) = jest.fn().mockReturnValue({
+            select: jest.fn().mockReturnThis(),
+            exec: jest.fn().mockReturnValue(dataMockItemInventoryStock),
+        });
+
+        (Order.create as jest.Mock) = jest
+            .fn()
+            .mockReturnValue(dataMockCreateOrder);
+
+        (Product.bulkWrite as jest.Mock) = jest
+            .fn()
+            .mockReturnValue({
+                modifiedCount: dataMockCreateOrder.items.length,
+            });
+
+        (mongoose.startSession as jest.Mock) = jest.fn().mockReturnValue({
+            startTransaction: jest.fn(),
+            commitTransaction: jest.fn().mockReturnThis(),
+            abortTransaction: jest.fn(),
+            endSession: jest.fn(),
+        });
+
+        await postCreateOrder(req, res, next);
+        
+        expect(next).not.toHaveBeenCalled();
+        expect(res.json).toHaveBeenCalledWith({
+            error: 'Login Expired!',
+        });
+        expect(res.status).toHaveBeenCalledWith(401);
+
+        expect(Product.find).not.toHaveBeenCalled();
+        expect(Order.create).not.toHaveBeenCalled();
+        expect(Product.bulkWrite).not.toHaveBeenCalled();
+        expect(mongoose.startSession).not.toHaveBeenCalled();
+    });
+
+    it("should handle errors gracefully and return response when userId is empty spaces", async () => {
+        const req: any = {
+            userId: '      ',
+            body: {
+                items: dataMockCreateOrder.items,
+                totalAmount: dataMockCreateOrder.totalAmount,
+            },
+        };
+
+        const res: any = {
+            json: jest.fn(),
+            status: jest.fn().mockReturnThis(),
+            send: jest.fn(),
+        };
+
+        const next: any = jest.fn();
+
+        (Product.find as jest.Mock) = jest.fn().mockReturnValue({
+            select: jest.fn().mockReturnThis(),
+            exec: jest.fn().mockReturnValue(dataMockItemInventoryStock),
+        });
+
+        (Order.create as jest.Mock) = jest
+            .fn()
+            .mockReturnValue(dataMockCreateOrder);
+
+        (Product.bulkWrite as jest.Mock) = jest
+            .fn()
+            .mockReturnValue({
+                modifiedCount: dataMockCreateOrder.items.length,
+            });
+
+        (mongoose.startSession as jest.Mock) = jest.fn().mockReturnValue({
+            startTransaction: jest.fn(),
+            commitTransaction: jest.fn().mockReturnThis(),
+            abortTransaction: jest.fn(),
+            endSession: jest.fn(),
+        });
+
+        await postCreateOrder(req, res, next);
+        
+        expect(next).not.toHaveBeenCalled();
+        expect(res.json).toHaveBeenCalledWith({
+            error: 'Login Expired!',
+        });
+        expect(res.status).toHaveBeenCalledWith(401);
+
+        expect(Product.find).not.toHaveBeenCalled();
+        expect(Order.create).not.toHaveBeenCalled();
+        expect(Product.bulkWrite).not.toHaveBeenCalled();
+        expect(mongoose.startSession).not.toHaveBeenCalled();
+    });
+
+    it("should handle errors gracefully and return response when no items are provided in request body", async () => {
+        const req: any = {
+            userId: '654715c5941455dd27f32425',
+            body: {                
+                totalAmount: dataMockCreateOrder.totalAmount,
+            },
+        };
+
+        const res: any = {
+            json: jest.fn(),
+            status: jest.fn().mockReturnThis(),
+            send: jest.fn(),
+        };
+
+        const next: any = jest.fn();
+
+        (Product.find as jest.Mock) = jest.fn().mockReturnValue({
+            select: jest.fn().mockReturnThis(),
+            exec: jest.fn().mockReturnValue(dataMockItemInventoryStock),
+        });
+
+        (Order.create as jest.Mock) = jest
+            .fn()
+            .mockReturnValue(dataMockCreateOrder);
+
+        (Product.bulkWrite as jest.Mock) = jest
+            .fn()
+            .mockReturnValue({
+                modifiedCount: dataMockCreateOrder.items.length,
+            });
+
+        (mongoose.startSession as jest.Mock) = jest.fn().mockReturnValue({
+            startTransaction: jest.fn(),
+            commitTransaction: jest.fn().mockReturnThis(),
+            abortTransaction: jest.fn(),
+            endSession: jest.fn(),
+        });
+
+        await postCreateOrder(req, res, next);
+        
+        expect(next).not.toHaveBeenCalled();
+        expect(res.json).toHaveBeenCalledWith({
+            error: 'Invalid order!',
+        });
+        expect(res.status).toHaveBeenCalledWith(400);
+
+        expect(Product.find).not.toHaveBeenCalled();
+        expect(Order.create).not.toHaveBeenCalled();
+        expect(Product.bulkWrite).not.toHaveBeenCalled();
+        expect(mongoose.startSession).not.toHaveBeenCalled();
+    });
+
+    it("should handle errors gracefully and return response when items in request body are empty", async () => {
+        const req: any = {
+            userId: '654715c5941455dd27f32425',
+            body: {
+                items: [],
+                totalAmount: dataMockCreateOrder.totalAmount,
+            },
+        };
+
+        const res: any = {
+            json: jest.fn(),
+            status: jest.fn().mockReturnThis(),
+            send: jest.fn(),
+        };
+
+        const next: any = jest.fn();
+
+        (Product.find as jest.Mock) = jest.fn().mockReturnValue({
+            select: jest.fn().mockReturnThis(),
+            exec: jest.fn().mockReturnValue(dataMockItemInventoryStock),
+        });
+
+        (Order.create as jest.Mock) = jest
+            .fn()
+            .mockReturnValue(dataMockCreateOrder);
+
+        (Product.bulkWrite as jest.Mock) = jest
+            .fn()
+            .mockReturnValue({
+                modifiedCount: dataMockCreateOrder.items.length,
+            });
+
+        (mongoose.startSession as jest.Mock) = jest.fn().mockReturnValue({
+            startTransaction: jest.fn(),
+            commitTransaction: jest.fn().mockReturnThis(),
+            abortTransaction: jest.fn(),
+            endSession: jest.fn(),
+        });
+
+        await postCreateOrder(req, res, next);
+        
+        expect(next).not.toHaveBeenCalled();
+        expect(res.json).toHaveBeenCalledWith({
+            error: 'Invalid order!',
+        });
+        expect(res.status).toHaveBeenCalledWith(400);
+
+        expect(Product.find).not.toHaveBeenCalled();
+        expect(Order.create).not.toHaveBeenCalled();
+        expect(Product.bulkWrite).not.toHaveBeenCalled();
+        expect(mongoose.startSession).not.toHaveBeenCalled();
+    });
+
+    it("should handle errors gracefully and return response when there is no totalAmount in the request body", async () => {
+        const req: any = {
+            userId: '654715c5941455dd27f32425',
+            body: {
+                items: dataMockCreateOrder.items,
+            },
+        };
+
+        const res: any = {
+            json: jest.fn(),
+            status: jest.fn().mockReturnThis(),
+            send: jest.fn(),
+        };
+
+        const next: any = jest.fn();
+
+        (Product.find as jest.Mock) = jest.fn().mockReturnValue({
+            select: jest.fn().mockReturnThis(),
+            exec: jest.fn().mockReturnValue(dataMockItemInventoryStock),
+        });
+
+        (Order.create as jest.Mock) = jest
+            .fn()
+            .mockReturnValue(dataMockCreateOrder);
+
+        (Product.bulkWrite as jest.Mock) = jest
+            .fn()
+            .mockReturnValue({
+                modifiedCount: dataMockCreateOrder.items.length,
+            });
+
+        (mongoose.startSession as jest.Mock) = jest.fn().mockReturnValue({
+            startTransaction: jest.fn(),
+            commitTransaction: jest.fn().mockReturnThis(),
+            abortTransaction: jest.fn(),
+            endSession: jest.fn(),
+        });
+
+        await postCreateOrder(req, res, next);
+        
+        expect(next).not.toHaveBeenCalled();
+        expect(res.json).toHaveBeenCalledWith({
+            error: 'Invalid order!',
+        });
+        expect(res.status).toHaveBeenCalledWith(400);
+
+        expect(Product.find).not.toHaveBeenCalled();
+        expect(Order.create).not.toHaveBeenCalled();
+        expect(Product.bulkWrite).not.toHaveBeenCalled();
+        expect(mongoose.startSession).not.toHaveBeenCalled();
+    });
+
+    it("should handle errors gracefully and return response when there totalAmount in the request body is invalid", async () => {
+        const req: any = {
+            userId: '654715c5941455dd27f32425',
+            body: {
+                items: dataMockCreateOrder.items,
+                totalAmount: 'abc',
+            },
+        };
+
+        const res: any = {
+            json: jest.fn(),
+            status: jest.fn().mockReturnThis(),
+            send: jest.fn(),
+        };
+
+        const next: any = jest.fn();
+
+        (Product.find as jest.Mock) = jest.fn().mockReturnValue({
+            select: jest.fn().mockReturnThis(),
+            exec: jest.fn().mockReturnValue(dataMockItemInventoryStock),
+        });
+
+        (Order.create as jest.Mock) = jest
+            .fn()
+            .mockReturnValue(dataMockCreateOrder);
+
+        (Product.bulkWrite as jest.Mock) = jest
+            .fn()
+            .mockReturnValue({
+                modifiedCount: dataMockCreateOrder.items.length,
+            });
+
+        (mongoose.startSession as jest.Mock) = jest.fn().mockReturnValue({
+            startTransaction: jest.fn(),
+            commitTransaction: jest.fn().mockReturnThis(),
+            abortTransaction: jest.fn(),
+            endSession: jest.fn(),
+        });
+
+        await postCreateOrder(req, res, next);
+        
+        expect(next).not.toHaveBeenCalled();
+        expect(res.json).toHaveBeenCalledWith({
+            error: 'Invalid order!',
+        });
+        expect(res.status).toHaveBeenCalledWith(400);
+        
+        expect(Product.find).not.toHaveBeenCalled();        
+        expect(Order.create).not.toHaveBeenCalled();
+        expect(Product.bulkWrite).not.toHaveBeenCalled();
+        expect(mongoose.startSession).not.toHaveBeenCalled();
+    });
+
+    it("should handle errors gracefully and return response when items provided in the order don't exist", async () => {
+        const req: any = {
+            userId: '654715c5941455dd27f32425',
+            body: {
+                items: dataMockCreateOrder.items,
+                totalAmount: dataMockCreateOrder.totalAmount,
+            },
+        };
+
+        const res: any = {
+            json: jest.fn(),
+            status: jest.fn().mockReturnThis(),
+            send: jest.fn(),
+        };
+
+        const next: any = jest.fn();
+
+        (Product.find as jest.Mock) = jest.fn().mockReturnValue({
+            select: jest.fn().mockReturnThis(),
+            exec: jest.fn().mockReturnValue(dataMockItemInventoryStockMissingItem),
+        });
+
+        (Order.create as jest.Mock) = jest
+            .fn()
+            .mockReturnValue(dataMockCreateOrder);
+
+        (Product.bulkWrite as jest.Mock) = jest
+            .fn()
+            .mockReturnValue({
+                modifiedCount: dataMockCreateOrder.items.length,
+            });
+
+        (mongoose.startSession as jest.Mock) = jest.fn().mockReturnValue({
+            startTransaction: jest.fn(),
+            commitTransaction: jest.fn().mockReturnThis(),
+            abortTransaction: jest.fn(),
+            endSession: jest.fn(),
+        });
+
+        await postCreateOrder(req, res, next);
+        
+        expect(next).not.toHaveBeenCalled();
+        expect(res.json).toHaveBeenCalledWith({
+            error: 'Order information is incorrect!',
+        });
+        expect(res.status).toHaveBeenCalledWith(401);
+        
+        expect(Order.create).not.toHaveBeenCalled();
+        expect(Product.bulkWrite).not.toHaveBeenCalled();
+        expect(mongoose.startSession).not.toHaveBeenCalled();
+    });
+
+    it("should handle errors gracefully and return response when items provided have invalid data - itemQuantity is invalid", async () => {
+        const invalidDataMockCreateOrder = {
+            items: [
+                {
+                    _id: '671eca8bd8f2398c9cc11182',
+                    name: 'Dummy',
+                    description: 'Dummy',
+                    imageFilename: 'dummy.png',
+                    category: {
+                        _id: '652624671853eb7ecdacd6b8',
+                        name: 'Computer Keyboards',
+                        url: '/categories/652624671853eb7ecdacd6b8',
+                        id: '652624671853eb7ecdacd6b8',
+                    },
+                    price: '10.00',
+                    stock: 3,
+                    url: '/products/671eca8bd8f2398c9cc11182',
+                    id: '671eca8bd8f2398c9cc11182',
+                    itemQuantity: 'a',
+                },
+            ],
+            totalAmount: 30.0,
+        };
+
+        const req: any = {
+            userId: '654715c5941455dd27f32425',
+            body: {
+                items: invalidDataMockCreateOrder.items,
+                totalAmount: invalidDataMockCreateOrder.totalAmount,
+            },
+        };
+
+        const res: any = {
+            json: jest.fn(),
+            status: jest.fn().mockReturnThis(),
+            send: jest.fn(),
+        };
+
+        const next: any = jest.fn();
+
+        (Product.find as jest.Mock) = jest.fn().mockReturnValue({
+            select: jest.fn().mockReturnThis(),
+            exec: jest.fn().mockReturnValue(dataMockItemInventoryStock),
+        });
+
+        (Order.create as jest.Mock) = jest
+            .fn()
+            .mockReturnValue(dataMockCreateOrder);
+
+        (Product.bulkWrite as jest.Mock) = jest
+            .fn()
+            .mockReturnValue({
+                modifiedCount: dataMockCreateOrder.items.length,
+            });
+
+        (mongoose.startSession as jest.Mock) = jest.fn().mockReturnValue({
+            startTransaction: jest.fn(),
+            commitTransaction: jest.fn().mockReturnThis(),
+            abortTransaction: jest.fn(),
+            endSession: jest.fn(),
+        });
+
+        await postCreateOrder(req, res, next);
+        
+        expect(next).not.toHaveBeenCalled();
+        expect(res.json).toHaveBeenCalledWith({
+            error: 'Products have invalid data: Dummy!',
+        });
+        expect(res.status).toHaveBeenCalledWith(401);
+        
+        expect(Order.create).not.toHaveBeenCalled();
+        expect(Product.bulkWrite).not.toHaveBeenCalled();
+        expect(mongoose.startSession).not.toHaveBeenCalled();
+    });
+
+    it("should handle errors gracefully and return response when items provided have invalid data - itemQuantity is not an integer", async () => {
+        const invalidDataMockCreateOrder = {
+            items: [
+                {
+                    _id: '671eca8bd8f2398c9cc11182',
+                    name: 'Dummy',
+                    description: 'Dummy',
+                    imageFilename: 'dummy.png',
+                    category: {
+                        _id: '652624671853eb7ecdacd6b8',
+                        name: 'Computer Keyboards',
+                        url: '/categories/652624671853eb7ecdacd6b8',
+                        id: '652624671853eb7ecdacd6b8',
+                    },
+                    price: '10.00',
+                    stock: 3,
+                    url: '/products/671eca8bd8f2398c9cc11182',
+                    id: '671eca8bd8f2398c9cc11182',
+                    itemQuantity: 1.5,
+                },
+            ],
+            totalAmount: 30.0,
+        };
+
+        const req: any = {
+            userId: '654715c5941455dd27f32425',
+            body: {
+                items: invalidDataMockCreateOrder.items,
+                totalAmount: invalidDataMockCreateOrder.totalAmount,
+            },
+        };
+
+        const res: any = {
+            json: jest.fn(),
+            status: jest.fn().mockReturnThis(),
+            send: jest.fn(),
+        };
+
+        const next: any = jest.fn();
+
+        (Product.find as jest.Mock) = jest.fn().mockReturnValue({
+            select: jest.fn().mockReturnThis(),
+            exec: jest.fn().mockReturnValue(dataMockItemInventoryStock),
+        });
+
+        (Order.create as jest.Mock) = jest
+            .fn()
+            .mockReturnValue(dataMockCreateOrder);
+
+        (Product.bulkWrite as jest.Mock) = jest
+            .fn()
+            .mockReturnValue({
+                modifiedCount: dataMockCreateOrder.items.length,
+            });
+
+        (mongoose.startSession as jest.Mock) = jest.fn().mockReturnValue({
+            startTransaction: jest.fn(),
+            commitTransaction: jest.fn().mockReturnThis(),
+            abortTransaction: jest.fn(),
+            endSession: jest.fn(),
+        });
+
+        await postCreateOrder(req, res, next);
+        
+        expect(next).not.toHaveBeenCalled();
+        expect(res.json).toHaveBeenCalledWith({
+            error: 'Products have invalid data: Dummy!',
+        });
+        expect(res.status).toHaveBeenCalledWith(401);
+        
+        expect(Order.create).not.toHaveBeenCalled();
+        expect(Product.bulkWrite).not.toHaveBeenCalled();
+        expect(mongoose.startSession).not.toHaveBeenCalled();
+    });
+
+    it("should handle errors gracefully and return response when items provided have invalid data - itemPrice is invalid", async () => {
+        const invalidDataMockCreateOrder = {
+            items: [
+                {
+                    _id: '671eca8bd8f2398c9cc11182',
+                    name: 'Dummy',
+                    description: 'Dummy',
+                    imageFilename: 'dummy.png',
+                    category: {
+                        _id: '652624671853eb7ecdacd6b8',
+                        name: 'Computer Keyboards',
+                        url: '/categories/652624671853eb7ecdacd6b8',
+                        id: '652624671853eb7ecdacd6b8',
+                    },
+                    price: 'asds',
+                    stock: 3,
+                    url: '/products/671eca8bd8f2398c9cc11182',
+                    id: '671eca8bd8f2398c9cc11182',
+                    itemQuantity: 1,
+                },
+            ],
+            totalAmount: 10.0,
+        };
+
+        const req: any = {
+            userId: '654715c5941455dd27f32425',
+            body: {
+                items: invalidDataMockCreateOrder.items,
+                totalAmount: invalidDataMockCreateOrder.totalAmount,
+            },
+        };
+
+        const res: any = {
+            json: jest.fn(),
+            status: jest.fn().mockReturnThis(),
+            send: jest.fn(),
+        };
+
+        const next: any = jest.fn();
+
+        (Product.find as jest.Mock) = jest.fn().mockReturnValue({
+            select: jest.fn().mockReturnThis(),
+            exec: jest.fn().mockReturnValue(dataMockItemInventoryStock),
+        });
+
+        (Order.create as jest.Mock) = jest
+            .fn()
+            .mockReturnValue(dataMockCreateOrder);
+
+        (Product.bulkWrite as jest.Mock) = jest
+            .fn()
+            .mockReturnValue({
+                modifiedCount: dataMockCreateOrder.items.length,
+            });
+
+        (mongoose.startSession as jest.Mock) = jest.fn().mockReturnValue({
+            startTransaction: jest.fn(),
+            commitTransaction: jest.fn().mockReturnThis(),
+            abortTransaction: jest.fn(),
+            endSession: jest.fn(),
+        });
+
+        await postCreateOrder(req, res, next);
+        
+        expect(next).not.toHaveBeenCalled();
+        expect(res.json).toHaveBeenCalledWith({
+            error: 'Products have invalid data: Dummy!',
+        });
+        expect(res.status).toHaveBeenCalledWith(401);
+        
+        expect(Order.create).not.toHaveBeenCalled();
+        expect(Product.bulkWrite).not.toHaveBeenCalled();
+        expect(mongoose.startSession).not.toHaveBeenCalled();
+    });
+
+    it("should handle errors gracefully and return response when items provided have insufficient stock", async () => {
+
+        const dataMockItemInventoryStockInsufficient = [
+            { _id: '671eca8bd8f2398c9cc11182', stock: 10, name: 'Dummy' },
+            { _id: '671fbd76ac8f4cbfe29689b9', stock: 0, name: 'Dummy 2' },
+            { _id: '653c5470189c20f1df257752', stock: 20, name: 'Victsing Keyboard' },
+        ];
+
+        const req: any = {
+            userId: '654715c5941455dd27f32425',
+            body: {
+                items: dataMockCreateOrder.items,
+                totalAmount: dataMockCreateOrder.totalAmount,
+            },
+        };
+
+        const res: any = {
+            json: jest.fn(),
+            status: jest.fn().mockReturnThis(),
+            send: jest.fn(),
+        };
+
+        const next: any = jest.fn();
+
+        (Product.find as jest.Mock) = jest.fn().mockReturnValue({
+            select: jest.fn().mockReturnThis(),
+            exec: jest.fn().mockReturnValue(dataMockItemInventoryStockInsufficient),
+        });
+
+        (Order.create as jest.Mock) = jest
+            .fn()
+            .mockReturnValue(dataMockCreateOrder);
+
+        (Product.bulkWrite as jest.Mock) = jest
+            .fn()
+            .mockReturnValue({
+                modifiedCount: dataMockCreateOrder.items.length,
+            });
+
+        (mongoose.startSession as jest.Mock) = jest.fn().mockReturnValue({
+            startTransaction: jest.fn(),
+            commitTransaction: jest.fn().mockReturnThis(),
+            abortTransaction: jest.fn(),
+            endSession: jest.fn(),
+        });
+
+        await postCreateOrder(req, res, next);
+        
+        expect(next).not.toHaveBeenCalled();
+        expect(res.json).toHaveBeenCalledWith({
+            error: 'Products have insufficient stock: Dummy 2!',
+        });
+        expect(res.status).toHaveBeenCalledWith(401);
+        
+        expect(Order.create).not.toHaveBeenCalled();
+        expect(Product.bulkWrite).not.toHaveBeenCalled();
+        expect(mongoose.startSession).not.toHaveBeenCalled();
+    });
+
+    it("should handle errors gracefully and return response when totalAmount is incorrect", async () => {
+
+        const req: any = {
+            userId: '654715c5941455dd27f32425',
+            body: {
+                items: dataMockCreateOrder.items,
+                totalAmount: 33,
+            },
+        };
+
+        const res: any = {
+            json: jest.fn(),
+            status: jest.fn().mockReturnThis(),
+            send: jest.fn(),
+        };
+
+        const next: any = jest.fn();
+
+        (Product.find as jest.Mock) = jest.fn().mockReturnValue({
+            select: jest.fn().mockReturnThis(),
+            exec: jest.fn().mockReturnValue(dataMockItemInventoryStock),
+        });
+
+        (Order.create as jest.Mock) = jest
+            .fn()
+            .mockReturnValue(dataMockCreateOrder);
+
+        (Product.bulkWrite as jest.Mock) = jest
+            .fn()
+            .mockReturnValue({
+                modifiedCount: dataMockCreateOrder.items.length,
+            });
+
+        (mongoose.startSession as jest.Mock) = jest.fn().mockReturnValue({
+            startTransaction: jest.fn(),
+            commitTransaction: jest.fn().mockReturnThis(),
+            abortTransaction: jest.fn(),
+            endSession: jest.fn(),
+        });
+
+        await postCreateOrder(req, res, next);
+        
+        expect(next).not.toHaveBeenCalled();
+        expect(res.json).toHaveBeenCalledWith({
+            error: 'Order information is incorrect!',
+        });
+        expect(res.status).toHaveBeenCalledWith(401);
+        
+        expect(Order.create).not.toHaveBeenCalled();
+        expect(Product.bulkWrite).not.toHaveBeenCalled();
+        expect(mongoose.startSession).not.toHaveBeenCalled();
+    });
+
+    it("should handle errors gracefully and return response when order creation fails", async () => {
+
+        const req: any = {
+            userId: '654715c5941455dd27f32425',
+            body: {
+                items: dataMockCreateOrder.items,
+                totalAmount: dataMockCreateOrder.totalAmount,
+            },
+        };
+
+        const res: any = {
+            json: jest.fn(),
+            status: jest.fn().mockReturnThis(),
+            send: jest.fn(),
+        };
+
+        const next: any = jest.fn();
+
+        (Product.find as jest.Mock) = jest.fn().mockReturnValue({
+            select: jest.fn().mockReturnThis(),
+            exec: jest.fn().mockReturnValue(dataMockItemInventoryStock),
+        });
+
+        (Order.create as jest.Mock) = jest
+            .fn()
+            .mockImplementation(() => { throw new Error('Error')});
+
+        (Product.bulkWrite as jest.Mock) = jest
+            .fn()
+            .mockReturnValue({
+                modifiedCount: dataMockCreateOrder.items.length,
+            });
+
+        (mongoose.startSession as jest.Mock) = jest.fn().mockReturnValue({
+            startTransaction: jest.fn(),
+            commitTransaction: jest.fn().mockReturnThis(),
+            abortTransaction: jest.fn(),
+            endSession: jest.fn(),
+        });
+
+        await postCreateOrder(req, res, next);
+        
+        expect(next).not.toHaveBeenCalled();
+        expect(res.json).toHaveBeenCalledWith({
+            error: 'Order creation failed!',
+        });
+        expect(res.status).toHaveBeenCalledWith(400);
+        expect(Product.bulkWrite).not.toHaveBeenCalled();
+    });
+
+    it("should handle errors gracefully and return response when Product stock updation fails", async () => {
+
+        const req: any = {
+            userId: '654715c5941455dd27f32425',
+            body: {
+                items: dataMockCreateOrder.items,
+                totalAmount: dataMockCreateOrder.totalAmount,
+            },
+        };
+
+        const res: any = {
+            json: jest.fn(),
+            status: jest.fn().mockReturnThis(),
+            send: jest.fn(),
+        };
+
+        const next: any = jest.fn();
+
+        (Product.find as jest.Mock) = jest.fn().mockReturnValue({
+            select: jest.fn().mockReturnThis(),
+            exec: jest.fn().mockReturnValue(dataMockItemInventoryStock),
+        });
+
+        (Order.create as jest.Mock) = jest
+            .fn()
+            .mockImplementation(() => { throw new Error('Error')});
+
+        (Product.bulkWrite as jest.Mock) = jest
+            .fn()
+            .mockReturnValue({
+                modifiedCount: dataMockCreateOrder.items.length - 1,
+            });
+
+        (mongoose.startSession as jest.Mock) = jest.fn().mockReturnValue({
+            startTransaction: jest.fn(),
+            commitTransaction: jest.fn().mockReturnThis(),
+            abortTransaction: jest.fn(),
+            endSession: jest.fn(),
+        });
+
+        await postCreateOrder(req, res, next);
+        
+        expect(next).not.toHaveBeenCalled();
+        expect(res.json).toHaveBeenCalledWith({
+            error: 'Order creation failed!',
+        });
+        expect(res.status).toHaveBeenCalledWith(400);
+        expect(Product.bulkWrite).not.toHaveBeenCalled();
+    });
+
+    it("should handle errors gracefully and return response when an unknown error occurs", async () => {
+
+        const req: any = {
+            userId: '654715c5941455dd27f32425',
+            body: {
+                items: dataMockCreateOrder.items,
+                totalAmount: dataMockCreateOrder.totalAmount,
+            },
+        };
+
+        const res: any = {
+            json: jest.fn(),
+            status: jest.fn().mockReturnThis(),
+            send: jest.fn(),
+        };
+
+        const next: any = jest.fn();
+
+        (Product.find as jest.Mock) = jest.fn().mockReturnValue({
+            select: jest.fn().mockReturnThis(),
+            exec: jest.fn().mockReturnValue(dataMockItemInventoryStock),
+        });
+
+        (Order.create as jest.Mock) = jest
+            .fn()
+            .mockImplementation(() => { throw new Error('Error')});
+
+        (Product.bulkWrite as jest.Mock) = jest
+            .fn()
+            .mockReturnValue({
+                modifiedCount: dataMockCreateOrder.items.length - 1,
+            });
+
+        (mongoose.startSession as jest.Mock) = jest.fn().mockImplementation(() => { throw new Error('Test Error')} );
+
+        await postCreateOrder(req, res, next);
+        
+        expect(next).toHaveBeenCalledWith(new Error ('Test Error'));
+        expect(res.json).not.toHaveBeenCalled();
+        expect(res.status).not.toHaveBeenCalled();        
     });
 });

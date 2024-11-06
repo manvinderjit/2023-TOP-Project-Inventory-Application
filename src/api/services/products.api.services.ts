@@ -19,8 +19,7 @@ const fetchProductsService = async (
             description: 1,
             imageFilename: 1,
             price: 1,
-            stock: 1,
-            _id: 0,
+            stock: 1,            
         })
         .sort({ name: 1 })
         .limit(Math.round(Number(perPageLimit)))

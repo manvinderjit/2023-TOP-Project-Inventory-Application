@@ -1,7 +1,7 @@
 import { jest } from '@jest/globals';
-import { getUserOrders, postCancelAnOrder, postCreateOrder } from '../../../src/api/controllers/orders.api.controllers';
-import Order from '../../../src/models/ordersModel';
-import Product from '../../../src/models/productModel';
+import { getUserOrders, postCancelAnOrder, postCreateOrder } from '../../src/api/controllers/orders.api.controllers';
+import Order from '../../src/models/ordersModel';
+import Product from '../../src/models/productModel';
 import mongoose from 'mongoose';
 import { totalmem } from 'os';
 

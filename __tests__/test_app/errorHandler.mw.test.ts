@@ -1,5 +1,5 @@
 import { jest } from '@jest/globals';
-import errorHandler from '../../../src/global.middleware/errorHandler.mw';
+import errorHandler from '../../src/global.middleware/errorHandler.mw';
 
 describe('Global Error Handler', () => {
     // Handles errors by logging the stack trace

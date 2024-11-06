@@ -1,10 +1,10 @@
 import request from 'supertest';
 import { jest } from '@jest/globals';
-import { app, Shutdown } from '../../../src/server';
-import connectDB from '../../../src/config/mongodb';
-import { registerEmployee } from '../../../src/app/controllers/auth.app.controllers';
-import * as appAuthServices from '../../../src/app/services/auth.app.services';
-import Employee from '../../../src/models/employees';
+import { app, Shutdown } from '../../src/server';
+import connectDB from '../../src/config/mongodb';
+import { registerEmployee } from '../../src/app/controllers/auth.app.controllers';
+import * as appAuthServices from '../../src/app/services/auth.app.services';
+import Employee from '../../src/models/employees';
 
 describe('Register View', () => {
     beforeEach(async () => {

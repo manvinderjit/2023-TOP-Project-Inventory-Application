@@ -1,6 +1,6 @@
 import request from 'supertest';
-import { app, Shutdown } from '../../../src/server';
-import connectDB from '../../../src/config/mongodb';
+import { app, Shutdown } from '../../src/server';
+import connectDB from '../../src/config/mongodb';
 
 describe('Inventory App', () => {
     beforeEach(async () => {

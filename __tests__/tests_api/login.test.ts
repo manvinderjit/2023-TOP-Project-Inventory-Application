@@ -1,6 +1,6 @@
 import { jest } from '@jest/globals';
-import User from '../../../src/models/apiUserModel';
-import { postLoginUser } from '../../../src/api/controllers/login.api.controllers';
+import User from '../../src/models/apiUserModel';
+import { postLoginUser } from '../../src/api/controllers/login.api.controllers';
 import { Types } from 'mongoose';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';

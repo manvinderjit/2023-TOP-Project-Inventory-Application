@@ -1,6 +1,6 @@
 import { jest } from '@jest/globals';
-import Product from '../../../src/models/productModel';
-import { getProducts } from '../../../src/api/controllers/products.api.controllers';
+import Product from '../../src/models/productModel';
+import { getProducts } from '../../src/api/controllers/products.api.controllers';
 import createHttpError from 'http-errors';
 
 const mockProducts = [

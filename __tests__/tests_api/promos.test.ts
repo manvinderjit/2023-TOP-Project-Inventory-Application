@@ -1,8 +1,8 @@
 import { jest } from '@jest/globals';
-import Promo from '../../../src/models/promoModel';
-import { getCarouselPromos } from '../../../src/api/controllers/promos.api.controllers';
-import { app, Shutdown } from '../../../src/server';
-import connectDB from '../../../src/config/mongodb';
+import Promo from '../../src/models/promoModel';
+import { getCarouselPromos } from '../../src/api/controllers/promos.api.controllers';
+import { app, Shutdown } from '../../src/server';
+import connectDB from '../../src/config/mongodb';
 
 interface Promos {
      caption: { 

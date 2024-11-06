@@ -1,5 +1,5 @@
 import { jest } from '@jest/globals';
-import { verifyApiToken } from '../../../src/api/api.middleware/auth.api.middleware';
+import { verifyApiToken } from '../../src/api/api.middleware/auth.api.middleware';
 import jwt from 'jsonwebtoken';
 import 'dotenv/config';
 

@@ -1,5 +1,5 @@
 import { jest } from '@jest/globals';
-import { getGuidePage } from '../../../src/app/controllers/guide.app.controllers';
+import { getGuidePage } from '../../src/app/controllers/guide.app.controllers';
 
 describe("GET Guide Page", () => {
     it("should render the guide page when a user is logged out", async () => {

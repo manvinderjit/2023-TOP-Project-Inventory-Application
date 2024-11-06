@@ -1,6 +1,6 @@
 import { jest } from '@jest/globals';
-import User from '../../../src/models/apiUserModel';
-import { postRegisterUser } from '../../../src/api/controllers/register.api.controllers';
+import User from '../../src/models/apiUserModel';
+import { postRegisterUser } from '../../src/api/controllers/register.api.controllers';
 import { Types } from 'mongoose';
 import bcrypt from 'bcrypt';
 

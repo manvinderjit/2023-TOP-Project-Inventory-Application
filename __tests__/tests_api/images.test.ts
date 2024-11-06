@@ -1,5 +1,5 @@
 import { jest } from '@jest/globals';
-import { apiGetImage } from '../../../src/api/controllers/image.api.controllers';
+import { apiGetImage } from '../../src/api/controllers/image.api.controllers';
 
 describe("get Image", () => {
     const staticsPath =

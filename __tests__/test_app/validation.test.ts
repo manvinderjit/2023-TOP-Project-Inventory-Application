@@ -1,4 +1,4 @@
-import { validateDescription, validateEmail, validateIsMongoObjectId, validateIsNumber, validateName, validatePassword } from "../../../src/utilities/validation";
+import { validateDescription, validateEmail, validateIsMongoObjectId, validateIsNumber, validateName, validatePassword } from "../../src/utilities/validation";
 
 describe("Validate Email", () => {
     it('should return true when a valid email is provided', () => {

@@ -1,6 +1,6 @@
 import { jest } from '@jest/globals';
-import Product from '../../../src/models/productModel';
-import Category from '../../../src/models/categoryModel';
+import Product from '../../src/models/productModel';
+import Category from '../../src/models/categoryModel';
 import {
     getManageProducts,
     getProductDetails,
@@ -12,7 +12,7 @@ import {
     postDeleteProduct,
     getEditProductImage,
     postEditProductImage,
-} from '../../../src/app/controllers/products.app.controllers';
+} from '../../src/app/controllers/products.app.controllers';
 import { unlink } from 'fs';
 
 const dataMockCategories = [

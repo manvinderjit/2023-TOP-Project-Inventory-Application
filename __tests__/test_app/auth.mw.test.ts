@@ -1,5 +1,5 @@
 import { jest } from '@jest/globals';
-import { redirectToLogin, redirectToDashboard } from "../../../src/app/middleware/auth.mw";
+import { redirectToLogin, redirectToDashboard } from "../../src/app/middleware/auth.mw";
 import { NextFunction } from 'express';
 
 describe("Redirect To Login", () => {

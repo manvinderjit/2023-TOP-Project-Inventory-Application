@@ -1,6 +1,6 @@
 import { jest } from '@jest/globals';
-import Orders from '../../../src/models/ordersModel';
-import { getAllOrders, getOrderById, postFulfillOrder } from '../../../src/app/controllers/orders.app.controller.js';
+import Orders from '../../src/models/ordersModel';
+import { getAllOrders, getOrderById, postFulfillOrder } from '../../src/app/controllers/orders.app.controller.js';
 
 const orderStatusList = [
     { id: 1, name: 'Ordered' },

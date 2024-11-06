@@ -1,9 +1,9 @@
 import request from 'supertest';
 import { jest } from '@jest/globals';
-import { app, Shutdown } from '../../../src/server';
-import connectDB from '../../../src/config/mongodb';
-import Category from '../../../src/models/categoryModel';
-import Product from '../../../src/models/productModel';
+import { app, Shutdown } from '../../src/server';
+import connectDB from '../../src/config/mongodb';
+import Category from '../../src/models/categoryModel';
+import Product from '../../src/models/productModel';
 import {
     getCategoryDetailsView,
     getManageCategoriesView,
@@ -13,7 +13,7 @@ import {
     postEditCategory,
     getDeleteCategory,
     postDeleteCategory,
-} from '../../../src/app/controllers/category.app.controllers';
+} from '../../src/app/controllers/category.app.controllers';
 
 const dataMockCategories = [
   {

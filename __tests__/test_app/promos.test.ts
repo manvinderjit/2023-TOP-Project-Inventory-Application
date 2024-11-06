@@ -1,5 +1,5 @@
 import { jest } from '@jest/globals';
-import Promo from '../../../src/models/promoModel';
+import Promo from '../../src/models/promoModel';
 import {
     getPromoDetails,
     getManagePromos,
@@ -11,12 +11,12 @@ import {
     postDeletePromo,
     getEditPromoImage,
     postEditPromoImage,
-} from '../../../src/app/controllers/promos.app.controllers';
-import { deletePromo, getPromoImageName, promoCategories } from '../../../src/app/services/promos.app.services';
+} from '../../src/app/controllers/promos.app.controllers';
+import { deletePromo, getPromoImageName, promoCategories } from '../../src/app/services/promos.app.services';
 import fs, { unlink } from 'node:fs';
-import { checkImageExists, deleteAppImage } from '../../../src/app/services/image.app.services';
+import { checkImageExists, deleteAppImage } from '../../src/app/services/image.app.services';
 
-// jest.mock('../../../src/app/services/promos.app.services');
+// jest.mock('../../src/app/services/promos.app.services');
 
 // const getPromoImageNameMock: any = getPromoImageName as jest.Mock;
 

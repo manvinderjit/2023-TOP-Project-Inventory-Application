@@ -4,7 +4,7 @@ on:
   push:
     branches:
       - production
-      - prodtest
+      - prodtest-v2
 
 # These permissions are needed to interact with GitHub's OIDC Token endpoint.
 permissions:
@@ -36,7 +36,7 @@ jobs:
           context: .
           platforms: linux/amd64,linux/arm64
           push: true
-          tags: ${{ secrets.DOCKERHUB_TAGS }}amd-arm
+          tags: ${{ secrets.DOCKERHUB_TAGS }}amd-arm-v2
   
   deploy:    
     needs: build

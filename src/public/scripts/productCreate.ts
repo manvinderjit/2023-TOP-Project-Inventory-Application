@@ -10,7 +10,7 @@ const productCategoryError = document.getElementById('productCategoryError') as 
 const productPriceError = document.getElementById('productPriceError') as HTMLDivElement;
 const productStockError = document.getElementById('productStockError') as HTMLDivElement;
 
-const form = document.querySelector('form');
+const productForm = document.querySelector('form') as HTMLFormElement;
 
 const descriptionRegExPattern = new RegExp('^[a-zA-Z0-9\.\-\_\(\)\ ]{3,100}$');
 

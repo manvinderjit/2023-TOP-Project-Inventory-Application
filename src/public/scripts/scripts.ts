@@ -1,10 +1,10 @@
-const email = document.getElementById('email');
-const emailError = document.getElementById('emailError');
-const password = document.getElementById('password');
-const passwordError = document.getElementById('passwordError');
-const confirmPassword = document.getElementById('confirmPassword');
-const confirmPasswordError = document.getElementById('confirmPasswordError');
-const form = document.querySelector('form');
+const email = document.getElementById('email') as HTMLInputElement;
+const emailError = document.getElementById('emailError') as HTMLDivElement;
+const password = document.getElementById('password') as HTMLInputElement;
+const passwordError = document.getElementById('passwordError') as HTMLDivElement;
+const confirmPassword = document.getElementById('confirmPassword') as HTMLInputElement;
+const confirmPasswordError = document.getElementById('confirmPasswordError') as HTMLDivElement;
+const form = document.querySelector('form') as HTMLFormElement;
 
 email.addEventListener('input', (event) => {
     if (email.validity.valid) {        

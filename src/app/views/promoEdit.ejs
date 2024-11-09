@@ -70,7 +70,7 @@
                         </div>
                         <div class="mb-3">
                             <div class="form-label" >Current Promo Image: </div>
-                            <img id="currentPromoImage" src="/images/promos/<%= promoDetails.imageFilename %>" class="img-fluid rounded">
+                            <img id="currentPromoImage" src="/api/promos/image/<%= promoDetails.imageFilename %>" class="img-fluid rounded">
                             <input class="form-control" type="hidden" id="promoImageName" name="promoImageName" value="<%= promoDetails.imageFilename %>" >
                         </div>                         
                         <div class="input-group mb-3">

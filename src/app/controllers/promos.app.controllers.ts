@@ -1,18 +1,13 @@
 import { NextFunction, Request, Response } from 'express';
-import { createPromo, deletePromo, fetchPromoDetails, fetchPromos, getPromoImageName, promoCategories, updatePromo } from '../services/promos.app.services.js';
+import { createPromo, deletePromo, fetchPromoDetails, fetchPromos, promoCategories, updatePromo } from '../services/promos.app.services.js';
 import { validateDate, validateDescription, validateEnums, validateFieldsMissingOrEmpty, validateFieldValues, validateIsMongoObjectId, validateName } from '../../utilities/validation.js';
 import { fileURLToPath } from 'url';
 import { replaceFileNameSpacesWithHyphen } from '../../utilities/fileFormatting.js';
-import { unlink } from 'node:fs';
-import { PathLike } from 'fs';
-import { checkImageExists, deleteAppImage } from '../services/image.app.services.js';
-import { Types } from 'mongoose';
+import { deleteFileFromS3, uploadFileToS3 } from '../../common/services/s3.aws.services.js';
 
 interface ExpressFileUploadRequest extends Request {
     files: any;
 };
-
-const staticsPath = fileURLToPath(new URL('../../public', import.meta.url));
 
 const validatePromoCategory = (categoryValue: string) =>
     validateEnums(['1', '2'], categoryValue);
@@ -115,8 +110,10 @@ export const postCreatePromo = async (
     res: Response,
 ): Promise<void> => {
     try {
-        let uploadedFile: { name: string; mv: (arg0: string, arg1: (error: any) => Promise<void>) => void; };
-        let uploadPath: PathLike;
+        let uploadedFile: {
+            mimetype: string;
+            data: any; name: string;
+};
         let isError: Error | string | null = null;
 
         const requiredFieldsAndValidators = [
@@ -153,23 +150,17 @@ export const postCreatePromo = async (
             // Remove spaces from image name
             const newUploadFileName = replaceFileNameSpacesWithHyphen(
                 uploadedFile.name,
-                req.body.promoName,
+                req.body.promoName + Date.now(),
             );
-            
-            // Set upload path
-            uploadPath = staticsPath + '/images/promos/' + newUploadFileName;
 
             // Get all promo details for storing in database
             const promoDetails = req.body;
             promoDetails.newUploadFileName = newUploadFileName;
 
-            // Upload files on the server
-            await uploadedFile.mv(uploadPath, async function (err: any) {
-                if(err) {
-                    console.error(err);
-                    isError = err;
-                }
-                else {
+            // Upload image file to s3
+            await uploadFileToS3(`images/promos/${newUploadFileName}`, uploadedFile.data, uploadedFile.mimetype)
+            .then(async success => {
+                if (success) {
                     // Create Promo
                     const createdPromo = await createPromo(promoDetails);
                     if (createdPromo && createdPromo !== null) {
@@ -177,7 +168,7 @@ export const postCreatePromo = async (
                         res.render('promoCreate', {
                             title: 'Create Promo',
                             username: res.locals.user,
-                            success: 'Promo Created!',                            
+                            success: 'Promo Created!',
                             promoName: '',
                             promoCaption: '',
                             promoDescription: '',
@@ -189,22 +180,24 @@ export const postCreatePromo = async (
                         });
                     } else {
                         // Delete the uploaded file if error
-                        unlink(uploadPath, (err) => {
-                            // Delete the file
-                            if (err) {
-                                console.error(`Failed to delete ${uploadedFile.name} file!`,)
-                                // throw error;
+                        await deleteFileFromS3(
+                            `images/promos/${newUploadFileName}`,
+                        ).then((success) => {
+                            if (success) {
+                                console.log('File deleted successfully!');
                             } else {
-                                console.log(
-                                    `${uploadedFile.name} file was deleted!`,
+                                console.error(
+                                    `Failed deleting file with key: images/promos/${newUploadFileName}`,
                                 );
                             }
-                        })
-                        // Assign promo creation error                        
-                        isError = new Error('Promo creation failed!');
+                        });
+                        // Throw product creation error
+                        isError = 'Promo creation failed!';
                     }
+                } else {
+                    isError = 'Failed to upload file!';
                 }
-            })
+            });
         }
         // If error encountered, throw error
         if (isError !== null) throw isError;
@@ -379,20 +372,23 @@ export const postDeletePromo = async (req: Request, res: Response): Promise<void
             // If no or invalid promo id, throw error
             throw new Error('Invalid promo ID provided!');
         } else {
-            // Get Promo Image Name for Deletion
-            const promoImageName = await getPromoImageName(req.params.id);
-            if (promoImageName) {
-                let imagePath =
-                    staticsPath + '/images/promos/' + promoImageName;
-                // Check Image Exists
-                const imageExistsFlag = await checkImageExists(imagePath);
-                // Delete Image
-                if (imageExistsFlag) await deleteAppImage(imagePath);
-            };
-            
             // Delete Promo from db
             const deleteStatus = await deletePromo(req.params.id);
-            if(deleteStatus && deleteStatus._id.toString() === req.params.id) res.redirect('/promos');
+            if(deleteStatus && deleteStatus._id.toString() === req.params.id) {
+                // Delete the uploaded file
+                await deleteFileFromS3(
+                    `images/promos/${deleteStatus.imageFilename}`,
+                ).then((success) => {
+                    if (success) {
+                        console.log('File deleted successfully!');
+                        res.redirect('/promos');
+                    } else {
+                        console.error(
+                            `Failed deleting file with key: images/promos/${deleteStatus.imageFilename}`,
+                        );
+                    }
+                });
+            }
             else throw new Error('Deletion Failed!');
         }
     } catch (error) {
@@ -483,25 +479,21 @@ export const postEditPromoImage = async (req: Request, res: Response): Promise<v
             // Try uploading the image file
             // The name of the input field (i.e. "promoImage") is used to retrieve the uploaded file
             const reqFiles = (req as ExpressFileUploadRequest).files;
-            const uploadedFile = reqFiles.promoImage;            
-            let uploadPath: PathLike;
+            const uploadedFile = reqFiles.promoImage;
             
             const promoDetails = await fetchPromoDetails(req.params.id);
             
             if (!promoDetails) throw new Error('File upload failed!');
-            // Remove spaces from image name
-            const newUploadFileName = replaceFileNameSpacesWithHyphen(
-                uploadedFile.name,
-                promoDetails.name,
-            );
-            
-            // Set upload path
-            uploadPath = staticsPath + '/images/promos/' + newUploadFileName;
 
             // Upload files on the server
-            await uploadedFile.mv(uploadPath, async function (err: any) {
-                if(err) {
-                    console.error(err);
+            await uploadFileToS3(
+                `images/promos/${promoDetails.imageFilename}`,
+                uploadedFile.data,
+                uploadedFile.mimetype,
+            ).then((success) => {
+                if (success) {
+                    res.redirect(`/promos/${req.params.id}/edit/image`);
+                } else {                    
                     res.render('promoImageEdit', {
                         title: 'Edit Promo Image',
                         username: res.locals.user,
@@ -510,10 +502,8 @@ export const postEditPromoImage = async (req: Request, res: Response): Promise<v
                         promoImage: req.body.imageFilename,
                         promoUrl: req.body.promoUrl,
                     });
-                } else {                    
-                    res.redirect(`/promos/${req.params.id}/edit/image`);
                 }
-            })
+            });
         }
     } catch (error) {
         res.render('promoImageEdit', {

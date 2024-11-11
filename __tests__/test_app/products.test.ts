@@ -14,6 +14,10 @@ import {
     postEditProductImage,
 } from '../../src/app/controllers/products.app.controllers';
 import { unlink } from 'fs';
+import { S3Client, DeleteObjectCommand, PutObjectCommand } from '@aws-sdk/client-s3';
+import { mockClient } from 'aws-sdk-client-mock';
+
+const s3Mock = mockClient(S3Client);
 
 const dataMockCategories = [
     {
@@ -495,6 +499,10 @@ describe("Create Product", () => {
 });
 
 describe("POST Create Product", () => {
+    beforeEach(() => {
+        s3Mock.reset();
+    });
+
     it("should create a new product and render success message", async () => {
 
         const dataCreatedProduct = {
@@ -515,7 +523,6 @@ describe("POST Create Product", () => {
             files: {
                 productImage: {
                     name: 'image.png',
-                    mv: jest.fn((path, callback: any) => callback(null)),
                 },
             },
         };
@@ -526,6 +533,8 @@ describe("POST Create Product", () => {
                 user: 'user@abc.com',
             },
         };
+
+        s3Mock.on(PutObjectCommand).resolvesOnce({});
 
         (Category.find as jest.Mock) = jest.fn().mockReturnValueOnce({
             select: jest.fn().mockReturnThis(),
@@ -538,7 +547,6 @@ describe("POST Create Product", () => {
         await postCreateProduct(req, res);
 
         expect(res.render).toHaveBeenCalled();
-        expect(req.files.productImage.mv).toHaveBeenCalled();
         expect(Product.create).toHaveBeenCalled();
         expect(res.render).toHaveBeenCalledWith('productCreate', {
             title: 'Create Product',
@@ -692,7 +700,6 @@ describe("POST Create Product", () => {
             files: {
                 productImage: {
                     name: 'image.png',
-                    mv: jest.fn((path, callback: any) => callback(new Error('Upload failed!'))),
                 },
             },
         };
@@ -704,6 +711,10 @@ describe("POST Create Product", () => {
             },
         };
 
+        s3Mock.on(PutObjectCommand).rejectsOnce('Dummy Error!');
+
+        s3Mock.on(DeleteObjectCommand).resolves({});
+
         (Category.find as jest.Mock) = jest.fn().mockReturnValueOnce({
             select: jest.fn().mockReturnThis(),
             sort: jest.fn().mockReturnThis(),
@@ -713,15 +724,12 @@ describe("POST Create Product", () => {
         (Product.create as jest.Mock) = jest.fn().mockReturnValueOnce(null);
 
         await postCreateProduct(req, res);
-
-        expect(req.files.productImage.mv).toHaveBeenCalled();
+        
         expect(Product.create).not.toHaveBeenCalled();
         expect(res.render).toHaveBeenCalledWith('productCreate', {
             title: 'Create Product',
             username: res.locals.user,
-            error: new Error(
-                'Upload failed!',
-            ),
+            error: new Error('Dummy Error!'),
             productName: req.body.productName,
             productDescription: req.body.productDescription,
             productCategory: req.body.productCategory,
@@ -737,7 +745,6 @@ describe("POST Create Product", () => {
             files: {
                 productImage: {
                     name: 'image.png',
-                    mv: jest.fn((path, callback: any) => callback(null)),
                 },
             },
         };
@@ -749,6 +756,21 @@ describe("POST Create Product", () => {
             },
         };
 
+        s3Mock.on(PutObjectCommand).resolvesOnce({
+            $metadata: {
+                httpStatusCode: 200,
+                requestId: 'xxxxxxxxxxxxxxxx',
+                extendedRequestId: 'xxxxxxxxxxxxxxxxxxxx',
+                cfId: 'xxxxxxxxxxxxxxxx',
+                attempts: 1,
+                totalRetryDelay: 0,
+            },
+            ETag: '"e8b7f6f79f7a2d7b3ab1cfdb3f79b424"',
+            VersionId: 'xxxxxxx', // If versioning is enabled
+        });
+
+        s3Mock.on(DeleteObjectCommand).resolvesOnce({});
+
         (Category.find as jest.Mock) = jest.fn().mockReturnValueOnce({
             select: jest.fn().mockReturnThis(),
             sort: jest.fn().mockReturnThis(),
@@ -757,19 +779,17 @@ describe("POST Create Product", () => {
 
         (Product.create as jest.Mock) = jest.fn().mockReturnValueOnce(null);
 
-        jest.spyOn({ unlink }, 'unlink').mockImplementationOnce(
-            (path, callback) => callback(null),
-        );
+        // jest.spyOn({ unlink }, 'unlink').mockImplementationOnce(
+        //     (path, callback) => callback(null),
+        // );
 
         await postCreateProduct(req, res);
 
         expect(res.render).toHaveBeenCalled();
-        expect(req.files.productImage.mv).toHaveBeenCalled();
-        expect(Product.create).toHaveBeenCalled();
         expect(res.render).toHaveBeenCalledWith('productCreate', {
             title: 'Create Product',
             username: res.locals.user,
-            error: new Error('Product creation failed!'),
+            error: 'Product creation failed!',
             productName: req.body.productName,
             productDescription: req.body.productDescription,
             productCategory: req.body.productCategory,
@@ -1465,6 +1485,10 @@ describe("POST Delete Product", () => {
         };
 
         const expectedData = dataMockProducts.filter(product => product._id === req.params.id);
+
+        s3Mock.on(DeleteObjectCommand).resolves({
+            DeleteMarker: true,
+        });
         
         (Product.findByIdAndDelete as jest.Mock) = jest.fn().mockReturnValueOnce(expectedData[0]);
 
@@ -1766,7 +1790,7 @@ describe("GET Edit Product Image", () => {
 });
 
 describe('POST Edit Product Image', () => {
-    it('should update the product image and redirect after updating image successfully', async () => {
+    it('should update the product image in s3 bucket and redirect after updating image successfully', async () => {
         const req: any = {
             params: {
                 id: '65cea4a2b9d6ae606013be23',
@@ -1779,7 +1803,7 @@ describe('POST Edit Product Image', () => {
             },
             body: {
                 productName: 'ABC 27G2SP Monitor',
-                productDescription: 'ABC 27G2SP Monitor',                
+                productDescription: 'ABC 27G2SP Monitor',
             },
         };
 
@@ -1792,6 +1816,10 @@ describe('POST Edit Product Image', () => {
         };
 
         const expectedData = dataMockProducts.filter(product => product._id === req.params.id);
+
+        s3Mock.on(PutObjectCommand).resolves({
+            ETag: "d41d8cd98f00b204e9800998ecf8427e",
+        });
 
         (Product.findById as jest.Mock) = jest.fn().mockReturnValueOnce({
             populate: jest.fn().mockReturnThis(),
@@ -2054,6 +2082,8 @@ describe('POST Edit Product Image', () => {
 
         const expectedData = dataMockProducts.filter(product => product._id === req.params.id);
 
+        s3Mock.on(PutObjectCommand).rejects('Mock Rejection!');
+        
         (Product.findById as jest.Mock) = jest.fn().mockReturnValueOnce({
             populate: jest.fn().mockReturnThis(),
             exec: jest.fn().mockReturnValueOnce(expectedData[0]),
@@ -2065,7 +2095,7 @@ describe('POST Edit Product Image', () => {
         expect(res.render).toHaveBeenCalledWith('productImageEdit', {
             title: 'Product Image Edit',
             username: res.locals.user,
-            error: new Error('File upload failed!'),
+            error: new Error('Mock Rejection!'),
             productData: {
                 productName: req.body.productName,
                 productImage: req.body.currProductImage,

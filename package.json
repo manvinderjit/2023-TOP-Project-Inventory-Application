@@ -32,6 +32,7 @@
     },
     "devDependencies": {
         "@aws-sdk/types": "^3.686.0",
+        "@smithy/util-stream": "^3.2.1",
         "@types/bcrypt": "^5.0.2",
         "@types/cors": "^2.8.17",
         "@types/ejs": "^3.1.5",
@@ -44,6 +45,7 @@
         "@types/mongoose": "^5.11.97",
         "@types/node": "^22.5.4",
         "@types/supertest": "^6.0.2",
+        "aws-sdk-client-mock": "^4.1.0",
         "eslint": "^8.52.0",
         "eslint-config-prettier": "^9.0.0",
         "jest": "^29.7.0",

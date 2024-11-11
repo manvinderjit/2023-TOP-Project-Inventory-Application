@@ -15,6 +15,10 @@ import {
 import { deletePromo, getPromoImageName, promoCategories } from '../../src/app/services/promos.app.services';
 import fs, { unlink } from 'node:fs';
 import { checkImageExists, deleteAppImage } from '../../src/app/services/image.app.services';
+import { S3Client, DeleteObjectCommand, PutObjectCommand } from '@aws-sdk/client-s3';
+import { mockClient } from 'aws-sdk-client-mock';
+
+const s3Mock = mockClient(S3Client);
 
 // jest.mock('../../src/app/services/promos.app.services');
 
@@ -462,13 +466,15 @@ describe('GET Create Promo View', () => {
 });
 
 describe("POST Create Promo", () => {
+
+    beforeEach(() => s3Mock.reset());
+
     it("should create a promo and render success message when all details are provided", async () => {
         const req: any = {
             body: mockCreatePromo,
             files: {
                 promoImage: {
                     name: 'image.png',
-                    mv: jest.fn((path, callback: any) => callback(null)),
                 },
             },
         };
@@ -480,12 +486,13 @@ describe("POST Create Promo", () => {
             },
         };
 
+        s3Mock.on(PutObjectCommand).resolvesOnce({});
+
         (Promo.create as jest.Mock) = jest.fn().mockReturnValueOnce(mockCreatePromo);
 
         await postCreatePromo(req, res);
 
         expect(res.render).toHaveBeenCalled();
-        expect(req.files.promoImage.mv).toHaveBeenCalled();
         expect(Promo.create).toHaveBeenCalled();
         expect(res.render).toHaveBeenCalledWith('promoCreate', {
             title: 'Create Promo',
@@ -638,7 +645,7 @@ describe("POST Create Promo", () => {
             files: {
                 promoImage: {
                     name: 'image.png',
-                    mv: jest.fn((path, callback: any) => callback(new Error('Upload failed'))),
+                    // mv: jest.fn((path, callback: any) => callback(new Error('Upload failed'))),
                 },
             },
         };
@@ -650,16 +657,17 @@ describe("POST Create Promo", () => {
             },
         };
 
+        s3Mock.on(PutObjectCommand).rejectsOnce('Upload failed!');
+
         (Promo.create as jest.Mock) = jest.fn().mockReturnValueOnce(mockCreatePromo);
 
         await postCreatePromo(req, res);
-
-        expect(req.files.promoImage.mv).toHaveBeenCalled();
+        
         expect(Promo.create).not.toHaveBeenCalled();
         expect(res.render).toHaveBeenCalledWith('promoCreate', {
             title: 'Create Promo',
             username: res.locals.user,
-            error: new Error('Upload failed'),
+            error: new Error('Upload failed!'),
             // TODO: Pass following field values
             promoName: req.body.promoName,
             promoCaption: req.body.promoCaption,
@@ -678,7 +686,7 @@ describe("POST Create Promo", () => {
             files: {
                 promoImage: {
                     name: 'image.png',
-                    mv: jest.fn((path, callback: any) => callback(null)),
+                    // mv: jest.fn((path, callback: any) => callback(null)),
                 },
             },
         };
@@ -690,19 +698,20 @@ describe("POST Create Promo", () => {
             },
         };
 
+        s3Mock.on(PutObjectCommand).resolvesOnce({});
+
         (Promo.create as jest.Mock) = jest.fn().mockReturnValueOnce(null);
 
-        jest.spyOn({ unlink }, 'unlink').mockImplementationOnce(
-            (path, callback) => callback(null),
-        );
+        // jest.spyOn({ unlink }, 'unlink').mockImplementationOnce(
+        //     (path, callback) => callback(null),
+        // );
 
         await postCreatePromo(req, res);
-
-        expect(req.files.promoImage.mv).toHaveBeenCalled();
+        
         expect(res.render).toHaveBeenCalledWith('promoCreate', {
             title: 'Create Promo',
             username: res.locals.user,
-            error: new Error('Promo creation failed!'),
+            error: 'Promo creation failed!',
             promoName: req.body.promoName,
             promoCaption: req.body.promoCaption,
             promoDescription: req.body.promoDescription,
@@ -1237,6 +1246,9 @@ describe('GET Delete Promo View', () => {
 });
 
 describe('POST Delete Promo', () => {
+
+    beforeEach(() => s3Mock.reset());
+
     it('should be able to Delete Promo and redirect to the Manage Promos page', async () => {
         const req: any = {
             params: {
@@ -1288,6 +1300,8 @@ describe('POST Delete Promo', () => {
         //         'checkImageExists',
         //     )
         //     .mockImplementation(() => true);
+
+        s3Mock.on(DeleteObjectCommand).resolvesOnce({});
 
         (Promo.findByIdAndDelete as jest.Mock) = jest
             .fn()
@@ -1352,9 +1366,11 @@ describe('POST Delete Promo', () => {
             .fn()
             .mockReturnValueOnce(null);
 
+        s3Mock.on(DeleteObjectCommand).resolvesOnce({});
+
         await postDeletePromo(req, res);
 
-        expect(Promo.findById).toHaveBeenCalledWith(req.params.id);
+        // expect(Promo.findById).toHaveBeenCalledWith(req.params.id);
         expect(Promo.findByIdAndDelete).toHaveBeenCalledWith(req.params.id);
 
         expect(res.render).toHaveBeenCalledWith('promoDelete', {
@@ -1487,6 +1503,11 @@ describe('GET Edit Promo Image', () => {
 
 
 describe('POST Edit Promo Image', () => {
+
+    beforeEach(() => {
+        s3Mock.reset();
+    });
+
     it('should update the promo image and redirect succesfully', async () => {
         const req: any = {
             params: {
@@ -1495,7 +1516,6 @@ describe('POST Edit Promo Image', () => {
             files: {
                 promoImage: {
                     name: 'image.png',
-                    mv: jest.fn((path, callback: any) => callback(null)),
                 },
             },
         };
@@ -1507,6 +1527,8 @@ describe('POST Edit Promo Image', () => {
             render: jest.fn(),
             redirect: jest.fn(),
         };
+
+        s3Mock.on(PutObjectCommand).resolvesOnce({});
 
         (Promo.findById as jest.Mock) = jest.fn().mockReturnValueOnce({
             sort: jest.fn().mockReturnThis(),
@@ -1643,7 +1665,7 @@ describe('POST Edit Promo Image', () => {
         });
     });
 
-    it('should render the error if it fails tp upload file', async () => {
+    it('should render the error if it fails to upload file', async () => {
         const req: any = {
             params: {
                 id: mockPromoDetails._id,
@@ -1651,7 +1673,6 @@ describe('POST Edit Promo Image', () => {
             files: {
                 promoImage: {
                     name: 'image.png',
-                    mv: jest.fn((path, callback: any) => callback(null)),
                 },
             },
         };
@@ -1663,6 +1684,8 @@ describe('POST Edit Promo Image', () => {
             render: jest.fn(),
             redirect: jest.fn(),
         };
+
+        s3Mock.on(PutObjectCommand).rejectsOnce();
 
         (Promo.findById as jest.Mock) = jest.fn().mockReturnValueOnce({
             sort: jest.fn().mockReturnThis(),

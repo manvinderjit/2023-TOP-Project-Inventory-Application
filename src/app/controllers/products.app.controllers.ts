@@ -3,9 +3,10 @@ import { fetchCategories } from '../services/category.app.services.js';
 import { createProduct, deleteProductById, fetchProduct, fetchProducts, updateProduct } from '../services/products.app.services.js';
 import { CategoryDetailsDocument, ProductDetails } from '../../types/types.js';
 import { validateDescription, validateIsMongoObjectId, validateIsNumber, validateName, validateRequiredFieldsInBody } from '../../utilities/validation.js';
-import { PathLike, unlink } from 'node:fs';
+import { PathLike  } from 'node:fs';
 import { replaceFileNameSpacesWithHyphen } from '../../utilities/fileFormatting.js';
 import { fileURLToPath } from 'node:url';
+import { deleteFileFromS3, uploadFileToS3 } from '../../common/services/s3.aws.services.js';
 
 const staticsPath = fileURLToPath(new URL('../../public', import.meta.url));
 
@@ -112,10 +113,11 @@ export const postCreateProduct = async (req: Request, res: Response): Promise<vo
 
     try {
         let uploadedFile: {
+            data: any;
+            mimetype: string;
             name: string;
-            mv: (arg0: string, arg1: (error: any) => Promise<void>) => void;
         };
-        let uploadPath: PathLike;
+        
         let isError: Error | string | null = null;
 
         const requiredFieldsAndValidators = [
@@ -170,26 +172,19 @@ export const postCreateProduct = async (req: Request, res: Response): Promise<vo
             // The name of the input field (i.e. "productImage") is used to retrieve the uploaded file
             uploadedFile = reqFiles.productImage;
 
-            // Remove spaces from image name
+            // Replaces spaces from image name with '-' and add a timestamp for uniqueness
             const newUploadFileName = replaceFileNameSpacesWithHyphen(
                 uploadedFile.name,
                 req.body.productName + Date.now(),
             );
 
-            // Set upload path
-            uploadPath = staticsPath + '/images/products/' + newUploadFileName;
-
             // Get all promo details for storing in database
             const productDetails = req.body;
             productDetails.newUploadFileName = newUploadFileName;
 
-            // Upload files on the server
-            await uploadedFile.mv(uploadPath, async function (err: any) {
-                if (err) {
-                    console.error(err);
-                    isError = err;
-                    // throw err;
-                } else {
+            await uploadFileToS3(`images/products/${newUploadFileName}`, uploadedFile.data, uploadedFile.mimetype)
+            .then(async (success) => {
+                if (success) {
                     // Create Product
                     const createdProduct = await createProduct(productDetails);
                     if (createdProduct && createdProduct !== null) {
@@ -205,26 +200,28 @@ export const postCreateProduct = async (req: Request, res: Response): Promise<vo
                             productStock: '',
                             categoryList: productCategories,
                         });
-                    } else {
+                    }
+                    else {
                         // Delete the uploaded file if error
-                        unlink(uploadPath, (err) => {
-                            // Delete the file
-                            if (err) {
-                                console.error(
-                                    `Failed to delete ${uploadedFile.name} file!`,
-                                );
-                                // throw error;
+                        await deleteFileFromS3(
+                            `images/products/${newUploadFileName}`,
+                        ).then((success) => {
+                            if (success) {
+                                console.log('File deleted successfully!');
                             } else {
-                                console.log(
-                                    `${uploadedFile.name} file was deleted!`,
+                                console.error(
+                                    `Failed deleting file with key: images/products/${newUploadFileName}`,
                                 );
                             }
                         });
                         // Throw product creation error
-                        isError = new Error('Product creation failed!');
+                        isError = 'Product creation failed!';
                     }
+                } else {
+                    isError = 'Failed to upload file!';
                 }
             });
+            
         }
         // If error encountered, throw error
         if (isError !== null) throw isError;
@@ -422,23 +419,21 @@ export const postEditProductImage = async (req: Request, res: Response): Promise
                 // The name of the input field (i.e. "productImage") is used to retrieve the uploaded file
                 const reqFiles = (req as ExpressFileUploadRequest).files;
                 const uploadedFile = reqFiles.productImage;
-                let uploadPath: PathLike;
-
+                
                 const productDetails = await fetchProduct(req.params.id);
 
                 if (!productDetails) throw new Error('File upload failed!');
 
-                // Set upload path
-                uploadPath =
-                    staticsPath + '/images/products/' + productDetails.imageFilename;
-
-                // Upload files on the server
-                await uploadedFile.mv(uploadPath, async function (err: any) {
-                    if (err) {
-                        console.error(err);
-                        throw new Error('File upload failed!')
-                    } else {
+                await uploadFileToS3(
+                    `images/products/${productDetails.imageFilename}`,
+                    uploadedFile.data,
+                    uploadedFile.mimetype,
+                )
+                .then((success) => {
+                    if (success) {
                         res.redirect(`/products/${req.params.id}/edit/image`);
+                    } else {                        
+                        throw new Error('File upload failed!');                        
                     }
                 });
             }
@@ -497,9 +492,24 @@ export const postDeleteProduct = async (req: Request, res: Response): Promise<vo
         if (!req.params.id || !validateIsMongoObjectId(req.params.id)) {
             // If no or invalid product id, throw error
             throw new Error('Product not found!');
-        } else {
-            const deleteStatus = await deleteProductById(req.params.id);            
-            if(deleteStatus && String(deleteStatus._id) === req.params.id) res.redirect('/products');
+        } else {            
+            const deleteStatus = await deleteProductById(req.params.id);
+            if(deleteStatus && String(deleteStatus._id) === req.params.id) {
+                // Delete the uploaded file
+                await deleteFileFromS3(
+                    `images/products/${deleteStatus.imageFilename}`,
+                ).then((success) => {
+                    if (success) {
+                        console.log('File deleted successfully!');
+                    } else {
+                        console.error(
+                            `Failed deleting file with key: images/products/${deleteStatus.imageFilename}`,
+                        );
+                    }
+                });
+                    
+                res.redirect('/products');
+            }
             else throw new Error('Deletion failed!');
         }
     } catch (error) {

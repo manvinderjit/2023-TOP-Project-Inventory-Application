@@ -3,7 +3,15 @@ import { getUserOrders, postCancelAnOrder, postCreateOrder } from '../../src/api
 import Order from '../../src/models/ordersModel';
 import Product from '../../src/models/productModel';
 import mongoose from 'mongoose';
-import { totalmem } from 'os';
+import { mockClient } from 'aws-sdk-client-mock';
+import {
+    DeleteMessageCommand,
+    ReceiveMessageCommand,
+    SendMessageCommand,
+    SQSClient,
+} from '@aws-sdk/client-sqs';
+
+const sqsMock = mockClient(SQSClient);
 
 const dataMockOrders = [
     {
@@ -1179,6 +1187,8 @@ describe("Post Cancel API User Order", () => {
 
 describe("POST Create Order", () => {
 
+    beforeEach(() => sqsMock.reset());
+
     it("should place an order and return appropriate response when the order information is valid", async () => {
         const req: any = {
             userId: '654715c5941455dd27f32425',
@@ -1191,7 +1201,7 @@ describe("POST Create Order", () => {
         const res: any = {
             json: jest.fn(),
             status: jest.fn().mockReturnThis(),
-            send: jest.fn(),
+            send: jest.fn(),            
         };
 
         const next: any = jest.fn();
@@ -1211,13 +1221,48 @@ describe("POST Create Order", () => {
                 modifiedCount: dataMockCreateOrder.items.length,
             });
 
+        sqsMock.on(SendMessageCommand).resolvesOnce({
+            $metadata: {
+                httpStatusCode: 200,
+                requestId: 'bb2e8165-f82a-5ddb-96b1-ded596584dd4',
+                extendedRequestId: undefined,
+                cfId: undefined,
+                attempts: 1,
+                totalRetryDelay: 0,
+            },
+            MD5OfMessageAttributes: '1524f8f8c68d5bbbb57a6e2b055d5664',
+            MD5OfMessageBody: '6e2874110a6f2a0d7cfd2df891dc016f',
+            MessageId: '2defaaf1-97ca-4338-ba0c-a9fd4253c4c9',
+        });
+
+        sqsMock.on(ReceiveMessageCommand).resolvesOnce({
+            Messages: [
+                {
+                    Attributes: { SentTimestamp: '1731619890837' },
+                    Body: '{"customerId":"654715c5941455dd27f32425","items":[{"itemQuantity":1,"itemId":"653c5470189c20f1df257752","itemPrice":"9.99"}],"totalAmount":22.59}',
+                    MD5OfBody: '6e2874110a6f2a0d7cfd2df891dc016f',
+                    MD5OfMessageAttributes: '1524f8f8c68d5bbbb57a6e2b055d5664',
+                    MessageAttributes: {
+                        CustomerId: {
+                            DataType: 'String',
+                            StringValue: '654715c5941455dd27f32425',
+                        },
+                    },
+                    MessageId: '2defaaf1-97ca-4338-ba0c-a9fd4253c4c9',
+                    ReceiptHandle:
+                        'AQEBPd5AsNOfmBGzVu95CkxoTAyvvl+XGnr5vbyNofgssrD7w3ylyiVIezkcz/MF0eql3vtP1/8sKv56zId/KKvuHRhb5Sg/KPoFgnKmQ0sL5FocrKp+42lYjjSU0pcH60kcowsrBR5rl8plk+ek8s3pQJv48cLbrXmG11jw7E8WtNdckCtFmsUabW+UB7fFlEfMfsDjPYn/urML+Xsr4ARCXZuz1J35mqz3qOxmOqycUGilPLtJzjDjICZkk9fVrEdl4tOqte+NmqPV6CWy9pyEqwi5za36KeS/pzHBpJvZobOBunimYK9gad4u6Bl8Ntd49suCMFjEGN4lJWYQ5qdMrnCyJJsJHuohpKuu/OBJ3NNBG5oOQXobvzssUez2JKZfuFH7D+YZ663+QywJSAXOXg==',
+                },
+            ],
+        });
+
+        sqsMock.on(DeleteMessageCommand).resolvesOnce({});
+
         (mongoose.startSession as jest.Mock) = jest.fn().mockReturnValue({
             startTransaction: jest.fn(),
             commitTransaction: jest.fn().mockReturnThis(),
             abortTransaction: jest.fn(),
             endSession: jest.fn(),
         });
-        
 
         await postCreateOrder(req, res, next);
         
@@ -2072,6 +2117,42 @@ describe("POST Create Order", () => {
                 modifiedCount: dataMockCreateOrder.items.length,
             });
 
+        sqsMock.on(SendMessageCommand).resolvesOnce({
+            $metadata: {
+                httpStatusCode: 200,
+                requestId: 'bb2e8165-f82a-5ddb-96b1-ded596584dd4',
+                extendedRequestId: undefined,
+                cfId: undefined,
+                attempts: 1,
+                totalRetryDelay: 0,
+            },
+            MD5OfMessageAttributes: '1524f8f8c68d5bbbb57a6e2b055d5664',
+            MD5OfMessageBody: '6e2874110a6f2a0d7cfd2df891dc016f',
+            MessageId: '2defaaf1-97ca-4338-ba0c-a9fd4253c4c9',
+        });
+
+        sqsMock.on(ReceiveMessageCommand).resolvesOnce({
+            Messages: [
+                {
+                    Attributes: { SentTimestamp: '1731619890837' },
+                    Body: '{"customerId":"654715c5941455dd27f32425","items":[{"itemQuantity":1,"itemId":"653c5470189c20f1df257752","itemPrice":"9.99"}],"totalAmount":22.59}',
+                    MD5OfBody: '6e2874110a6f2a0d7cfd2df891dc016f',
+                    MD5OfMessageAttributes: '1524f8f8c68d5bbbb57a6e2b055d5664',
+                    MessageAttributes: {
+                        CustomerId: {
+                            DataType: 'String',
+                            StringValue: '654715c5941455dd27f32425',
+                        },
+                    },
+                    MessageId: '2defaaf1-97ca-4338-ba0c-a9fd4253c4c9',
+                    ReceiptHandle:
+                        'AQEBPd5AsNOfmBGzVu95CkxoTAyvvl+XGnr5vbyNofgssrD7w3ylyiVIezkcz/MF0eql3vtP1/8sKv56zId/KKvuHRhb5Sg/KPoFgnKmQ0sL5FocrKp+42lYjjSU0pcH60kcowsrBR5rl8plk+ek8s3pQJv48cLbrXmG11jw7E8WtNdckCtFmsUabW+UB7fFlEfMfsDjPYn/urML+Xsr4ARCXZuz1J35mqz3qOxmOqycUGilPLtJzjDjICZkk9fVrEdl4tOqte+NmqPV6CWy9pyEqwi5za36KeS/pzHBpJvZobOBunimYK9gad4u6Bl8Ntd49suCMFjEGN4lJWYQ5qdMrnCyJJsJHuohpKuu/OBJ3NNBG5oOQXobvzssUez2JKZfuFH7D+YZ663+QywJSAXOXg==',
+                },
+            ],
+        });
+
+        sqsMock.on(DeleteMessageCommand).resolvesOnce({});
+
         (mongoose.startSession as jest.Mock) = jest.fn().mockReturnValue({
             startTransaction: jest.fn(),
             commitTransaction: jest.fn().mockReturnThis(),
@@ -2129,6 +2210,42 @@ describe("POST Create Order", () => {
             endSession: jest.fn(),
         });
 
+        sqsMock.on(SendMessageCommand).resolvesOnce({
+            $metadata: {
+                httpStatusCode: 200,
+                requestId: 'bb2e8165-f82a-5ddb-96b1-ded596584dd4',
+                extendedRequestId: undefined,
+                cfId: undefined,
+                attempts: 1,
+                totalRetryDelay: 0,
+            },
+            MD5OfMessageAttributes: '1524f8f8c68d5bbbb57a6e2b055d5664',
+            MD5OfMessageBody: '6e2874110a6f2a0d7cfd2df891dc016f',
+            MessageId: '2defaaf1-97ca-4338-ba0c-a9fd4253c4c9',
+        });
+
+        sqsMock.on(ReceiveMessageCommand).resolvesOnce({
+            Messages: [
+                {
+                    Attributes: { SentTimestamp: '1731619890837' },
+                    Body: '{"customerId":"654715c5941455dd27f32425","items":[{"itemQuantity":1,"itemId":"653c5470189c20f1df257752","itemPrice":"9.99"}],"totalAmount":22.59}',
+                    MD5OfBody: '6e2874110a6f2a0d7cfd2df891dc016f',
+                    MD5OfMessageAttributes: '1524f8f8c68d5bbbb57a6e2b055d5664',
+                    MessageAttributes: {
+                        CustomerId: {
+                            DataType: 'String',
+                            StringValue: '654715c5941455dd27f32425',
+                        },
+                    },
+                    MessageId: '2defaaf1-97ca-4338-ba0c-a9fd4253c4c9',
+                    ReceiptHandle:
+                        'AQEBPd5AsNOfmBGzVu95CkxoTAyvvl+XGnr5vbyNofgssrD7w3ylyiVIezkcz/MF0eql3vtP1/8sKv56zId/KKvuHRhb5Sg/KPoFgnKmQ0sL5FocrKp+42lYjjSU0pcH60kcowsrBR5rl8plk+ek8s3pQJv48cLbrXmG11jw7E8WtNdckCtFmsUabW+UB7fFlEfMfsDjPYn/urML+Xsr4ARCXZuz1J35mqz3qOxmOqycUGilPLtJzjDjICZkk9fVrEdl4tOqte+NmqPV6CWy9pyEqwi5za36KeS/pzHBpJvZobOBunimYK9gad4u6Bl8Ntd49suCMFjEGN4lJWYQ5qdMrnCyJJsJHuohpKuu/OBJ3NNBG5oOQXobvzssUez2JKZfuFH7D+YZ663+QywJSAXOXg==',
+                },
+            ],
+        });
+
+        sqsMock.on(DeleteMessageCommand).resolvesOnce({});
+
         await postCreateOrder(req, res, next);
         
         expect(next).not.toHaveBeenCalled();
@@ -2171,6 +2288,43 @@ describe("POST Create Order", () => {
             .mockReturnValue({
                 modifiedCount: dataMockCreateOrder.items.length - 1,
             });
+        
+        sqsMock.on(SendMessageCommand).resolvesOnce({
+            $metadata: {
+                httpStatusCode: 200,
+                requestId: 'bb2e8165-f82a-5ddb-96b1-ded596584dd4',
+                extendedRequestId: undefined,
+                cfId: undefined,
+                attempts: 1,
+                totalRetryDelay: 0,
+            },
+            MD5OfMessageAttributes: '1524f8f8c68d5bbbb57a6e2b055d5664',
+            MD5OfMessageBody: '6e2874110a6f2a0d7cfd2df891dc016f',
+            MessageId: '2defaaf1-97ca-4338-ba0c-a9fd4253c4c9',
+        });
+
+        sqsMock.on(ReceiveMessageCommand).resolvesOnce({
+            Messages: [
+                {
+                    Attributes: { SentTimestamp: '1731619890837' },
+                    Body: '{"customerId":"654715c5941455dd27f32425","items":[{"itemQuantity":1,"itemId":"653c5470189c20f1df257752","itemPrice":"9.99"}],"totalAmount":22.59}',
+                    MD5OfBody: '6e2874110a6f2a0d7cfd2df891dc016f',
+                    MD5OfMessageAttributes:
+                        '1524f8f8c68d5bbbb57a6e2b055d5664',
+                    MessageAttributes: {
+                        CustomerId: {
+                            DataType: 'String',
+                            StringValue: '654715c5941455dd27f32425',
+                        },
+                    },
+                    MessageId: '2defaaf1-97ca-4338-ba0c-a9fd4253c4c9',
+                    ReceiptHandle:
+                        'AQEBPd5AsNOfmBGzVu95CkxoTAyvvl+XGnr5vbyNofgssrD7w3ylyiVIezkcz/MF0eql3vtP1/8sKv56zId/KKvuHRhb5Sg/KPoFgnKmQ0sL5FocrKp+42lYjjSU0pcH60kcowsrBR5rl8plk+ek8s3pQJv48cLbrXmG11jw7E8WtNdckCtFmsUabW+UB7fFlEfMfsDjPYn/urML+Xsr4ARCXZuz1J35mqz3qOxmOqycUGilPLtJzjDjICZkk9fVrEdl4tOqte+NmqPV6CWy9pyEqwi5za36KeS/pzHBpJvZobOBunimYK9gad4u6Bl8Ntd49suCMFjEGN4lJWYQ5qdMrnCyJJsJHuohpKuu/OBJ3NNBG5oOQXobvzssUez2JKZfuFH7D+YZ663+QywJSAXOXg==',
+                },
+            ],
+        });
+
+        sqsMock.on(DeleteMessageCommand).resolvesOnce({});
 
         (mongoose.startSession as jest.Mock) = jest.fn().mockImplementation(() => { throw new Error('Test Error')} );
 
@@ -2179,5 +2333,225 @@ describe("POST Create Order", () => {
         expect(next).toHaveBeenCalledWith(new Error ('Test Error'));
         expect(res.json).not.toHaveBeenCalled();
         expect(res.status).not.toHaveBeenCalled();        
+    });
+
+    it('should handle errors gracefully and return appropriate response when sqs queue returns invalid response for send Message', async () => {
+        const req: any = {
+            userId: '654715c5941455dd27f32425',
+            body: {
+                items: dataMockCreateOrder.items,
+                totalAmount: dataMockCreateOrder.totalAmount,
+            },
+        };
+
+        const res: any = {
+            json: jest.fn(),
+            status: jest.fn().mockReturnThis(),
+            send: jest.fn(),
+        };
+
+        const next: any = jest.fn();
+
+        (Product.find as jest.Mock) = jest.fn().mockReturnValue({
+            select: jest.fn().mockReturnThis(),
+            exec: jest.fn().mockReturnValue(dataMockItemInventoryStock),
+        });
+
+        (Order.create as jest.Mock) = jest
+            .fn()
+            .mockReturnValue(dataMockCreateOrder);
+
+        (Product.bulkWrite as jest.Mock) = jest.fn().mockReturnValue({
+            modifiedCount: dataMockCreateOrder.items.length,
+        });
+
+        sqsMock.on(SendMessageCommand).resolvesOnce({
+            $metadata: {
+                httpStatusCode: 400,
+            },
+        });
+
+        sqsMock.on(ReceiveMessageCommand).resolvesOnce({
+            Messages: [
+                {
+                    Attributes: { SentTimestamp: '1731619890837' },
+                    Body: '{"customerId":"654715c5941455dd27f32425","items":[{"itemQuantity":1,"itemId":"653c5470189c20f1df257752","itemPrice":"9.99"}],"totalAmount":22.59}',
+                    MD5OfBody: '6e2874110a6f2a0d7cfd2df891dc016f',
+                    MD5OfMessageAttributes: '1524f8f8c68d5bbbb57a6e2b055d5664',
+                    MessageAttributes: {
+                        CustomerId: {
+                            DataType: 'String',
+                            StringValue: '654715c5941455dd27f32425',
+                        },
+                    },
+                    MessageId: '2defaaf1-97ca-4338-ba0c-a9fd4253c4c9',
+                    ReceiptHandle:
+                        'AQEBPd5AsNOfmBGzVu95CkxoTAyvvl+XGnr5vbyNofgssrD7w3ylyiVIezkcz/MF0eql3vtP1/8sKv56zId/KKvuHRhb5Sg/KPoFgnKmQ0sL5FocrKp+42lYjjSU0pcH60kcowsrBR5rl8plk+ek8s3pQJv48cLbrXmG11jw7E8WtNdckCtFmsUabW+UB7fFlEfMfsDjPYn/urML+Xsr4ARCXZuz1J35mqz3qOxmOqycUGilPLtJzjDjICZkk9fVrEdl4tOqte+NmqPV6CWy9pyEqwi5za36KeS/pzHBpJvZobOBunimYK9gad4u6Bl8Ntd49suCMFjEGN4lJWYQ5qdMrnCyJJsJHuohpKuu/OBJ3NNBG5oOQXobvzssUez2JKZfuFH7D+YZ663+QywJSAXOXg==',
+                },
+            ],
+        });
+
+        sqsMock.on(DeleteMessageCommand).resolvesOnce({});
+
+        (mongoose.startSession as jest.Mock) = jest.fn().mockReturnValue({
+            startTransaction: jest.fn(),
+            commitTransaction: jest.fn().mockReturnThis(),
+            abortTransaction: jest.fn(),
+            endSession: jest.fn(),
+        });
+
+        await postCreateOrder(req, res, next);
+
+        expect(next).not.toHaveBeenCalled();
+        expect(res.json).toHaveBeenCalledWith({
+            error: `Order creation failed!`,
+        });
+        expect(res.status).toHaveBeenCalledWith(400);
+    });
+
+    it('handle errors gracefully and return appropriate response when an order for the customer is not found in SQS queue', async () => {
+        const req: any = {
+            userId: '654715c5941455dd27f32425',
+            body: {
+                items: dataMockCreateOrder.items,
+                totalAmount: dataMockCreateOrder.totalAmount,
+            },
+        };
+
+        const res: any = {
+            json: jest.fn(),
+            status: jest.fn().mockReturnThis(),
+            send: jest.fn(),
+        };
+
+        const next: any = jest.fn();
+
+        (Product.find as jest.Mock) = jest.fn().mockReturnValue({
+            select: jest.fn().mockReturnThis(),
+            exec: jest.fn().mockReturnValue(dataMockItemInventoryStock),
+        });
+
+        (Order.create as jest.Mock) = jest
+            .fn()
+            .mockReturnValue(dataMockCreateOrder);
+
+        (Product.bulkWrite as jest.Mock) = jest.fn().mockReturnValue({
+            modifiedCount: dataMockCreateOrder.items.length,
+        });
+
+        sqsMock.on(SendMessageCommand).resolvesOnce({
+            $metadata: {
+                httpStatusCode: 200,
+                requestId: 'bb2e8165-f82a-5ddb-96b1-ded596584dd4',
+                extendedRequestId: undefined,
+                cfId: undefined,
+                attempts: 1,
+                totalRetryDelay: 0,
+            },
+            MD5OfMessageAttributes: '1524f8f8c68d5bbbb57a6e2b055d5664',
+            MD5OfMessageBody: '6e2874110a6f2a0d7cfd2df891dc016f',
+            MessageId: '2defaaf1-97ca-4338-ba0c-a9fd4253c4c9',
+        });
+
+        sqsMock.on(ReceiveMessageCommand).resolvesOnce({
+            Messages: [
+                {
+                    Attributes: { SentTimestamp: '1731619890837' },
+                    Body: '{"customerId":"654715c5941455dd27f32415","items":[{"itemQuantity":1,"itemId":"653c5470189c20f1df257752","itemPrice":"9.99"}],"totalAmount":22.59}',
+                    MD5OfBody: '6e2874110a6f2a0d7cfd2df891dc016f',
+                    MD5OfMessageAttributes: '1524f8f8c68d5bbbb57a6e2b055d5664',
+                    MessageAttributes: {
+                        CustomerId: {
+                            DataType: 'String',
+                            StringValue: '654715c5941455dd27f32425',
+                        },
+                    },
+                    MessageId: '2defaaf1-97ca-4338-ba0c-a9fd4253c4c9',
+                    ReceiptHandle:
+                        'AQEBPd5AsNOfmBGzVu95CkxoTAyvvl+XGnr5vbyNofgssrD7w3ylyiVIezkcz/MF0eql3vtP1/8sKv56zId/KKvuHRhb5Sg/KPoFgnKmQ0sL5FocrKp+42lYjjSU0pcH60kcowsrBR5rl8plk+ek8s3pQJv48cLbrXmG11jw7E8WtNdckCtFmsUabW+UB7fFlEfMfsDjPYn/urML+Xsr4ARCXZuz1J35mqz3qOxmOqycUGilPLtJzjDjICZkk9fVrEdl4tOqte+NmqPV6CWy9pyEqwi5za36KeS/pzHBpJvZobOBunimYK9gad4u6Bl8Ntd49suCMFjEGN4lJWYQ5qdMrnCyJJsJHuohpKuu/OBJ3NNBG5oOQXobvzssUez2JKZfuFH7D+YZ663+QywJSAXOXg==',
+                },
+            ],
+        });
+
+        sqsMock.on(DeleteMessageCommand).resolvesOnce({});
+
+        (mongoose.startSession as jest.Mock) = jest.fn().mockReturnValue({
+            startTransaction: jest.fn(),
+            commitTransaction: jest.fn().mockReturnThis(),
+            abortTransaction: jest.fn(),
+            endSession: jest.fn(),
+        });
+
+        await postCreateOrder(req, res, next);
+
+        expect(next).not.toHaveBeenCalled();
+        expect(res.json).toHaveBeenCalledWith({
+            error: `Order creation failed!`,
+        });
+        expect(res.status).toHaveBeenCalledWith(400);
+    });
+
+    it('handle errors gracefully and return appropriate response when the SQS queue returns no orders', async () => {
+        const req: any = {
+            userId: '654715c5941455dd27f32425',
+            body: {
+                items: dataMockCreateOrder.items,
+                totalAmount: dataMockCreateOrder.totalAmount,
+            },
+        };
+
+        const res: any = {
+            json: jest.fn(),
+            status: jest.fn().mockReturnThis(),
+            send: jest.fn(),
+        };
+
+        const next: any = jest.fn();
+
+        (Product.find as jest.Mock) = jest.fn().mockReturnValue({
+            select: jest.fn().mockReturnThis(),
+            exec: jest.fn().mockReturnValue(dataMockItemInventoryStock),
+        });
+
+        (Order.create as jest.Mock) = jest
+            .fn()
+            .mockReturnValue(dataMockCreateOrder);
+
+        (Product.bulkWrite as jest.Mock) = jest.fn().mockReturnValue({
+            modifiedCount: dataMockCreateOrder.items.length,
+        });
+
+        sqsMock.on(SendMessageCommand).resolvesOnce({
+            $metadata: {
+                httpStatusCode: 200,
+                requestId: 'bb2e8165-f82a-5ddb-96b1-ded596584dd4',
+                extendedRequestId: undefined,
+                cfId: undefined,
+                attempts: 1,
+                totalRetryDelay: 0,
+            },
+            MD5OfMessageAttributes: '1524f8f8c68d5bbbb57a6e2b055d5664',
+            MD5OfMessageBody: '6e2874110a6f2a0d7cfd2df891dc016f',
+            MessageId: '2defaaf1-97ca-4338-ba0c-a9fd4253c4c9',
+        });
+
+        sqsMock.on(ReceiveMessageCommand).resolvesOnce({});
+
+        sqsMock.on(DeleteMessageCommand).resolvesOnce({});
+
+        (mongoose.startSession as jest.Mock) = jest.fn().mockReturnValue({
+            startTransaction: jest.fn(),
+            commitTransaction: jest.fn().mockReturnThis(),
+            abortTransaction: jest.fn(),
+            endSession: jest.fn(),
+        });
+
+        await postCreateOrder(req, res, next);
+
+        expect(next).not.toHaveBeenCalled();
+        expect(res.json).toHaveBeenCalledWith({
+            error: `Order creation failed!`,
+        });
+        expect(res.status).toHaveBeenCalledWith(400);
     });
 });

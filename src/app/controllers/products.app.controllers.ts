@@ -116,9 +116,8 @@ export const postCreateProduct = async (req: Request, res: Response): Promise<vo
             data: any;
             mimetype: string;
             name: string;
-            mv: (arg0: string, arg1: (error: any) => Promise<void>) => void;
         };
-        let uploadPath: PathLike;
+        
         let isError: Error | string | null = null;
 
         const requiredFieldsAndValidators = [
@@ -178,9 +177,6 @@ export const postCreateProduct = async (req: Request, res: Response): Promise<vo
                 uploadedFile.name,
                 req.body.productName + Date.now(),
             );
-
-            // Set upload path
-            uploadPath = staticsPath + '/images/products/' + newUploadFileName;
 
             // Get all promo details for storing in database
             const productDetails = req.body;

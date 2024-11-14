@@ -3,6 +3,7 @@ import { cancelUserOrder, createUserOrder, fetchTotalPageCountForOrders, fetchUs
 import { OrderDetails } from '../../types/types.js';
 import { validateIsMongoObjectId, validateIsNumber } from '../../utilities/validation.js';
 import { OrderItem, validateUserOrder } from '../helpers/orders.api.helpers.js';
+import { deleteMessageFromSQSQueue, fetchOrdersFromSQSQueue, sendOrderToSQSQueue } from '../../common/services/sqs.aws.services.js';
 
 export const getUserOrders = async(req: Request, res: Response, next: NextFunction) => {
     try {
@@ -109,17 +110,45 @@ export const postCreateOrder = async(req: Request, res: Response, next: NextFunc
             const orderValidationErrors = await validateUserOrder(items, totalAmount);
             // If no validation error
             if (orderValidationErrors === null) {
-                // Create order
-                const createdOrder = await createUserOrder(orderDetails);
-                if(createdOrder) {
-                    res.status(200).json({
-                        message: 'Order created successfully!',
-                        orderDetails: createdOrder,
-                    });
+                // Send order to the SQS Queue
+                const sendOrderToQueueStatus = await sendOrderToSQSQueue(orderDetails);
+                
+                // Check if the message was send succefully to SQS queue
+                if (sendOrderToQueueStatus.$metadata.httpStatusCode === 200) {
+                    
+                    // Receive order from SQS Queue, in real-world, this will be done in a separate service
+                    const userOrderFromSQS: { body: string, receiptHandle: string} | null = await fetchOrdersFromSQSQueue(userId);
+
+                    // If order not found in SQS queue
+                    if (userOrderFromSQS === null) {
+                        res.status(400).json({
+                            error: `Order creation failed!`,
+                        });
+                    } else {
+                        // Create order
+                        const createdOrder = await createUserOrder(
+                            JSON.parse(userOrderFromSQS?.body),
+                        );
+                        // If Order created successfully
+                        if (createdOrder) {
+                            // Delete order from SQS Queue
+                            await deleteMessageFromSQSQueue(
+                                userOrderFromSQS?.receiptHandle,
+                            );
+                            res.status(200).json({
+                                message: 'Order created successfully!',
+                                orderDetails: createdOrder,
+                            });
+                        } else {
+                            res.status(400).json({
+                                error: `Order creation failed!`,
+                            });
+                        }
+                    }
                 } else {
                     res.status(400).json({
-                        error: `Order creation failed!`
-                    })
+                        error: `Order creation failed!`,
+                    });
                 }
             } 
             // If validation error occurs
@@ -128,7 +157,6 @@ export const postCreateOrder = async(req: Request, res: Response, next: NextFunc
                     error: orderValidationErrors,
                 });
             }
-            
         }
     } catch (error) {
         console.error(error);

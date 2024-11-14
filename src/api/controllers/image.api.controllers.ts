@@ -1,8 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
-import { fileURLToPath } from 'url';
 import { retrieveFileFromS3 } from '../../common/services/s3.aws.services.js';
 import stream from 'stream';
-const staticsPath = fileURLToPath(new URL('../../public', import.meta.url));
 
 const allowedImageDirectories = ['promos', 'products', 'guide'];
 
@@ -18,9 +16,7 @@ const apiGetImage = async (
         ) {
             res.sendStatus(404);
         } else {
-
             const imgFileName = `images/${req.baseUrl.split('/api/')[1]}/${req.params.name}`;
-            console.log(imgFileName)
 
             const data = await retrieveFileFromS3(imgFileName);
             const readStream = data.Body as stream.Readable;
@@ -28,7 +24,7 @@ const apiGetImage = async (
             readStream.pipe(res);
         }
     } catch (error) {
-        console.error(error);        
+        console.error(error);
         res.status(400).send({
             error: `Something went wrong!`,
         });

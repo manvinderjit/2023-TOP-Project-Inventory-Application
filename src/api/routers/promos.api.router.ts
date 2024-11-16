@@ -8,4 +8,6 @@ apiPromosRouter.get('/carousel', getCarouselPromos);
 
 apiPromosRouter.get('/image/:name', apiGetImage);
 
+apiPromosRouter.get('/image/thumbs/:name', apiGetImage);
+
 export default apiPromosRouter;

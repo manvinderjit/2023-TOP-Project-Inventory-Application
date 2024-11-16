@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import { retrieveFileFromS3 } from '../../common/services/s3.aws.services.js';
+import { retrieveFileFromS3, retrieveFileThumbnailFromS3 } from '../../common/services/s3.aws.services.js';
 import stream from 'stream';
 
 const allowedImageDirectories = ['promos', 'products', 'guide'];
@@ -17,8 +17,13 @@ const apiGetImage = async (
             res.sendStatus(404);
         } else {
             const imgFileName = `images/${req.baseUrl.split('/api/')[1]}/${req.params.name}`;
+            
+            let data;
 
-            const data = await retrieveFileFromS3(imgFileName);
+            if(req.path?.includes('/thumbs/')) {
+                data = await retrieveFileThumbnailFromS3(imgFileName);
+            } else data = await retrieveFileFromS3(imgFileName);
+            
             const readStream = data.Body as stream.Readable;
             res.setHeader('Content-Type', data.ContentType || 'image/jpeg');
             readStream.pipe(res);

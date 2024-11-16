@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<coverage generated="1731625225246" clover="3.2.0">
-  <project timestamp="1731625225246" name="All files">
-    <metrics statements="1047" coveredstatements="1007" conditionals="585" coveredconditionals="562" methods="163" coveredmethods="144" elements="1795" coveredelements="1713" complexity="0" loc="1047" ncloc="1047" packages="15" files="53" classes="53"/>
+<coverage generated="1731718760445" clover="3.2.0">
+  <project timestamp="1731718760445" name="All files">
+    <metrics statements="1059" coveredstatements="1019" conditionals="587" coveredconditionals="564" methods="164" coveredmethods="145" elements="1810" coveredelements="1728" complexity="0" loc="1059" ncloc="1059" packages="15" files="53" classes="53"/>
     <package name="src">
       <metrics statements="23" coveredstatements="23" conditionals="7" coveredconditionals="6" methods="4" coveredmethods="3"/>
       <file name="server.ts" path="/home/manvinderjit/repos/2023-TOP-Project-Inventory-Application/src/server.ts">
@@ -60,21 +60,23 @@
       </file>
     </package>
     <package name="src.api.controllers">
-      <metrics statements="138" coveredstatements="133" conditionals="109" coveredconditionals="109" methods="12" coveredmethods="12"/>
+      <metrics statements="140" coveredstatements="135" conditionals="111" coveredconditionals="111" methods="12" coveredmethods="12"/>
       <file name="image.api.controllers.ts" path="/home/manvinderjit/repos/2023-TOP-Project-Inventory-Application/src/api/controllers/image.api.controllers.ts">
-        <metrics statements="12" coveredstatements="12" conditionals="6" coveredconditionals="6" methods="1" coveredmethods="1"/>
+        <metrics statements="14" coveredstatements="14" conditionals="8" coveredconditionals="8" methods="1" coveredmethods="1"/>
         <line num="5" count="6" type="stmt"/>
         <line num="7" count="6" type="stmt"/>
-        <line num="12" count="5" type="stmt"/>
-        <line num="13" count="5" type="cond" truecount="2" falsecount="0"/>
+        <line num="12" count="6" type="stmt"/>
+        <line num="13" count="6" type="cond" truecount="2" falsecount="0"/>
         <line num="17" count="2" type="stmt"/>
-        <line num="19" count="3" type="stmt"/>
-        <line num="21" count="3" type="stmt"/>
-        <line num="22" count="2" type="stmt"/>
-        <line num="23" count="2" type="cond" truecount="2" falsecount="0"/>
-        <line num="24" count="2" type="stmt"/>
-        <line num="27" count="1" type="stmt"/>
-        <line num="28" count="1" type="stmt"/>
+        <line num="19" count="4" type="stmt"/>
+        <line num="23" count="4" type="cond" truecount="2" falsecount="0"/>
+        <line num="24" count="1" type="stmt"/>
+        <line num="25" count="3" type="stmt"/>
+        <line num="27" count="3" type="stmt"/>
+        <line num="28" count="3" type="cond" truecount="2" falsecount="0"/>
+        <line num="29" count="3" type="stmt"/>
+        <line num="32" count="1" type="stmt"/>
+        <line num="33" count="1" type="stmt"/>
       </file>
       <file name="login.api.controllers.ts" path="/home/manvinderjit/repos/2023-TOP-Project-Inventory-Application/src/api/controllers/login.api.controllers.ts">
         <metrics statements="16" coveredstatements="14" conditionals="10" coveredconditionals="10" methods="2" coveredmethods="2"/>
@@ -268,7 +270,7 @@
       </file>
     </package>
     <package name="src.api.routers">
-      <metrics statements="20" coveredstatements="20" conditionals="0" coveredconditionals="0" methods="0" coveredmethods="0"/>
+      <metrics statements="22" coveredstatements="22" conditionals="0" coveredconditionals="0" methods="0" coveredmethods="0"/>
       <file name="index.api.router.ts" path="/home/manvinderjit/repos/2023-TOP-Project-Inventory-Application/src/api/routers/index.api.router.ts">
         <metrics statements="6" coveredstatements="6" conditionals="0" coveredconditionals="0" methods="0" coveredmethods="0"/>
         <line num="9" count="5" type="stmt"/>
@@ -291,16 +293,18 @@
         <line num="11" count="5" type="stmt"/>
       </file>
       <file name="products.api.router.ts" path="/home/manvinderjit/repos/2023-TOP-Project-Inventory-Application/src/api/routers/products.api.router.ts">
-        <metrics statements="3" coveredstatements="3" conditionals="0" coveredconditionals="0" methods="0" coveredmethods="0"/>
+        <metrics statements="4" coveredstatements="4" conditionals="0" coveredconditionals="0" methods="0" coveredmethods="0"/>
         <line num="5" count="5" type="stmt"/>
         <line num="7" count="5" type="stmt"/>
         <line num="9" count="5" type="stmt"/>
+        <line num="11" count="5" type="stmt"/>
       </file>
       <file name="promos.api.router.ts" path="/home/manvinderjit/repos/2023-TOP-Project-Inventory-Application/src/api/routers/promos.api.router.ts">
-        <metrics statements="3" coveredstatements="3" conditionals="0" coveredconditionals="0" methods="0" coveredmethods="0"/>
+        <metrics statements="4" coveredstatements="4" conditionals="0" coveredconditionals="0" methods="0" coveredmethods="0"/>
         <line num="5" count="5" type="stmt"/>
         <line num="7" count="5" type="stmt"/>
         <line num="9" count="5" type="stmt"/>
+        <line num="11" count="5" type="stmt"/>
       </file>
       <file name="register.api.router.ts" path="/home/manvinderjit/repos/2023-TOP-Project-Inventory-Application/src/api/routers/register.api.router.ts">
         <metrics statements="2" coveredstatements="2" conditionals="0" coveredconditionals="0" methods="0" coveredmethods="0"/>
@@ -1050,20 +1054,28 @@
       </file>
     </package>
     <package name="src.common.services">
-      <metrics statements="31" coveredstatements="31" conditionals="7" coveredconditionals="7" methods="8" coveredmethods="8"/>
+      <metrics statements="39" coveredstatements="39" conditionals="7" coveredconditionals="7" methods="9" coveredmethods="9"/>
       <file name="s3.aws.services.ts" path="/home/manvinderjit/repos/2023-TOP-Project-Inventory-Application/src/common/services/s3.aws.services.ts">
-        <metrics statements="11" coveredstatements="11" conditionals="0" coveredconditionals="0" methods="3" coveredmethods="3"/>
-        <line num="4" count="8" type="stmt"/>
-        <line num="12" count="8" type="stmt"/>
+        <metrics statements="19" coveredstatements="19" conditionals="0" coveredconditionals="0" methods="4" coveredmethods="4"/>
+        <line num="5" count="8" type="stmt"/>
+        <line num="13" count="8" type="stmt"/>
         <line num="14" count="8" type="stmt"/>
-        <line num="15" count="9" type="stmt"/>
-        <line num="23" count="6" type="stmt"/>
-        <line num="26" count="8" type="stmt"/>
-        <line num="27" count="4" type="stmt"/>
-        <line num="33" count="3" type="stmt"/>
-        <line num="36" count="8" type="stmt"/>
-        <line num="37" count="4" type="stmt"/>
-        <line num="40" count="4" type="stmt"/>
+        <line num="16" count="8" type="stmt"/>
+        <line num="17" count="9" type="stmt"/>
+        <line num="25" count="6" type="stmt"/>
+        <line num="28" count="8" type="stmt"/>
+        <line num="29" count="4" type="stmt"/>
+        <line num="35" count="3" type="stmt"/>
+        <line num="38" count="8" type="stmt"/>
+        <line num="40" count="1" type="stmt"/>
+        <line num="41" count="1" type="stmt"/>
+        <line num="42" count="1" type="stmt"/>
+        <line num="43" count="1" type="stmt"/>
+        <line num="45" count="1" type="stmt"/>
+        <line num="51" count="1" type="stmt"/>
+        <line num="54" count="8" type="stmt"/>
+        <line num="55" count="4" type="stmt"/>
+        <line num="58" count="4" type="stmt"/>
       </file>
       <file name="sqs.aws.services.ts" path="/home/manvinderjit/repos/2023-TOP-Project-Inventory-Application/src/common/services/sqs.aws.services.ts">
         <metrics statements="20" coveredstatements="20" conditionals="7" coveredconditionals="7" methods="5" coveredmethods="5"/>

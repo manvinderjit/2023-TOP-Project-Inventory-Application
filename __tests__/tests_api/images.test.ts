@@ -69,6 +69,48 @@ describe("get Image", () => {
     });
 
     // Successfully sends the requested promo image file when valid directory and image name are provided
+    it('should fetch the requested promo image thumbnail file from s3 and send as a stream when a thumbnail path is hit and a valid image key (name) is provided', async () => {
+        const req: any = {
+            params: { name: 'test-image.jpg' },
+            baseUrl: '/api/promos',
+            path: '/thumbs/',
+        };
+
+        const res: any = {
+            sendStatus: jest.fn(),
+            setHeader: jest.fn(),
+            status: jest.fn().mockReturnThis(),
+            send: jest.fn(),
+        } as unknown as Response;
+
+        const next: any = jest.fn();
+
+        // create Stream from string
+        const stream = new Readable();
+        stream._read = () => {};
+        stream.pipe = jest.fn() as any;
+        stream.push('hello world');
+        stream.push(null); // end of stream
+
+        // wrap the Stream with SDK mixin
+        const sdkStream = sdkStreamMixin(stream);
+
+        s3Mock
+            .on(GetObjectCommand)
+            .resolves({ Body: sdkStream, ContentType: 'image/jpeg' });
+
+        await apiGetImage(req, res, next);
+
+        expect(stream.pipe).toHaveBeenCalled();
+        expect(stream.pipe).toHaveBeenCalledWith(res);
+        expect(res.setHeader).toHaveBeenCalledWith(
+            'Content-Type',
+            'image/jpeg',
+        );
+        expect(next).not.toHaveBeenCalled();
+    });
+
+    // Successfully sends the requested promo image file when valid directory and image name are provided
     it('should fetch the requested promo image file from s3 and send as a stream with the default ContentType if it is not provided', async () => {
         const req: any = {
             params: { name: 'test-image.jpg' },
@@ -94,9 +136,7 @@ describe("get Image", () => {
         // wrap the Stream with SDK mixin
         const sdkStream = sdkStreamMixin(stream);
 
-        s3Mock
-            .on(GetObjectCommand)
-            .resolves({ Body: sdkStream });
+        s3Mock.on(GetObjectCommand).resolves({ Body: sdkStream });
 
         await apiGetImage(req, res, next);
 

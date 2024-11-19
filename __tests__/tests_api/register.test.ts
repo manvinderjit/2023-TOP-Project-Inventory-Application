@@ -3,8 +3,20 @@ import User from '../../src/models/apiUserModel';
 import { postRegisterUser } from '../../src/api/controllers/register.api.controllers';
 import { Types } from 'mongoose';
 import bcrypt from 'bcrypt';
+import { mockClient } from 'aws-sdk-client-mock';
+import {
+    CreateEmailIdentityCommand,    
+    SESv2Client,
+} from '@aws-sdk/client-sesv2';
+
+const sesMock = mockClient(SESv2Client);
 
 describe("Register API User", () => {
+
+    beforeEach(() => {
+        sesMock.reset();
+    });
+
     it("should register api user when a valid email and password is provided", async () => {
         const req: any = {
             body: {
@@ -32,11 +44,17 @@ describe("Register API User", () => {
         });
         (User.create as jest.Mock) = jest.fn().mockReturnValue(user);
 
+        sesMock.on(CreateEmailIdentityCommand).resolvesOnce({
+            $metadata: {
+                httpStatusCode: 200,
+            },            
+        });
+
         await postRegisterUser(req, res, next);
 
         expect(res.status).toHaveBeenCalledWith(201);
         expect(res.json).toHaveBeenCalledWith({
-            message: `New user created with ${req.body.userEmail}`,
+            message: `New user created with ${req.body.userEmail}! Verification email sent!`,
         });
     });
 

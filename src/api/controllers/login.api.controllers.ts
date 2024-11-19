@@ -5,6 +5,7 @@ import 'dotenv/config';
 import { Types } from "mongoose";
 import { validateEmail } from "../../utilities/validation.js";
 import { fetchUserByEmail } from "../services/auth.api.services.js";
+import { checkEmailExistsAndVerified, sendEmailv2 } from "../../common/services/ses.aws.services.js";
 
 const secret: string = process.env['JWT_SECRET'] as string;
 
@@ -32,10 +33,17 @@ export const postLoginUser = async (req: Request, res: Response, next: NextFunct
         else {
             // Check if user with the provided email exists
             const user = await fetchUserByEmail(userEmail);
+            // Check if email is verified
+            const verificationStatus = await checkEmailExistsAndVerified(userEmail);
 
-            if (user && (await bcrypt.compare(userPassword, user.password))) {
+            if (user && (await bcrypt.compare(userPassword, user.password)) && verificationStatus === true) {
+                await sendEmailv2(userEmail, 'Login', undefined);
                 res.status(201).send({
                     token: generateToken(user._id, user.email),
+                });
+            } else if(user && (await bcrypt.compare(userPassword, user.password)) && verificationStatus !== true) {
+                res.status(401).json({
+                    error: 'Please verify your email, a verification link was sent to your email after registration!',
                 });
             } else {
                 res.status(401).json({

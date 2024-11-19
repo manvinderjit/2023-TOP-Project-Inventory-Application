@@ -11,25 +11,36 @@ const loginView = (req: Request, res: Response) => {
     });
 };
 
-const loginEmployeeController = async(req: Request, res: Response, next: NextFunction) => {    
-    const { email, password } = req.body;
-    // Login Employee
-    const loginResult = await loginEmployee(email, password);
-    // If Login Success
-    if(loginResult.authenticated === true && loginResult.error === null) {
-        req.session.userId = email;
-        req.session.authorized = true;
-        // Redirect to Dashboard
-        res.redirect('/');
-    }
-    // If Login Error
-    else if(loginResult?.error) {
+const loginEmployeeController = async(req: Request, res: Response, next: NextFunction) => {
+    try {
+        const { email, password } = req.body;
+        // Login Employee
+        const loginResult = await loginEmployee(email, password);
+        // If Login Success
+        if (loginResult.authenticated === true && loginResult.error === null) {
+            req.session.userId = email;
+            req.session.authorized = true;
+
+            // Redirect to Dashboard
+            res.redirect('/');
+        }
+        // If Login Error
+        else if (loginResult?.error) {
+            res.render('login', {
+                title: <string>`Login`,
+                email: <string>`${loginResult.email}`,
+                error: <string>`${loginResult.error}`,
+            });
+        }     
+    } catch (error) {
+        console.error(error);
         res.render('login', {
             title: <string>`Login`,
-            email: <string>`${loginResult.email}`,
-            error: <string>`${loginResult.error}`,
+            email: <string>`${req.body.email}`,
+            error: <string>`${error}`,
         });
-    } 
+    }
+    
 };
 
 const registerView = (req: Request, res: Response) => {

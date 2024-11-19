@@ -4,8 +4,20 @@ import { postLoginUser } from '../../src/api/controllers/login.api.controllers';
 import { Types } from 'mongoose';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
+import { mockClient } from 'aws-sdk-client-mock';
+import {
+    GetEmailIdentityCommand,    
+    SESv2Client,
+} from '@aws-sdk/client-sesv2';
+
+const sesMock = mockClient(SESv2Client);
 
 describe("Login API User", () => {
+
+    beforeEach(() => {
+        sesMock.reset();
+    });
+
     it("should login api user when a valid email and password is provided", async () => {
         const req: any = {
             body: {
@@ -27,6 +39,13 @@ describe("Login API User", () => {
             password: await bcrypt.hash('correctPassword', 10),
         };
 
+        sesMock.on(GetEmailIdentityCommand).resolvesOnce({
+            $metadata: {
+                httpStatusCode : 200,
+            },
+            VerificationStatus: 'SUCCESS',
+        });
+
         (User.findOne as jest.Mock) = jest.fn().mockReturnValue({
             exec: jest.fn().mockReturnValueOnce(user)
         });
@@ -37,6 +56,50 @@ describe("Login API User", () => {
 
         expect(res.status).toHaveBeenCalledWith(201);
         expect(res.send).toHaveBeenCalledWith({ token: 'fakeToken' });
+    });
+
+    it('should handle errors gracefully and return appropriate response and status code when a userEmail is not verified', async () => {
+        const req: any = {
+            body: {
+                userEmail: 'test@example.com',
+                userPassword: 'correctPassword',
+            },
+        };
+
+        const res: any = {
+            json: jest.fn(),
+            status: jest.fn().mockReturnThis(),
+            send: jest.fn(),
+        };
+        const next: any = jest.fn();
+
+        const user = {
+            _id: new Types.ObjectId(),
+            email: 'test@example.com',
+            password: await bcrypt.hash('correctPassword', 10),
+        };
+        
+        sesMock.on(GetEmailIdentityCommand).resolves({
+            $metadata: {
+                httpStatusCode: 200,
+            },
+            VerificationInfo: {},
+            VerificationStatus: 'PENDING',
+            VerifiedForSendingStatus: false,
+        });
+
+        (User.findOne as jest.Mock) = jest.fn().mockReturnValue({
+            exec: jest.fn().mockReturnValue(user),
+        });
+        (bcrypt.compare as jest.Mock) = jest.fn().mockReturnValue(true);
+        (jwt.sign as jest.Mock) = jest.fn().mockReturnValue('fakeToken');
+
+        await postLoginUser(req, res, next);
+
+        expect(res.status).toHaveBeenCalledWith(401);
+        expect(res.json).toHaveBeenCalledWith({
+            error: 'Please verify your email, a verification link was sent to your email after registration!',
+        });
     });
 
     it('should handle errors gracefully and return appropriate response and status code when there is no userEmail', async () => {

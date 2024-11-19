@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import { validateEmail, validatePassword } from "../../utilities/validation.js";
 import { fetchUserByEmail, registerUser } from "../services/auth.api.services.js";
+import { verifyEmail } from "../../common/services/ses.aws.services.js";
 
 export const postRegisterUser = async (req: Request, res: Response, next: NextFunction) => {
     try {
@@ -26,9 +27,14 @@ export const postRegisterUser = async (req: Request, res: Response, next: NextFu
             // Otherwise register user
             else {
                 const registeredUser = await registerUser(userEmail, userPassword);
+                
                 if(registeredUser && registeredUser._id) {
+                    // Send a verification email
+                    await verifyEmail(
+                        registeredUser.email,
+                    );
                     res.status(201).json({
-                        message: `New user created with ${registeredUser.email}`,
+                        message: `New user created with ${registeredUser.email}! Verification email sent!`,
                     });
                 } else {
                     res.status(400).json({

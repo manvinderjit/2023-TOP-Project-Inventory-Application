@@ -26,6 +26,17 @@ export const fetchUserOrders = async (userId: string, page: number | null | unde
     return userOrders;
 };
 
+export const fetchUserOrderById = async (orderId: Types.ObjectId) => {
+    const userOrders: OrderDetails | null = await Order.findById(orderId)
+        .populate({
+            path: 'items.itemDetails',
+            select: 'name description',
+        })
+        .exec();
+    
+    return userOrders;
+}
+
 // Update the status of a user's order to cancelled
 export const cancelUserOrder = async (orderId: string, userId: string): Promise<OrderDetails | null> => {
     const updatedOrderData = { status: 'Cancelled' };

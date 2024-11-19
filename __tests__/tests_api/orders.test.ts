@@ -10,8 +10,11 @@ import {
     SendMessageCommand,
     SQSClient,
 } from '@aws-sdk/client-sqs';
+import { SendEmailCommand, SESv2Client } from '@aws-sdk/client-sesv2';
+import User from '../../src/models/apiUserModel';
 
 const sqsMock = mockClient(SQSClient);
+const sesMock = mockClient(SESv2Client);
 
 const dataMockOrders = [
     {
@@ -1187,7 +1190,10 @@ describe("Post Cancel API User Order", () => {
 
 describe("POST Create Order", () => {
 
-    beforeEach(() => sqsMock.reset());
+    beforeEach(() => {
+        sqsMock.reset();
+        sesMock.reset();
+    });
 
     it("should place an order and return appropriate response when the order information is valid", async () => {
         const req: any = {
@@ -1214,6 +1220,16 @@ describe("POST Create Order", () => {
         (Order.create as jest.Mock) = jest
             .fn()
             .mockReturnValue(dataMockCreateOrder);
+
+        (Order.findById as jest.Mock) = jest.fn().mockReturnValue({
+            populate: jest.fn().mockReturnThis(),
+            exec: jest.fn().mockReturnValue(dataMockOrders[0]),
+        });
+
+        (User.findById as jest.Mock) = jest.fn().mockReturnValue({
+            select: jest.fn().mockReturnThis(),
+            exec: jest.fn().mockReturnValue({ email: 'email@abc.com'}),
+        });
 
         (Product.bulkWrite as jest.Mock) = jest
             .fn()
@@ -1256,6 +1272,8 @@ describe("POST Create Order", () => {
         });
 
         sqsMock.on(DeleteMessageCommand).resolvesOnce({});
+
+        sesMock.on(SendEmailCommand).resolves({ MessageId: 'dummy-message-id'});
 
         (mongoose.startSession as jest.Mock) = jest.fn().mockReturnValue({
             startTransaction: jest.fn(),

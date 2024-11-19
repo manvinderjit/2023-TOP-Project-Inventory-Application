@@ -13,3 +13,8 @@ export const registerUser = async (userEmail: string, userPassword: string) => {
     const registeredUser = await User.create({ email: userEmail, password: hashedPassword });
     return registeredUser;
 };
+
+export const fetchUserEmailFromId = async(userId: string) => {
+    const userEmail = await User.findById(userId).select({ email: 1, id: -1 }).exec();
+    return userEmail?.email;
+};

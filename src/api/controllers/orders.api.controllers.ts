@@ -1,9 +1,11 @@
 import { NextFunction, Request, Response } from 'express';
-import { cancelUserOrder, createUserOrder, fetchTotalPageCountForOrders, fetchUserOrders } from '../services/orders.api.services.js';
+import { cancelUserOrder, createUserOrder, fetchTotalPageCountForOrders, fetchUserOrderById, fetchUserOrders } from '../services/orders.api.services.js';
 import { OrderDetails } from '../../types/types.js';
 import { validateIsMongoObjectId, validateIsNumber } from '../../utilities/validation.js';
 import { OrderItem, validateUserOrder } from '../helpers/orders.api.helpers.js';
 import { deleteMessageFromSQSQueue, fetchOrdersFromSQSQueue, sendOrderToSQSQueue } from '../../common/services/sqs.aws.services.js';
+import { sendEmailv2 } from '../../common/services/ses.aws.services.js';
+import { fetchUserEmailFromId } from '../services/auth.api.services.js';
 
 export const getUserOrders = async(req: Request, res: Response, next: NextFunction) => {
     try {
@@ -135,6 +137,14 @@ export const postCreateOrder = async(req: Request, res: Response, next: NextFunc
                             await deleteMessageFromSQSQueue(
                                 userOrderFromSQS?.receiptHandle,
                             );
+
+                            // Fetch user email and order details to send in email
+                            const userEmail = await fetchUserEmailFromId(userId) as string;
+                            const placedUserOrder = await fetchUserOrderById(createdOrder._id);
+                            
+                            // Send order confirmation email
+                            await sendEmailv2(userEmail, 'Checkout', placedUserOrder);
+
                             res.status(200).json({
                                 message: 'Order created successfully!',
                                 orderDetails: createdOrder,

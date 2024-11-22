@@ -3,12 +3,9 @@ import { fetchCategories } from '../services/category.app.services.js';
 import { createProduct, deleteProductById, fetchProduct, fetchProducts, updateProduct } from '../services/products.app.services.js';
 import { CategoryDetailsDocument, ProductDetails } from '../../types/types.js';
 import { validateDescription, validateIsMongoObjectId, validateIsNumber, validateName, validateRequiredFieldsInBody } from '../../utilities/validation.js';
-import { PathLike  } from 'node:fs';
 import { replaceFileNameSpacesWithHyphen } from '../../utilities/fileFormatting.js';
-import { fileURLToPath } from 'node:url';
 import { deleteFileFromS3, uploadFileToS3 } from '../../common/services/s3.aws.services.js';
-
-const staticsPath = fileURLToPath(new URL('../../public', import.meta.url));
+import { publishNewProduct } from '../../common/services/sns.aws.services.js';
 
 interface ExpressFileUploadRequest extends Request {
     files: any;
@@ -188,6 +185,9 @@ export const postCreateProduct = async (req: Request, res: Response): Promise<vo
                     // Create Product
                     const createdProduct = await createProduct(productDetails);
                     if (createdProduct && createdProduct !== null) {
+
+                        publishNewProduct(`We have added a new product ${createdProduct.name}. Check out now!`);
+
                         // Render the page
                         res.render('productCreate', {
                             title: 'Create Product',

@@ -13,11 +13,12 @@ import {
     getEditProductImage,
     postEditProductImage,
 } from '../../src/app/controllers/products.app.controllers';
-import { unlink } from 'fs';
 import { S3Client, DeleteObjectCommand, PutObjectCommand } from '@aws-sdk/client-s3';
 import { mockClient } from 'aws-sdk-client-mock';
+import { PublishCommand, SNSClient } from '@aws-sdk/client-sns';
 
 const s3Mock = mockClient(S3Client);
+const snsMock = mockClient(SNSClient);
 
 const dataMockCategories = [
     {
@@ -501,6 +502,7 @@ describe("Create Product", () => {
 describe("POST Create Product", () => {
     beforeEach(() => {
         s3Mock.reset();
+        snsMock.reset();
     });
 
     it("should create a new product and render success message", async () => {
@@ -536,6 +538,18 @@ describe("POST Create Product", () => {
 
         s3Mock.on(PutObjectCommand).resolvesOnce({});
 
+        snsMock.on(PublishCommand).resolvesOnce({
+            $metadata: {
+                httpStatusCode: 200,
+                requestId: '12fa3ba6-52a8-57d8-8404-641e7e03b38e',
+                extendedRequestId: undefined,
+                cfId: undefined,
+                attempts: 1,
+                totalRetryDelay: 0,
+            },
+            MessageId: 'f1403f17-fd50-5feb-9f53-60afd1fb3bbd',
+        });
+        
         (Category.find as jest.Mock) = jest.fn().mockReturnValueOnce({
             select: jest.fn().mockReturnThis(),
             sort: jest.fn().mockReturnThis(),

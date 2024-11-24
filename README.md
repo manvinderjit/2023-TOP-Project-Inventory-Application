@@ -59,13 +59,13 @@ The `Inventory App` is deployed using the following technologies:
 
 ### Other AWS Services
 In addition to the above, the app also uses the following AWS technologies:
-- `VPC Gateway Endpoint - S3` - To enable access to S3 objects while disabling public access to the S3 bucket.
+- `VPC Gateway Endpoint - S3` - To retrieve S3 objects while disabling public access to the S3 bucket.
 - `SSM Parameter Store`: For storing env variables.
 - `CodeDeploy`: To deploy the app via a GitHub Actions CD pipeline to deploy the app.
 - `STS`: To allow GitHub to assume a role that enables deployment to AWS without using access keys.
 - `IAM`: To create a programmatic role with the required permissions for the application.
 
-# 3. Description
+# 3. Description - Inventory App
 
 Inventory App has two distinct functions:
 
@@ -90,7 +90,7 @@ The application is created to demonstrate the following coding abilities:
 
     5. Use of SSL certificates to provide an https server.
 
-    6. Familiarity with the AWS cloud platform, with the project showing deployment to an EC2 instance using AWS CodeDeploy via AppSpec and Linux shell scripts, and storing environment variables in the AWS Parameter Store.
+    6. Exhibit familiarity with the AWS cloud platform, with the project showing deployment to an EC2 instance using AWS CodeDeploy via AppSpec and Linux shell scripts, and storing environment variables in the AWS Parameter Store, and permission management through IAM.
 
 ## 4.2 Functional Objectives
 The webapp has the following functional objectives:
@@ -178,18 +178,39 @@ Click on the `Manage Products` link from the employee `Dashboard`. It will open 
 
 To view `Products` belonging to a specific category, select the category from the dropdown list and click on the `Get Products` button. It will show products only from the specified category.
 
-#### Adding a New Product
-1. To add a new product, click on the `Add a New Product` button. It will lead you to the `Create Product` page.
-2. Enter all product details, select a category, and upload an image.
-3. Click on the `Add Product` button. A success message will show if the product is created successfully.
-4. Click on the `Back to All Products` link on the bottom to return to the `Products` page. The newly created product should be in the list.
-5. This new product will also be added available on the [Shopping Cart App](https://2023-top-project-shopping-cart.pages.dev/). Click the link and visit the home page to confirm the same.
+#### Creating a New Product
+1. Click on the `Products` link from the navigation menu to go to the `Manage Products` page.
+2. To add a new product, click on the `Add a New Product` button. It will lead you to the `Create Product` page.
+3. Enter all product details, select a category, and upload an image.
+4. Click on the `Add Product` button. A success message will show if the product is created successfully.
+5. Click on the `Back to All Products` link on the bottom to return to the `Products` page. The newly created product should be in the list.
+6. This new product will also be added available on the [Shopping Cart App](https://2023-top-project-shopping-cart.pages.dev/). Click the link and visit the home page to confirm the same.
 
-#### In addition to adding a product, the following product CRUD operations can be performed:
-- `Viewing` a product's details on the `~/products/:productID` route.
-- `Editing` a product's details on the `~/products/:productID/edit` route.
-- `Changing` a product's image on the `~/products/:productID/edit/image` route.
-- `Deleting` a product's image on the `~/products/:productID/delete` route.
+#### Reading (Viewing) a Product's Details
+1. Click on the `Products` link from the navigation menu to go to the `Manage Products` page.
+2. Click on the respective `View` button for the product whose details you want to view.
+3. The `Product Details` page for the product will open.
+
+#### Updating (Editing) a Product
+1. Click on the `Products` link from the navigation menu to go to the `Manage Products` page.
+2. Click on the respective `Edit` button for the product whose details you want to edit.
+3. The `Edit Product` page will open for the respective product listing all the product details.
+4. Change the product information as required.
+5. Click on the `Update Product` button to update the product details.
+
+#### Updating a Product'S Image
+1. Click on the `Products` link from the navigation menu to go to the `Manage Products` page.
+2. Click on the respective `Edit` button for the product whose image you want to edit.
+3. Click on the `Change Image <Product Name>` button on the `Edit Product` page.
+4. On the `Product Edit Image` page, upload the new file and click on the `Update Product Image`.
+5. The image will be updated.
+
+#### Deleteing a Product
+1. Click on the `Products` link from the navigation menu to go to the `Manage Products` page.
+2. Click on the respective `Delete` button for the product which to be deleted.
+3. It will direct you to the `Delete Product` page.
+4. To confirm product deletion, click on the `Delete <Product Name>` button.
+5. Upon successful product deletion, it will redirect to the `Manage Products` page.
 
 ### 5.2.e. User Actions: CRUD Operations - Promos <hr/>
 This `Inventory App` allows `Employees` to manage the `Promos` visible in the carousel of the `Shopping App`. The following CRUD operations can be perfomed for the `Promos`.
@@ -200,7 +221,25 @@ This `Inventory App` allows `Employees` to manage the `Promos` visible in the ca
 3. Click on the `Add Promo` button. A success message will show if the promo is created successfully. In case of errors, take appropriate action.
 4. Click on the `Back to All Promos` button to return to the `Promos` page. The newly created Promo should be in the list.
 5. If you go to the home page of the [Shopping Cart App](https://2023-top-project-shopping-cart.pages.dev/) and the new Promo  should be listed.
+
 #### Editing a Promo
+1. To edit a Promo, go to the `Manage Promos` page by clicking on the `Promo` tab in the navigation.
+2. From there, click on the respective `Edit` button for the promo you want to edit. It will open the `Edit Details` page for that promo.
+3. Here, edit all the promo details as required.
+4. Finally, click on the `Update Promo` button to update the promo.
+
+#### Editing a Promo Image
+1. To edit a Promo, go to the `Manage Promos` page by clicking on the `Promo` tab in the navigation.
+2. From there, click on the respective `Edit` button for the promo you want to edit. It will open the `Edit Details` page for that promo. 
+3. On this page click on the `Change Image: <Promo Name>` button. It will open the `Edit Promo Image` page.
+4. Upload the new promo image and then click on `Update Promo Image` button. The promo image will be updated.
+
+#### Deleting a Promo
+1. To edit a Promo, go to the `Manage Promos` page by clicking on the `Promo` tab in the navigation.
+2. From there, click on the respective `Delete` button for the promo you want to delete. It will open the `Delete Promo` page for that promo.
+3. Confirm deletion by click on the `Delete <Promo Name>` button.
+4. Upon successfully deletion, it will redirect to the `Manage Promos` page.
+
 
 ### 5.2.f. User Actions: CRUD Operations - Orders <hr/>
 This `Inventory App` allows `Employees` to manage the `Orders` placed by `Customers` on the `Shopping App`. They can change the `Orders Status` based on its fulfillment status(Processing, Ready for Shipping, Shipped, or Delivered).

@@ -1,13 +1,71 @@
-# Project Inventory Application by Manvinderjit
-A project based primarily on a NodeJS, Express, and MongoDB app with EJS templating view engine and Mongoose ODM.
+# Project Inventory Application
+A project based primarily on a TypeScript, JavaScript, NodeJS, Express, and MongoDB app with EJS templating view engine and Mongoose ODM. It uses JEST for testing along with aws-sdk-client-mock for AWS mocking in tests.
 
-Creates an app ecosystem for an organization selling computer hardware by actings as a full-fledged WebApp while also providing RESTful APIs for the [Shopping Cart App](https://2023-top-project-shopping-cart.pages.dev/). 
+# 1. Ecosystem Architecture
+
+The goal is to create an app ecosystem for an organization selling computer hardware by actings as a full-fledged Inventory Management WebApp while also providing RESTful APIs for the [Shopping Cart App](https://2023-top-project-shopping-cart.pages.dev/).
+
+### Ecosystem Applications
+The ecosystem consists of two apps:
+1. `Inventory App` :  Is an app that allows inventory mangement and order processing for the orders placed on the [Shopping Cart App](https://2023-top-project-shopping-cart.pages.dev/).
+    
+    - Provides RESTful APIs for the [Shopping Cart App](https://2023-top-project-shopping-cart.pages.dev/).
+    - Provides a CMS for managing Products and Promos shown on the [Shopping Cart App](https://2023-top-project-shopping-cart.pages.dev/).
+
+2. `Shopping App` : Is a React App that allows users to purchase products and subscribe to offers.
+    - Uses RESTful Apis provided by the `Inventory App`.
+
+### Ecosystem User Roles
 
 The app ecosystem consists of two user roles:
-- `Customers:` They use the [Shopping Cart App](https://2023-top-project-shopping-cart.pages.dev/) to place orders.
+- `Customers:` They use the [Shopping Cart App](https://2023-top-project-shopping-cart.pages.dev/) to place and managed orders.
 - `Employees`: They use this `Inventory App` to perform inventory and logistics operations, including processing orders received through the `Shopping Cart App`.
 
-# 1. Description
+
+![alt text](architectureGrid.png)
+
+# 2. Tech Stack
+
+### Core Development Stack
+The `Inventory App` part of the application (except the RESTful APIs provided for `Shopping Cart App`) makes use of the following technologies and packages:
+- `NodeJS & Express` : NodeJS and Express are used to create the server and APIs.
+- `EJS Template Engine` : EJS Template rendering engine is used for the front-end of the `Inventory App`.
+- `MongoDB Atlas & Mongoose ORM` : MongoDB Atlas is the database of choice with Mongoose ORM being used for data modeling.
+- `Connect Mongo & Express Session Based Login` : Employee authentication utilizes session-based login through `Express Session` and `Connect Mongo` packages.
+- `JWT` : Used to authenticate api users, Customers of the [Shopping Cart App](https://2023-top-project-shopping-cart.pages.dev/).
+- `Bcrypt Password Encryption` : Bcrypt is used for encrypting the passwords.
+- `Express File Upload` : Media files are uploaded using the `Express File Upload` package.
+- `Javascript & Typescript` : Typescript is used for type safety with it being converted to Javascript build.
+- `Jest` : Jest is the framework used for testing.
+- `AWS SDK Client Mock` : To mock AWS services for testing.
+
+### AWS Development Services
+
+The app is hosted on AWS EC2 and implements the following AWS cloud services:
+- `SES V2` : For sending transactional emails to users.
+- `Lamda` : For generating thumbnails of images uploaded in S3 Bucket.
+- `SQS` : For decoupling the services receiving and handling the orders placed by customers on the Shopping Cart app.
+- `S3 Buckets` : For storing files and images as objects.
+- `SNS` : For sending subscription emails to customers of the Shopping Cart app.
+
+### Deployment Stack
+The `Inventory App` is deployed using the following technologies:
+- `CI/CD Pipeline With GitHub` : A CI/CD pipeline is created by leveraging GitHub actions to automatically deploy newly implemented features to the production environment.
+- `AWS EC2 Cloud Instance` : The application is deployed on the cloud on an AWS EC2 instance running Linux OS.
+- `AWS CodeDeploy` : AWS CodeDeploy is used to automate the deployment process. It uses `AppSpec` and `Linux Shell Scripts` to deploy the `Inventory App` to the EC2 instance.
+- `AWS Parameter Store` : `AWS Parameter Store` is used to manage environment variables and secrets.
+- `Docker`: This Inventory App is deployed as a Docker container on the EC2 instance.
+- `Nginx & Certbot`: Used to enable SSL certificates with auto renewal.
+
+### Other AWS Services
+In addition to the above, the app also uses the following AWS technologies:
+- `VPC Gateway Endpoint - S3` - To retrieve S3 objects while disabling public access to the S3 bucket.
+- `SSM Parameter Store`: For storing env variables.
+- `CodeDeploy`: To deploy the app via a GitHub Actions CD pipeline to deploy the app.
+- `STS`: To allow GitHub to assume a role that enables deployment to AWS without using access keys.
+- `IAM`: To create a programmatic role with the required permissions for the application.
+
+# 3. Description - Inventory App
 
 Inventory App has two distinct functions:
 
@@ -17,31 +75,12 @@ Inventory App has two distinct functions:
 The `Promos` shown in the `Carousel` of the `Shopping Cart App` are uploaded and managed in the `Inventory App`. <br><br>
 Similarly, the `Orders` placed by the `Customers` in the `Shopping Cart App` are managed by the `Employees` in the `Inventory App`.
 
-## Tech Stack
+# 4. Objectives
 
-### Core Development Stack
-The `Inventory App` part of the application (except the RESTful APIs provided for `Shopping Cart App`) makes use of the following technologies and packages:
-- `NodeJS & Express`: NodeJS and Express are used to create the server and APIs.
-- `EJS Template Engine`: EJS Template rendering engine is used for the front-end of the `Inventory App`.
-- `HTTPS & SSL`: HTTPS and self-generated SSL certificates to deploy a secure server.
-- `MongoDB Atlas & Mongoose ORM`: MongoDB Atlas is the database of choice with Mongoose ORM being used for data modeling.
-- `Connect Mongo & Express Session Based Login`: Employee authentication utilizes session-based login through `Express Session` and `Connect Mongo` packages.
-- `Bcrypt Password Encryption`: Bcrypt is used for encrypting the passwords.
-- `Express File Upload`: Media files are uploaded using the `Express File Upload` package.
-
-### Deployment Stack
-The `Inventory App` is deployed using the following technologies:
-- `CI/CD Pipeline With GitHub`: A CI/CD pipeline is created by leveraging GitHub actions to automatically deploy newly implemented features to the production environment.
-- `AWS EC2 Cloud Instance`: The application is deployed on the cloud on an AWS EC2 instance running Linux OS.
-- `AWS CodeDeploy`: AWS CodeDeploy is used to automate the deployment process. It uses `AppSpec` and `Linux Shell Scripts` to deploy the `Inventory App` to the EC2 instance.
-- `AWS Parameter Store`: `AWS Parameter Store` is used to manage environment variables and secrets.
-
-# 2. Objectives
-
-## 2.1 Skill Demonstration Objectives
+## 4.1 Skill Demonstration Objectives
 The application is created to demonstrate the following coding abilities:
 
-    1. Build a full-stack app utilizing Node, Express, MongoDB Atlas / Mongoose, and EJS templating engine.
+    1. Build a full-stack app utilizing TypeScript, Node, Express, MongoDB Atlas / Mongoose, AWS cloud, and EJS templating engine.
 
     2. Creating RESTfuls APIs for connecting to a single-page web app.
 
@@ -49,11 +88,11 @@ The application is created to demonstrate the following coding abilities:
 
     4. Usage of Docker containerization to build and deploy the application and persist data using Docker volumes.
 
-    5. Use of self-signed SSL certificates to provide an https server.
+    5. Use of SSL certificates to provide an https server.
 
-    6. Familiarity with the AWS cloud platform, with the project showing deployment to an EC2 instance using AWS CodeDeploy via AppSpec and Linux shell scripts, and storing environment variables in the AWS Parameter Store.
+    6. Exhibit familiarity with the AWS cloud platform, with the project showing deployment to an EC2 instance using AWS CodeDeploy via AppSpec and Linux shell scripts, and storing environment variables in the AWS Parameter Store, and permission management through IAM.
 
-## 2.2 Functional Objectives
+## 4.2 Functional Objectives
 The webapp has the following functional objectives:
 
     1. Allows a computer hardware retailer to manage product inventory, promotions, and orders.
@@ -64,11 +103,11 @@ Shopping Cart GitHub Repo [Click Here for Shopping Cart GitHub Repo Page](https:
 
 Shopping Cart WebApp Live Link [Click Here for Shopping Cart WebApp Live Link](https://2023-top-project-shopping-cart.pages.dev/).
 
-# 3. Inventory App: Usage Guide for Inventory Management Features
+# 5. Inventory App: Usage Guide for Inventory Management Features
 
-## 3.1 User Role: `Employee`
+## 5.1 User Role: `Employee`
 You will be using the inventory app as an `Employee` of the organization, i.e., your user role with be that of an `employee`.
-## 3.2 User Actions: `Employee` 
+## 5.2 User Actions: `Employee` 
 As an `employee` user, you will be able to perform the following actions:
 
 - Register as an `employee`.
@@ -83,7 +122,7 @@ As an `employee` user, you will be able to perform the following actions:
 
 - Perform CRUD operations related to `Promotions` that are shown in the `Carousel` or other areas of the customer-facing [Shopping Cart App](https://2023-top-project-shopping-cart.pages.dev/).
 
-### 3.2.a. User Actions: Registering as an `Employee`<hr/>
+### 5.2.a. User Actions: Registering as an `Employee`<hr/>
 To register as an employee, click on the `Register` link in the top navigation bar.
 
 Password must contain at least one number and one uppercase and lowercase letter, and at least 5 or more characters
@@ -93,10 +132,10 @@ Password must contain at least one number and one uppercase and lowercase letter
 A success message will appear upon successful registration. In case of an error, take action according to the message.
 
     You can use these demo credentials to log in instead of registering your own account:
-    email: `email@email.com`
+    email: `e@abc.com`
     password: `Admin1` 
 
-### 3.2.b. User Actions: Log in as an employee <hr/>
+### 5.2.b. User Actions: Log in as an employee <hr/>
 To log in as an employee, use the credentials provided or the ones you used to register.
 
 Upon successful login, you will be taken to the `Employee Dashboard`. It allows you to perform CRUD operations for the following:
@@ -107,7 +146,7 @@ Upon successful login, you will be taken to the `Employee Dashboard`. It allows 
 
 Click on the link according to the CRUD operation you want to perform.
 
-### 3.2.c. User Actions: CRUD Operations - Category <hr/>
+### 5.2.c. User Actions: CRUD Operations - Category <hr/>
 Clicking on the `Manage Categories` link will open the `Categories` page. It will show:
 - An `Add a New Category` link to add a new category.
 - All existing categories with the links to `View`, `Edit`, or `Delete` each of the categories.
@@ -122,7 +161,7 @@ If category was create successfully, a success alert will show. If something goe
 2. Click on the corresponing `View` button for the category.
 3. The page for that particular category will open and show the details.
 4. Links to `Edit` and `Delete` that category are also available on the page.
-#### Updating (Updating) a Category <hr/>
+#### Updating a Category <hr/>
 1. Click on the `Edit` link for a `Category` from the `Categories` page or `View Category` page.
 2. Change the `Category Name` and `Category Description`.
 3. Click on the `Update Category` button to update the details for the category.
@@ -132,79 +171,139 @@ If category was create successfully, a success alert will show. If something goe
 2. You will be taken to the `Delete Category` confirmation page. Click on the `Delete Category` button to delete the category.
 3. After successful deletion, you will be taken back to the `Categories` page.
 
-### 3.2.d. User Actions: CRUD Operations - Products <hr/>
+### 5.2.d. User Actions: CRUD Operations - Products <hr/>
 Click on the `Manage Products` link from the employee `Dashboard`. It will open the `All Products` page. By default, it shows all `Products` with details in a list format. 
 
 #### Viewing Products for Only a Particular Category
 
 To view `Products` belonging to a specific category, select the category from the dropdown list and click on the `Get Products` button. It will show products only from the specified category.
 
-#### Adding a New Product
-1. To add a new product, click on the `Add a New Product` button. It will lead you to the `Create Product` page.
-2. Enter all product details, select a category, and upload an image.
-3. Click on the `Add Product` button. A success message will show if the product is created successfully.
-4. Click on the `Back to All Products` link on the bottom to return to the `Products` page. The newly created product should be in the list.
-5. This new product will also be added available on the [Shopping Cart App](https://2023-top-project-shopping-cart.pages.dev/). Click the link and visit the home page to confirm the same.
+#### Creating a New Product
+1. Click on the `Products` link from the navigation menu to go to the `Manage Products` page.
+2. To add a new product, click on the `Add a New Product` button. It will lead you to the `Create Product` page.
+3. Enter all product details, select a category, and upload an image.
+4. Click on the `Add Product` button. A success message will show if the product is created successfully.
+5. Click on the `Back to All Products` link on the bottom to return to the `Products` page. The newly created product should be in the list.
+6. This new product will also be added available on the [Shopping Cart App](https://2023-top-project-shopping-cart.pages.dev/). Click the link and visit the home page to confirm the same.
 
-#### In addition to adding a product, the following product CRUD operations can be performed:
-- `Viewing` a product's details on the `~/allproducts/:productID` route.
-- `Editing` a product's details on the `~/allproducts/:productID/edit` route.
-- `Changing` a product's image on the `~/allproducts/:productID/edit/image` route.
-- `Deleting` a product's image on the `~/allproducts/:productID/delete` route.
+#### Reading (Viewing) a Product's Details
+1. Click on the `Products` link from the navigation menu to go to the `Manage Products` page.
+2. Click on the respective `View` button for the product whose details you want to view.
+3. The `Product Details` page for the product will open.
 
-### 3.2.e. User Actions: CRUD Operations - Promos <hr/>
+#### Updating (Editing) a Product
+1. Click on the `Products` link from the navigation menu to go to the `Manage Products` page.
+2. Click on the respective `Edit` button for the product whose details you want to edit.
+3. The `Edit Product` page will open for the respective product listing all the product details.
+4. Change the product information as required.
+5. Click on the `Update Product` button to update the product details.
+
+#### Updating a Product'S Image
+1. Click on the `Products` link from the navigation menu to go to the `Manage Products` page.
+2. Click on the respective `Edit` button for the product whose image you want to edit.
+3. Click on the `Change Image <Product Name>` button on the `Edit Product` page.
+4. On the `Product Edit Image` page, upload the new file and click on the `Update Product Image`.
+5. The image will be updated.
+
+#### Deleteing a Product
+1. Click on the `Products` link from the navigation menu to go to the `Manage Products` page.
+2. Click on the respective `Delete` button for the product which to be deleted.
+3. It will direct you to the `Delete Product` page.
+4. To confirm product deletion, click on the `Delete <Product Name>` button.
+5. Upon successful product deletion, it will redirect to the `Manage Products` page.
+
+### 5.2.e. User Actions: CRUD Operations - Promos <hr/>
 This `Inventory App` allows `Employees` to manage the `Promos` visible in the carousel of the `Shopping App`. The following CRUD operations can be perfomed for the `Promos`.
 
 #### Adding a Promo
+1. To add a new Promo, go to the `Promos` page and click on the `Add a New Promo` page.
+2. Enter all the promo details, select a promo category, upload a file, and select promo status.
+3. Click on the `Add Promo` button. A success message will show if the promo is created successfully. In case of errors, take appropriate action.
+4. Click on the `Back to All Promos` button to return to the `Promos` page. The newly created Promo should be in the list.
+5. If you go to the home page of the [Shopping Cart App](https://2023-top-project-shopping-cart.pages.dev/) and the new Promo  should be listed.
 
 #### Editing a Promo
+1. To edit a Promo, go to the `Manage Promos` page by clicking on the `Promo` tab in the navigation.
+2. From there, click on the respective `Edit` button for the promo you want to edit. It will open the `Edit Details` page for that promo.
+3. Here, edit all the promo details as required.
+4. Finally, click on the `Update Promo` button to update the promo.
 
-#### 
+#### Editing a Promo Image
+1. To edit a Promo, go to the `Manage Promos` page by clicking on the `Promo` tab in the navigation.
+2. From there, click on the respective `Edit` button for the promo you want to edit. It will open the `Edit Details` page for that promo. 
+3. On this page click on the `Change Image: <Promo Name>` button. It will open the `Edit Promo Image` page.
+4. Upload the new promo image and then click on `Update Promo Image` button. The promo image will be updated.
+
+#### Deleting a Promo
+1. To edit a Promo, go to the `Manage Promos` page by clicking on the `Promo` tab in the navigation.
+2. From there, click on the respective `Delete` button for the promo you want to delete. It will open the `Delete Promo` page for that promo.
+3. Confirm deletion by click on the `Delete <Promo Name>` button.
+4. Upon successfully deletion, it will redirect to the `Manage Promos` page.
 
 
-### 3.2.f. User Actions: CRUD Operations - Orders <hr/>
+### 5.2.f. User Actions: CRUD Operations - Orders <hr/>
 This `Inventory App` allows `Employees` to manage the `Orders` placed by `Customers` on the `Shopping App`. They can change the `Orders Status` based on its fulfillment status(Processing, Ready for Shipping, Shipped, or Delivered).
 
-    These CRUD operations are still under development.
+#### Viewing Customer Orders
+1. Click on the `Orders` link from the nav link to go to the `Manage Orders` page.
+2. If required, filter the orders by selecting the Order Category from the dropdown list and click the `Get Orders` button to see the respective orders.
+3. The page will show orders from the selected order category.
 
 #### Updating Order Fullfilment Status
-- Under Development
+1. Click on the `Orders` link from the nav link to go to the `Manage Orders` page.
+2. If required, filter the orders by selecting the Order Category from the dropdown list and click the `Get Orders` button to see the respective orders.
+3. Click on the `Manage Order` button for that order for the order to be updated.
+4. From the `Select New Order Status` dropdown list, select the new order status and click on the `Update Status` button.
+5. The order status will be updated.
 
-# 4. Inventory App: RESTful APIs
+# 6. Inventory App: RESTful APIs
 Inventory App also provides RESTful APIs for the customer-facing [Shopping Cart App](https://2023-top-project-shopping-cart.pages.dev/) used by the same organization. In addition to being a standalone WebApp, it acts as a back-end for the `Shopping Cart App`.
 
-## 4.1 RESTful APIs Tech Stack and Packages
+## 6.1 RESTful APIs Tech Stack and Packages
 The inventory app uses additional technologies and packages for its RESTful APIs.
 
 #### JWT Token
 The APIs provided by the app use JWT-based authentication for protected API routes. These routes are for the [Shopping Inventory app](https://2023-top-project-shopping-cart.pages.dev/).
 
-## 4.2 RESTful API Routes
+## 6.2 RESTful API Routes
 The following routes are provided by the app:
 
-### 4.2.a. RESTful API Routes: Public Routes
+### 6.2.a. RESTful API Routes: Public Routes
 The application provides the following public routes:
 
 `~/api/products` GET route to fetch data of all products sold by the organization.
 
-`~/api/products/image/:productName` GET route to fetch to get product image by product name.
+`~/api/products/image/:productName` GET route to fetch product image by product name.
+
+`~/api/products/image/thumbs/:productName` GET route to fetch product image thumbnail by product name.
 
 `~/api/promos/carousel` GET route to fetch all active carousel promos.
 
-`~/api/promos/carousel/:promoName` GET route to get a promo image by promo name.
+`~/api/promos/image/:promoName` GET route to get a promo image by promo name.
 
-### 4.2.b. RESTful API Routes: Protected Routes
+`~/api/promos/image/thumbs/:promoName` GET route to get a promo image thumbnail by promo name.
+
+`~/api/login` POST route to login users of the Shopping App.
+
+`~/api/register` POST route to register uses of the Shopping App.
+
+
+### 6.2.b. RESTful API Routes: Protected Routes
 The application provides the following protected routes:
-
-`~/api/dash`: GET request to fetch data for the logged-in user.
 
 `~/api/orders`: GET request to fetch all orders for the logged-in user.
 
-`~/api/checkout`: POST request to checkout the cart items for the logged-in user.
+`~/api/orders/checkout`: POST request to checkout the cart items for the logged-in user.
 
-`~/api/orders`: POST request to cancel an order based on the `order id` provided in the request body.
+`~/api/orders/cancel`: POST request to cancel an order based on the `order id` provided in the request body.
 
-# 5. Test Coverage
+`~/api/subscribe`: GET request to fetch the subscription status for the logged-in user.
+
+`~/api/subscribe`: POST request to allow the logged-in user to subscribe for offers.
+
+`~/api/subscribe/cancel`: POST request to allow the logged-in user to cancel subscription.
+
+# 7. Test Coverage
 
 ### Current Test Coverage Report:
 The following is the current test coverage report screenshot for the main branch.

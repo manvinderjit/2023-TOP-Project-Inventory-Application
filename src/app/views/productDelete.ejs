@@ -4,6 +4,7 @@
             <li class="nav-item"><a href="/categories" class="nav-link  ">Categories</a></li>      
             <li class="nav-item"><a href="/products" class="nav-link  active">Products</a></li>
             <li class="nav-item"><a href="/promos" class="nav-link ">Promos</a></li>
+            <li class="nav-item"><a href="/orders" class="nav-link  ">Orders</a></li>
             <li class="nav-item"><a href="/guide" class="nav-link" aria-current="page">Guide</a></li>
         </ul>
     </header>
@@ -65,6 +66,12 @@
                                 <div class="row">
                                     <div class="col-3 border d-flex align-items-center py-2">Stock Available:</div>
                                     <div class="col-9 border d-flex align-items-center py-2"><%= productDetails.stock %></div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-3 border d-flex align-items-center py-2">Product Image:</div>
+                                    <div class="col-9 border d-flex align-items-center py-2">
+                                        <img src="/api/products/image/<%= productDetails.imageFilename %>" class="img-thumbnail">
+                                    </div>
                                 </div>
                             </div>
                         </div>

@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from 'express';
 import createHttpError from 'http-errors';
-import { fetchProductsService, fetchTotalPagesBasedOnLimit } from '../services/products.api.services.js';
+import { fetchProductCategoriesService, fetchProductsService, fetchTotalPagesBasedOnLimit } from '../services/products.api.services.js';
 import {
     validateIsMongoObjectId,
     validateQuery,
@@ -92,4 +92,22 @@ const getProducts = async(req: Request, res: Response, next: NextFunction): Prom
     }
 };
 
-export { getProducts };
+const getProductCategories = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const productCategories = await fetchProductCategoriesService();
+        if (!productCategories || productCategories.length === 0) {
+            res.status(400).send({
+                message: 'No Product Categories found!',
+            });
+        } else {
+            res.status(200).send({
+                productCategories,
+            });
+        }
+    } catch (error) {
+        console.error();
+        next(error);
+    }
+};
+
+export { getProducts, getProductCategories };

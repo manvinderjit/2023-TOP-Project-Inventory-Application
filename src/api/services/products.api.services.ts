@@ -30,4 +30,12 @@ const fetchProductsService = async (
         return fetchedProducts;
 };
 
-export { fetchProductsService, fetchTotalPagesBasedOnLimit };
+const fetchProductCategoriesService = async () => {
+    const dataCategories = await Category.find()
+        .select('name')
+        .sort({ name: 1 })
+        .exec();
+    return dataCategories;
+};
+
+export { fetchProductsService, fetchTotalPagesBasedOnLimit, fetchProductCategoriesService };

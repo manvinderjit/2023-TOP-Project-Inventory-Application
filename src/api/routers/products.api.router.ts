@@ -6,6 +6,8 @@ const apiProductsRouter: Router = express.Router();
 
 apiProductsRouter.get('/', apiProductsControllers.getProducts);
 
+apiProductsRouter.get('/categories', apiProductsControllers.getProductCategories);
+
 apiProductsRouter.get('/image/:name', apiGetImage);
 
 apiProductsRouter.get('/image/thumbs/:name', apiGetImage);

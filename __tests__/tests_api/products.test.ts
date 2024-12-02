@@ -1,6 +1,7 @@
 import { jest } from '@jest/globals';
 import Product from '../../src/models/productModel';
-import { getProducts } from '../../src/api/controllers/products.api.controllers';
+import Category from '../../src/models/categoryModel';
+import { getProducts, getProductCategories } from '../../src/api/controllers/products.api.controllers';
 import createHttpError from 'http-errors';
 
 const mockProducts = [
@@ -156,6 +157,17 @@ const mockProducts = [
     },
 ];
 
+const mockProductCategories = [
+    { _id: '652624671853eb7ecdacd6b8', name: 'Computer Keyboards' },
+    { _id: '651f74b0df4699212c8abacb', name: 'Monitors' },
+    { _id: '6534680c8a7ce6a6af7f9cb9', name: 'Mouse' },
+    { _id: '65389dec03f4c7f5bfb7f72e', name: 'PSU-SMPS' },
+    { _id: '6538a0572e4b5bfd1aa31384', name: 'Power Cable' },
+    { _id: '65398be37d1f92b9d4568a87', name: 'Speakers' },
+    { _id: '653c607042f0b21c93e70020', name: 'UPS' },
+    { _id: '67003cc58ea8ab54fe0cf65b', name: 'Wifi Dongles' },
+];
+
 describe("Get Products", () => {
     // Return result with default values when no query search parameters are provided
     it('should return products and total pages when no query parameters are provided', async () => {
@@ -277,7 +289,9 @@ describe("Get Products", () => {
         };
         const next: any = jest.fn();
 
-        const returnedProducts = mockProducts.slice(req.query.limit - mockProducts.length);
+        const returnedProducts = mockProducts.slice(
+            req.query.limit - mockProducts.length,
+        );
 
         (Product.countDocuments as jest.Mock) = jest
             .fn()
@@ -346,4 +360,103 @@ describe("Get Products", () => {
             createHttpError(400, 'Invalid request!'),
         );
     });
+
+    // Unknown error
+    it('should handle unknown errors gracefully and call the next function', async () => {
+        const req: any = {
+            query: {},
+        };
+        const res: any = {
+            json: jest.fn(),
+            status: jest.fn().mockReturnThis(),
+        };
+        const next: any = jest.fn();
+
+        (Product.find as jest.Mock) = jest.fn().mockImplementationOnce(() => {
+            throw new Error('Test Error');
+        });
+
+        await getProducts(req, res, next);
+
+        expect(next).toHaveBeenCalledWith(new Error('Test Error'));
+        expect(res.status).not.toHaveBeenCalled();
+        expect(res.json).not.toHaveBeenCalled();
+    });
+});
+
+describe("GET Product Categories", () => {
+    it("should return Product Categories upon a successful request", async () => {
+        const req: any = {};
+
+        const res: any = {
+            json: jest.fn(),
+            status: jest.fn().mockReturnThis(),
+            send: jest.fn(),
+        };
+
+        const next: any = jest.fn();
+
+        (Category.find as jest.Mock) = jest.fn().mockReturnValueOnce({
+            select: jest.fn().mockReturnThis(),
+            sort: jest.fn().mockReturnThis(),
+            exec: jest.fn().mockReturnValueOnce(mockProductCategories),
+        });
+
+        await getProductCategories(req, res, next);
+
+        expect(res.status).toHaveBeenCalledWith(200);
+        expect(res.send).toHaveBeenCalledWith({ productCategories: mockProductCategories });
+        expect(next).not.toHaveBeenCalled();
+
+    });
+
+    it('should return an error when no product categories found', async () => {
+        const req: any = {};
+
+        const res: any = {
+            json: jest.fn(),
+            status: jest.fn().mockReturnThis(),
+            send: jest.fn(),
+        };
+
+        const next: any = jest.fn();
+
+        (Category.find as jest.Mock) = jest.fn().mockReturnValueOnce({
+            select: jest.fn().mockReturnThis(),
+            sort: jest.fn().mockReturnThis(),
+            exec: jest.fn().mockReturnValueOnce([]),
+        });
+
+        await getProductCategories(req, res, next);
+
+        expect(res.status).toHaveBeenCalledWith(400);
+        expect(res.send).toHaveBeenCalledWith({
+            error: 'No Product Categories Found!',
+        });
+        expect(next).not.toHaveBeenCalled();
+    });
+
+    it('should handle unknown errors gracefully and call the next function', async () => {
+        const req: any = {};
+
+        const res: any = {
+            json: jest.fn(),
+            status: jest.fn().mockReturnThis(),
+            send: jest.fn(),
+        };
+
+        const next: any = jest.fn();
+
+        (Category.find as jest.Mock) = jest.fn().mockImplementationOnce(() => { throw new Error ('Test Error')});
+
+        await getProductCategories(req, res, next);
+
+
+        expect(next).toHaveBeenCalledWith(new Error('Test Error'));
+        expect(res.status).not.toHaveBeenCalled();
+        expect(res.send).not.toHaveBeenCalled();
+        
+    });
+
+
 });

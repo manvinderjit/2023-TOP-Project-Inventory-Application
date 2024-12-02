@@ -97,7 +97,7 @@ const getProductCategories = async (req: Request, res: Response, next: NextFunct
         const productCategories = await fetchProductCategoriesService();
         if (!productCategories || productCategories.length === 0) {
             res.status(400).send({
-                message: 'No Product Categories found!',
+                error: 'No Product Categories Found!',
             });
         } else {
             res.status(200).send({

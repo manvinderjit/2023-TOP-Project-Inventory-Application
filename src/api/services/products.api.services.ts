@@ -31,10 +31,31 @@ const fetchProductsService = async (
 };
 
 const fetchProductCategoriesService = async () => {
-    const dataCategories = await Category.find()
-        .select('name')
-        .sort({ name: 1 })
-        .exec();
+    // const dataCategories = await Category.find()
+    //     .select('name')
+    //     .sort({ name: 1 })
+    //     .exec();
+    const dataCategories = await Category.aggregate([
+        {
+            $lookup: {
+                from: 'products', // The collection name for products
+                localField: '_id', // Field from Category collection
+                foreignField: 'category', // Field from Product collection
+                as: 'products', // Alias for the joined products array
+            },
+        },
+        {
+            $match: {
+                products: { $ne: [] }, // Ensure products array is not empty
+            },
+        },
+        // Optional: Project necessary fields (e.g., category name, description)
+        {
+            $project: {
+                name: 1,                
+            },
+        },
+    ]);    
     return dataCategories;
 };
 

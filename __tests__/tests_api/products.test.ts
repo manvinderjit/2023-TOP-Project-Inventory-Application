@@ -396,11 +396,7 @@ describe("GET Product Categories", () => {
 
         const next: any = jest.fn();
 
-        (Category.find as jest.Mock) = jest.fn().mockReturnValueOnce({
-            select: jest.fn().mockReturnThis(),
-            sort: jest.fn().mockReturnThis(),
-            exec: jest.fn().mockReturnValueOnce(mockProductCategories),
-        });
+        (Category.aggregate as jest.Mock) = jest.fn().mockReturnValueOnce(mockProductCategories);
 
         await getProductCategories(req, res, next);
 
@@ -421,11 +417,7 @@ describe("GET Product Categories", () => {
 
         const next: any = jest.fn();
 
-        (Category.find as jest.Mock) = jest.fn().mockReturnValueOnce({
-            select: jest.fn().mockReturnThis(),
-            sort: jest.fn().mockReturnThis(),
-            exec: jest.fn().mockReturnValueOnce([]),
-        });
+        (Category.aggregate as jest.Mock) = jest.fn().mockReturnValueOnce([]);
 
         await getProductCategories(req, res, next);
 
@@ -447,7 +439,11 @@ describe("GET Product Categories", () => {
 
         const next: any = jest.fn();
 
-        (Category.find as jest.Mock) = jest.fn().mockImplementationOnce(() => { throw new Error ('Test Error')});
+        (Category.aggregate as jest.Mock) = jest
+            .fn()
+            .mockImplementationOnce(() => {
+                throw new Error('Test Error');
+            });
 
         await getProductCategories(req, res, next);
 

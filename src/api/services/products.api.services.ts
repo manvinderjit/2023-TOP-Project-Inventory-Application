@@ -30,11 +30,7 @@ const fetchProductsService = async (
         return fetchedProducts;
 };
 
-const fetchProductCategoriesService = async () => {
-    // const dataCategories = await Category.find()
-    //     .select('name')
-    //     .sort({ name: 1 })
-    //     .exec();
+const fetchProductCategoriesService = async () => {    
     const dataCategories = await Category.aggregate([
         {
             $lookup: {

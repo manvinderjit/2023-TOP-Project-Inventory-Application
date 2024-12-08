@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<coverage generated="1733167750061" clover="3.2.0">
-  <project timestamp="1733167750061" name="All files">
+<coverage generated="1733671418952" clover="3.2.0">
+  <project timestamp="1733671418953" name="All files">
     <metrics statements="1228" coveredstatements="1175" conditionals="669" coveredconditionals="639" methods="188" coveredmethods="169" elements="2085" coveredelements="1983" complexity="0" loc="1228" ncloc="1228" packages="15" files="57" classes="57"/>
     <package name="src">
       <metrics statements="23" coveredstatements="23" conditionals="7" coveredconditionals="6" methods="4" coveredmethods="3"/>
@@ -443,7 +443,7 @@
         <line num="30" count="5" type="stmt"/>
         <line num="33" count="6" type="stmt"/>
         <line num="34" count="3" type="stmt"/>
-        <line num="38" count="2" type="stmt"/>
+        <line num="55" count="2" type="stmt"/>
       </file>
       <file name="promos.api.services.ts" path="/home/manvinderjit/repos/2023-TOP-Project-Inventory-Application/src/api/services/promos.api.services.ts">
         <metrics statements="3" coveredstatements="3" conditionals="0" coveredconditionals="0" methods="1" coveredmethods="1"/>
